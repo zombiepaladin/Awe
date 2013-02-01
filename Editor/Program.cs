@@ -12,7 +12,7 @@ using System;
 using System.Windows.Forms;
 #endregion
 
-namespace WinFormsContentLoading
+namespace AweEditor
 {
     /// <summary>
     /// The main entry point for the application.

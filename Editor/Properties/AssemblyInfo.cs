@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("This sample shows you how to import arbitrary 3D models at run time by running the Content Pipeline importers and processors dynamically on the fly as opposed to building all the content ahead of time in the usual way.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("WinFormsContentLoading")]
+[assembly: AssemblyProduct("AweEditor")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2008")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

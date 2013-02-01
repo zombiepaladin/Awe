@@ -16,7 +16,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 #endregion
 
-namespace WinFormsContentLoading
+namespace AweEditor
 {
     /// <summary>
     /// Custom form provides the main user interface for the program.
@@ -57,9 +57,9 @@ namespace WinFormsContentLoading
 
 
         /// <summary>
-        /// Event handler for the Open menu option.
+        /// Event handler for the Import Model menu option.
         /// </summary>
-        void OpenMenuClicked(object sender, EventArgs e)
+        void ImportModelMenuClicked(object sender, EventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
 
@@ -81,6 +81,14 @@ namespace WinFormsContentLoading
             {
                 LoadModel(fileDialog.FileName);
             }
+        }
+
+        /// <summary>
+        /// Loads a new minecraft terrain file into the TerrainViewerControl.
+        /// </summary>
+        private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
+        {
+            // TODO: Import the file
         }
 
 
