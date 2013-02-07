@@ -63,12 +63,7 @@ namespace AweEditor
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
 
-            // Default to the directory which contains our content files.
-            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            string relativePath = Path.Combine(assemblyLocation, "../../../../Content");
-            string contentPath = Path.GetFullPath(relativePath);
-
-            fileDialog.InitialDirectory = contentPath;
+            fileDialog.InitialDirectory = ContentPath();
 
             fileDialog.Title = "Load Model";
 
@@ -81,6 +76,15 @@ namespace AweEditor
             {
                 LoadModel(fileDialog.FileName);
             }
+        }
+
+        private static string ContentPath()
+        {
+            // Default to the directory which contains our content files.
+            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            string relativePath = Path.Combine(assemblyLocation, "../../../../Content");
+            string contentPath = Path.GetFullPath(relativePath);
+            return contentPath;
         }
 
         /// <summary>
@@ -98,6 +102,9 @@ namespace AweEditor
         void LoadModel(string fileName)
         {
             Cursor = Cursors.WaitCursor;
+
+            // Switch to the Model tab pane
+            tabControl1.SelectedIndex = 1;
 
             // Unload any existing model.
             modelViewerControl.Model = null;
@@ -121,6 +128,60 @@ namespace AweEditor
                 // If the build failed, display an error message.
                 MessageBox.Show(buildError, "Error");
             }
+
+            Cursor = Cursors.Arrow;
+        }
+
+        private void ImportImageClicked(object sender, EventArgs e)
+        {
+            OpenFileDialog fd = new OpenFileDialog();
+
+            fd.InitialDirectory = ContentPath();
+
+            fd.Title = "Import Image";
+
+            fd.Filter = "Image Files (*.bmp;*.dds;*.dib;*.hdr;*.jpg;*.pfm;*.png;*.ppm;*.tga)|*.bmp;*.dds;*.dib;*.hdr;*.jpg;*.pfm;*.png;*.ppm;*.tga|" +
+                                "Bitmap (*.bmp)|*.bmp|" +
+                                "Portable network Graphic (*.png)|*.png|" +
+                                "All Files (*.*)|*.*";
+
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                LoadTexture(fd.FileName);
+            }
+
+        }
+
+        protected void LoadTexture(string fileName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            // Switch to the Texture tab pane
+            tabControl1.SelectedIndex = 5;
+
+            // Unload any existing texture.
+            textureViewerControl.Texture = null;
+            contentManager.Unload();
+
+            // Tell the ContentBuilder what to build.
+            contentBuilder.Clear();
+            contentBuilder.Add(fileName, "Texture", null, "TextureProcessor");
+
+            // Build this new texture data.
+            string buildError = contentBuilder.Build();
+
+            if (string.IsNullOrEmpty(buildError))
+            {
+                // If the build succeeded, use the ContentManager to
+                // load the temporary .xnb file that we just created.
+                textureViewerControl.Texture = contentManager.Load<Texture2D>("Texture");
+            }
+            else
+            {
+                // If the build failed, display an error message.
+                MessageBox.Show(buildError, "Error");
+            }
+
 
             Cursor = Cursors.Arrow;
         }

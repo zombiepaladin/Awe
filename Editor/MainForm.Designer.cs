@@ -32,6 +32,7 @@ namespace AweEditor
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importVoxelTerrainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelViewerControl = new AweEditor.ModelViewerControl();
@@ -43,10 +44,12 @@ namespace AweEditor
             this.terrainViewerControl = new AweEditor.TerrainViewerControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.textureViewerControl = new AweEditor.TextureViewerControl();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.tabPage6.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -65,6 +68,7 @@ namespace AweEditor
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importVoxelTerrainToolStripMenuItem,
             this.openToolStripMenuItem,
+            this.toolStripMenuItem1,
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -84,6 +88,13 @@ namespace AweEditor
             this.openToolStripMenuItem.Size = new System.Drawing.Size(223, 24);
             this.openToolStripMenuItem.Text = "Import Model...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.ImportModelMenuClicked);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(223, 24);
+            this.toolStripMenuItem1.Text = "Import Image...";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.ImportImageClicked);
             // 
             // toolStripSeparator1
             // 
@@ -185,12 +196,23 @@ namespace AweEditor
             // 
             // tabPage6
             // 
+            this.tabPage6.Controls.Add(this.textureViewerControl);
             this.tabPage6.Location = new System.Drawing.Point(4, 25);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Size = new System.Drawing.Size(1048, 648);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Texture";
             this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // textureViewerControl
+            // 
+            this.textureViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textureViewerControl.Location = new System.Drawing.Point(0, 0);
+            this.textureViewerControl.Name = "textureViewerControl";
+            this.textureViewerControl.Size = new System.Drawing.Size(1048, 648);
+            this.textureViewerControl.TabIndex = 0;
+            this.textureViewerControl.Text = "textureViewerControl";
+            this.textureViewerControl.Texture = null;
             // 
             // MainForm
             // 
@@ -208,6 +230,7 @@ namespace AweEditor
             this.tabControl1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
+            this.tabPage6.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -230,6 +253,8 @@ namespace AweEditor
         private TerrainViewerControl terrainViewerControl;
         private System.Windows.Forms.ToolStripMenuItem importVoxelTerrainToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private TextureViewerControl textureViewerControl;
 
     }
 }

@@ -76,6 +76,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\TextureViewerControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Datatypes\VoxelTerrain.cs" />
     <Compile Include="Utilities\ContentBuilder.cs" />
     <Compile Include="Controls\TerrainViewerControl.cs">
