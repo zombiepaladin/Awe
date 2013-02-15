@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO.Compression;
 #endregion
 
 namespace AweEditor
@@ -91,20 +92,8 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            int xPos = 0;
-            int zPos = 0;
-            long LastUpdate;
-            bool TerrainPopulated;
-            byte[] Biomes = new byte[256];
-            int[] HeightMap = new int[256];
-            int y = 0;
-            byte[] Blocks = new byte[4096];
-            byte[] Add = new byte[2048];
-            byte[] Data = new byte[2048];
-            byte[] BlockLight = new byte[2048];
-            byte[] SkyLight = new byte[2048];
-            
 
+      
             OpenFileDialog fileDialog = new OpenFileDialog();
 
             fileDialog.InitialDirectory = ContentPath();
@@ -114,13 +103,21 @@ namespace AweEditor
             fileDialog.Filter = "Region Files (*.mca)|*.mca|" +
                                 "Level Files (*.dat)|*.dat|" +
                                 "All Files (*.*)|*.*";
-
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
-                byte[] nibble = new byte[4];
-                int index = 0;
-                FileStream fs = new FileStream(fileDialog.FileName, FileMode.Open,FileAccess.Read);
-                fs.Read(nibble,0,4);
+                FileStream f = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read);
+                f.Flush();
+                byte[] bi= new byte[(int)f.Length];
+                f.Read(bi,0,(int)f.Length);
+                byte[] dcF = new byte[f.Length];
+                GZipStream gzs = new GZipStream(f, CompressionMode.Decompress);
+                gzs.Flush();
+                int l = gzs.ReadByte();
+                gzs.Read(dcF, 0, (int)f.Length);
+                gzs.Close();
+                //MincraftImporter mi = new MincraftImporter();
+                //byte[] dcf = mi.mincraftImport(fileDialog.FileName);
+        
             }
 
         }
