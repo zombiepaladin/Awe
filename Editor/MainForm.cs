@@ -29,7 +29,6 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager;
 
-
         /// <summary>
         /// Constructs the main form.
         /// </summary>
@@ -92,7 +91,38 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Import the file
+            int xPos = 0;
+            int zPos = 0;
+            long LastUpdate;
+            bool TerrainPopulated;
+            byte[] Biomes = new byte[256];
+            int[] HeightMap = new int[256];
+            int y = 0;
+            byte[] Blocks = new byte[4096];
+            byte[] Add = new byte[2048];
+            byte[] Data = new byte[2048];
+            byte[] BlockLight = new byte[2048];
+            byte[] SkyLight = new byte[2048];
+            
+
+            OpenFileDialog fileDialog = new OpenFileDialog();
+
+            fileDialog.InitialDirectory = ContentPath();
+
+            fileDialog.Title = "Load MinecraftFile";
+
+            fileDialog.Filter = "Region Files (*.mca)|*.mca|" +
+                                "Level Files (*.dat)|*.dat|" +
+                                "All Files (*.*)|*.*";
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                byte[] nibble = new byte[4];
+                int index = 0;
+                FileStream fs = new FileStream(fileDialog.FileName, FileMode.Open,FileAccess.Read);
+                fs.Read(nibble,0,4);
+            }
+
         }
 
 
