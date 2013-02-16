@@ -75,6 +75,9 @@
     <Reference Include="WinFormsContentLoading, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <ExecutableExtension>.exe</ExecutableExtension>
     </Reference>
+    <Reference Include="zlibnet">
+      <HintPath>..\..\..\..\Downloads\zlibnet v1.2\zlibnet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\TextureViewerControl.cs">

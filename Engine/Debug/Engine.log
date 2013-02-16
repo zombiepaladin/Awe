@@ -1,4 +1,4 @@
-﻿Build started 2/16/2013 1:37:57 PM.
+﻿Build started 2/16/2013 2:32:09 PM.
      1>Project "C:\Users\Borzen\Documents\GitHub\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -17,4 +17,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.04
+Time Elapsed 00:00:00.03
