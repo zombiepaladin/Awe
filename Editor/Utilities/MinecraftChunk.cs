@@ -7,7 +7,7 @@ namespace AweEditor
 {
     class MinecraftChunk
     {
-        byte[] decryptedChunck;
+        public byte[] decryptedChunck;
 
         public MinecraftChunk(byte[] mc)
         {

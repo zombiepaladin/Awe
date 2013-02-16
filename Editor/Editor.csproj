@@ -105,6 +105,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\MinecraftChunk.cs" />
+    <Compile Include="Utilities\MinecraftChunkParser.cs" />
+    <Compile Include="Utilities\SubChunk.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MainForm.cs</DependentUpon>

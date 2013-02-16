@@ -92,18 +92,13 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            int deflateMax = 1024 * 64;
             MinecraftChunk[] mc = new MinecraftChunk[1024];
             int mcNum = 0;
-            int[] chunkLocation = new int[1024];
 
-            int[] chunkSize = new int[1024];
 
             for (int i = 0; i < 1024; i++)
             {
                 mc[i] = null;
-                chunkLocation[i] = -1;
-                chunkSize[i] = -1;
             }
             OpenFileDialog fileDialog = new OpenFileDialog();
 
@@ -176,7 +171,19 @@ namespace AweEditor
                     }
                 }
                 f.Close();
-        
+                MinecraftChunkParser[] mcpa = new MinecraftChunkParser[1024];
+                for (int i = 0; i < 1024; i++)
+                {
+                    if (mc[i] != null)
+                    {
+                        mcpa[i] = new MinecraftChunkParser(mc[i]);
+                        mcpa[i].Parse();
+                    }
+                    else
+                    {
+                        mcpa[i] = null;
+                    }
+                }
             }
 
         }
