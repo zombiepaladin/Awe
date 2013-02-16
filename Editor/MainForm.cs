@@ -92,13 +92,25 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
+            MinecraftChunk[] mc = new MinecraftChunk[1024];
 
-      
+            int[] chunkLocation = new int[1024];
+
+            int[] chunkSize = new int[1024];
+
+            for (int i = 0; i < 1024; i++)
+            {
+                mc[i] = null;
+                chunkLocation[i] = -1;
+                chunkSize[i] = -1;
+            }
             OpenFileDialog fileDialog = new OpenFileDialog();
 
             fileDialog.InitialDirectory = ContentPath();
 
             fileDialog.Title = "Load MinecraftFile";
+
+            fileDialog.InitialDirectory = "%appdata%";
 
             fileDialog.Filter = "Region Files (*.mca)|*.mca|" +
                                 "Level Files (*.dat)|*.dat|" +
@@ -109,14 +121,46 @@ namespace AweEditor
                 f.Flush();
                 byte[] bi= new byte[(int)f.Length];
                 f.Read(bi,0,(int)f.Length);
-                byte[] dcF = new byte[f.Length];
-                GZipStream gzs = new GZipStream(f, CompressionMode.Decompress);
-                gzs.Flush();
-                int l = gzs.ReadByte();
-                gzs.Read(dcF, 0, (int)f.Length);
-                gzs.Close();
-                //MincraftImporter mi = new MincraftImporter();
-                //byte[] dcf = mi.mincraftImport(fileDialog.FileName);
+                byte[] biH = new byte[8192];
+                byte[] biE = new byte[bi.Length - 8192];
+                int j = 0;
+                int k = 0;
+                for (int i = 0; i < 8192; i++)
+                {
+                    biH[i] = bi[j];
+                    j++;
+                }
+                int localX = 0 >> 5;
+                int localZ = 0 >> 5;
+                for (int i = 0; i < biE.Length; i++)
+                {
+                    biE[i] = bi[j];
+                    j++;
+                }
+                j = 0;
+                while (k < 4096)
+                {
+                    chunkLocation[j] = biH[k] << 16 | biH[k + 1] << 8 | biH[k + 2];
+                    chunkSize[j] = biH[k + 3];
+                    k += 4;
+                    j++;
+                }
+                j = 0;
+                k = 0;
+                
+                while (k < 1024)
+                {
+                    if (chunkSize[k] == 0)
+                    {
+                        k++;
+                    }
+                    else
+                    {
+                        j = chunkLocation[k];
+                        int cL = biE[j] << 24 | biE[j + 1] << 16 | biE[j + 2] << 8 | biE[j + 3];
+                    }
+                }
+                f.Close();
         
             }
 
