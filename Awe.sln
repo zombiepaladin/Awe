@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{CF425096-7FB3-4883-B2C6-F82EF6CAA12C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinecraftImportTesting", "MinecraftImportTesting\MinecraftImportTesting.csproj", "{320625D2-1367-4F19-961C-89283D5368ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -35,6 +37,16 @@ Global
 		{CF425096-7FB3-4883-B2C6-F82EF6CAA12C}.Release|Win32.ActiveCfg = Release|Win32
 		{CF425096-7FB3-4883-B2C6-F82EF6CAA12C}.Release|Win32.Build.0 = Release|Win32
 		{CF425096-7FB3-4883-B2C6-F82EF6CAA12C}.Release|x86.ActiveCfg = Release|Win32
+		{320625D2-1367-4F19-961C-89283D5368ED}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Debug|Win32.ActiveCfg = Debug|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Debug|x86.ActiveCfg = Debug|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Debug|x86.Build.0 = Debug|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Release|Mixed Platforms.Build.0 = Release|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Release|Win32.ActiveCfg = Release|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Release|x86.ActiveCfg = Release|x86
+		{320625D2-1367-4F19-961C-89283D5368ED}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
