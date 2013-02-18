@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AweEditor.Datatypes;
 
 namespace AweEditor
 {
@@ -21,6 +22,13 @@ namespace AweEditor
     /// </summary>
     public class VoxelTerrain
     {
-        // TODO: Complete class
+        public List<TerrainBlockInstance> blocks; //store as List for now, optimize later
+
+        public VoxelTerrain(List<TerrainBlockInstance> blocks)
+        {
+            this.blocks = blocks;
+        }
+        
     }
+
 }

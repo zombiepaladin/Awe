@@ -12,8 +12,11 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Collections;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using AweEditor.Datatypes;
+using System.Collections.Generic;
 #endregion
 
 namespace AweEditor
@@ -92,7 +95,64 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Import the file
+            OpenFileDialog fd = new OpenFileDialog();
+
+            fd.InitialDirectory = ContentPath();
+
+            fd.Title = "Import Voxel Terrain";
+
+            fd.Filter = "Decompressed Schematic Files (*.*)|*.*";
+
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                LoadVoxelTerrain(fd.FileName);
+            }
+        }
+
+        private void LoadVoxelTerrain(string fileName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            // Switch to the Terrain tab pane
+            tabControl1.SelectedIndex = 3;
+
+            List<TerrainBlockInstance> blocks = new List<TerrainBlockInstance>();
+
+            //TODO: populate terrain
+
+            //Populate w/ blocks for testing
+            for (int i = 0; i < 32; i++)
+                for(int j = 0; j < 32; j++)
+                    blocks.Add(new TerrainBlockInstance(i, j, 0, BlockType.Stone));
+            
+            VoxelTerrain terrain = new VoxelTerrain(blocks);
+            terrainViewerControl.VoxelTerrain = terrain;
+
+            #region Load Block
+            //TODO:move model load into VoxelTerrain
+            contentManager.Unload();
+
+            // Tell the ContentBuilder what to build.
+            contentBuilder.Clear();
+            contentBuilder.Add(ContentPath() + "\\Cats.fbx", "Model", null, "ModelProcessor");
+
+            // Build this new model data.
+            string buildError = contentBuilder.Build();
+
+            if (string.IsNullOrEmpty(buildError))
+            {
+                // If the build succeeded, use the ContentManager to
+                // load the temporary .xnb file that we just created.
+                terrainViewerControl.voxelModel = contentManager.Load<Model>("Model");
+            }
+            else
+            {
+                // If the build failed, display an error message.
+                MessageBox.Show(buildError, "Error");
+            }
+            #endregion
+
+            Cursor = Cursors.Arrow;
         }
 
 

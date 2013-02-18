@@ -1,50 +1,17 @@
-﻿Build started 2/1/2013 4:53:54 PM.
-     1>Project "D:\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
+﻿Build started 2/18/2013 2:14:40 PM.
+     1>Project "C:\Users\Samuel\Documents\XNA Projects\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\DXUT11\Core /I..\DXUT11\Optional /ZI /nologo /W4 /WX- /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /arch:SSE2 /fp:fast /Zc:wchar_t /Zc:forScope /openmp- /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\DXUT11\Core\DXUT.cpp ..\DXUT11\Core\DXUTDevice11.cpp ..\DXUT11\Core\DXUTDevice9.cpp ..\DXUT11\Core\DXUTmisc.cpp ..\DXUT11\Optional\DXUTcamera.cpp ..\DXUT11\Optional\DXUTgui.cpp ..\DXUT11\Optional\DXUTres.cpp ..\DXUT11\Optional\DXUTsettingsdlg.cpp ..\DXUT11\Optional\SDKmesh.cpp ..\DXUT11\Optional\SDKmisc.cpp D3D9App.cpp D3D11App.cpp
-         D3D11App.cpp
-         D3D9App.cpp
-         SDKmisc.cpp
-         SDKmesh.cpp
-         DXUTsettingsdlg.cpp
-         DXUTres.cpp
-         DXUTgui.cpp
-         DXUTcamera.cpp
-         DXUTmisc.cpp
-         DXUTDevice9.cpp
-         DXUTDevice11.cpp
-         DXUT.cpp
-         Generating Code...
-       ManifestResourceCompile:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\Engine.exe.embed.manifest.res" Debug\Engine_manifest.rc 
+         All outputs are up-to-date.
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Awe\Debug\Engine.exe" /INCREMENTAL /NOLOGO d3dcompiler.lib d3dx11d.lib d3dx9d.lib dxerr.lib dxguid.lib winmm.lib comctl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\Awe\Debug\Engine.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Awe\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
-         Debug\DXUT.obj
-         Debug\DXUTDevice11.obj
-         Debug\DXUTDevice9.obj
-         Debug\DXUTmisc.obj
-         Debug\DXUTcamera.obj
-         Debug\DXUTgui.obj
-         Debug\DXUTres.obj
-         Debug\DXUTsettingsdlg.obj
-         Debug\SDKmesh.obj
-         Debug\SDKmisc.obj
-         Debug\D3D9App.obj
-         Debug\D3D11App.obj
-         LINK : D:\Awe\Debug\Engine.exe not found or not built by the last incremental link; performing full link
-       Manifest:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\Engine.exe.embed.manifest" /manifest Debug\Engine.exe.intermediate.manifest
          All outputs are up-to-date.
-       LinkEmbedManifest:
-         All outputs are up-to-date.
-         Engine.vcxproj -> D:\Awe\Debug\Engine.exe
+         Engine.vcxproj -> C:\Users\Samuel\Documents\XNA Projects\Awe\Debug\Engine.exe
        FinalizeBuildStatus:
          Deleting file "Debug\Engine.unsuccessfulbuild".
          Touching "Debug\Engine.lastbuildstate".
-     1>Done Building Project "D:\Awe\Engine\Engine.vcxproj" (build target(s)).
+     1>Done Building Project "C:\Users\Samuel\Documents\XNA Projects\Awe\Engine\Engine.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:22.71
+Time Elapsed 00:00:00.07
