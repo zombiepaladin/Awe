@@ -58,8 +58,7 @@ namespace AweEditor
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1056, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(792, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -72,50 +71,49 @@ namespace AweEditor
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // importVoxelTerrainToolStripMenuItem
             // 
             this.importVoxelTerrainToolStripMenuItem.Name = "importVoxelTerrainToolStripMenuItem";
-            this.importVoxelTerrainToolStripMenuItem.Size = new System.Drawing.Size(223, 24);
+            this.importVoxelTerrainToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.importVoxelTerrainToolStripMenuItem.Text = "Import Voxel Terrain...";
             this.importVoxelTerrainToolStripMenuItem.Click += new System.EventHandler(this.ImportVoxelTerrainMenuClicked);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(223, 24);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.openToolStripMenuItem.Text = "Import Model...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.ImportModelMenuClicked);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(223, 24);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(190, 22);
             this.toolStripMenuItem1.Text = "Import Image...";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.ImportImageClicked);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(220, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(187, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(223, 24);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitMenuClicked);
             // 
             // modelViewerControl
             // 
             this.modelViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.modelViewerControl.Location = new System.Drawing.Point(3, 3);
-            this.modelViewerControl.Margin = new System.Windows.Forms.Padding(4);
+            this.modelViewerControl.Location = new System.Drawing.Point(2, 2);
             this.modelViewerControl.Model = null;
             this.modelViewerControl.Name = "modelViewerControl";
-            this.modelViewerControl.Size = new System.Drawing.Size(1042, 642);
+            this.modelViewerControl.Size = new System.Drawing.Size(780, 520);
             this.modelViewerControl.TabIndex = 1;
             this.modelViewerControl.Text = "modelViewerControl";
             // 
@@ -128,18 +126,20 @@ namespace AweEditor
             this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 28);
+            this.tabControl1.Location = new System.Drawing.Point(0, 24);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1056, 677);
+            this.tabControl1.Size = new System.Drawing.Size(792, 549);
             this.tabControl1.TabIndex = 2;
             // 
             // tabPage1
             // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1048, 648);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage1.Size = new System.Drawing.Size(784, 523);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "World";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -147,20 +147,22 @@ namespace AweEditor
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.modelViewerControl);
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1048, 648);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage2.Size = new System.Drawing.Size(784, 524);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Model";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // tabPage3
             // 
-            this.tabPage3.Location = new System.Drawing.Point(4, 25);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(1048, 648);
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Size = new System.Drawing.Size(784, 524);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Animation";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -168,9 +170,10 @@ namespace AweEditor
             // tabPage4
             // 
             this.tabPage4.Controls.Add(this.terrainViewerControl);
-            this.tabPage4.Location = new System.Drawing.Point(4, 25);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(1048, 648);
+            this.tabPage4.Size = new System.Drawing.Size(784, 523);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Terrain";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -179,17 +182,19 @@ namespace AweEditor
             // 
             this.terrainViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.terrainViewerControl.Location = new System.Drawing.Point(0, 0);
+            this.terrainViewerControl.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.terrainViewerControl.Name = "terrainViewerControl";
-            this.terrainViewerControl.Size = new System.Drawing.Size(1048, 648);
+            this.terrainViewerControl.Size = new System.Drawing.Size(784, 523);
             this.terrainViewerControl.TabIndex = 0;
             this.terrainViewerControl.Text = "terrainViewerControl";
             this.terrainViewerControl.VoxelTerrain = null;
             // 
             // tabPage5
             // 
-            this.tabPage5.Location = new System.Drawing.Point(4, 25);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(1048, 648);
+            this.tabPage5.Size = new System.Drawing.Size(784, 524);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "Material";
             this.tabPage5.UseVisualStyleBackColor = true;
@@ -197,9 +202,10 @@ namespace AweEditor
             // tabPage6
             // 
             this.tabPage6.Controls.Add(this.textureViewerControl);
-            this.tabPage6.Location = new System.Drawing.Point(4, 25);
+            this.tabPage6.Location = new System.Drawing.Point(4, 22);
+            this.tabPage6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(1048, 648);
+            this.tabPage6.Size = new System.Drawing.Size(784, 524);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Texture";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -208,21 +214,21 @@ namespace AweEditor
             // 
             this.textureViewerControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textureViewerControl.Location = new System.Drawing.Point(0, 0);
+            this.textureViewerControl.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.textureViewerControl.Name = "textureViewerControl";
-            this.textureViewerControl.Size = new System.Drawing.Size(1048, 648);
+            this.textureViewerControl.Size = new System.Drawing.Size(784, 524);
             this.textureViewerControl.TabIndex = 0;
             this.textureViewerControl.Text = "textureViewerControl";
             this.textureViewerControl.Texture = null;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1056, 705);
+            this.ClientSize = new System.Drawing.Size(792, 573);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "WinForms Content Loading";
             this.menuStrip1.ResumeLayout(false);

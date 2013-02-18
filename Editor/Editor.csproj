@@ -74,8 +74,15 @@
     <Reference Include="WinFormsContentLoading, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <ExecutableExtension>.exe</ExecutableExtension>
     </Reference>
+    <Reference Include="zlib.net">
+      <HintPath>zlib.NET_104\bin\zlib.net.dll</HintPath>
+    </Reference>
+    <Reference Include="zlibnet">
+      <HintPath>.\zlibnet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utilities\TerrainImporter.cs" />
     <Compile Include="Controls\TextureViewerControl.cs">
       <SubType>Component</SubType>
     </Compile>

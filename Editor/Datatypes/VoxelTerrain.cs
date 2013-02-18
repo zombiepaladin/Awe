@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace AweEditor
 {
@@ -21,6 +22,26 @@ namespace AweEditor
     /// </summary>
     public class VoxelTerrain
     {
+        private static int WORLDSIZE = 100;
+
+        private int[, ,] terrainMatrix = new int[WORLDSIZE, WORLDSIZE, WORLDSIZE];
         // TODO: Complete class
+        internal void addBlock(int x, int y, int z, string blockType)
+        {
+            if (x < WORLDSIZE && y < WORLDSIZE && z < WORLDSIZE)
+            {
+                terrainMatrix[x, y, z] = 1;
+            }
+        }
+
+        public int getWorldSize()
+        {
+            return WORLDSIZE;
+        }
+
+        public int[, ,] getTerrainMatrix()
+        {
+            return terrainMatrix;
+        }
     }
 }

@@ -28,6 +28,7 @@ namespace AweEditor
     {
         ContentBuilder contentBuilder;
         ContentManager contentManager;
+        TerrainImporter terrainImporter;
 
 
         /// <summary>
@@ -41,6 +42,8 @@ namespace AweEditor
 
             contentManager = new ContentManager(modelViewerControl.Services,
                                                 contentBuilder.OutputDirectory);
+
+            terrainImporter = new TerrainImporter();
 
             /// Automatically bring up the "Load Model" dialog when we are first shown.
             ///this.Shown += OpenMenuClicked;
@@ -93,6 +96,53 @@ namespace AweEditor
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
             // TODO: Import the file
+            Cursor = Cursors.WaitCursor;
+
+            
+
+            terrainImporter.importTerrain(terrainViewerControl);
+
+            LoadTerrainModel();
+
+            Cursor = Cursors.Arrow;
+        }
+
+        private void LoadTerrainModel()
+        {
+            Cursor = Cursors.WaitCursor;
+
+            // Switch to the Model tab pane
+            tabControl1.SelectedIndex = 1;
+
+            // Unload any existing model.
+            terrainViewerControl.Model = null;
+            contentManager.Unload();
+
+            // Tell the ContentBuilder what to build.
+            contentBuilder.Clear();
+            contentBuilder.Add(Path.Combine(ContentPath(), "cats.fbx"), "Model", null, "ModelProcessor");
+
+            // Build this new model data.
+            string buildError = contentBuilder.Build();
+
+            if (string.IsNullOrEmpty(buildError))
+            {
+                // If the build succeeded, use the ContentManager to
+                // load the temporary .xnb file that we just created.
+                terrainViewerControl.Model = contentManager.Load<Model>("Model");
+            }
+            else
+            {
+                // If the build failed, display an error message.
+                MessageBox.Show(buildError, "Error");
+            }
+
+            // Switch to the Terrain tab pane
+            tabControl1.SelectedIndex = 3;
+
+            Cursor = Cursors.Arrow;
+           // contentBuilder.Add(Path.Combine(ContentPath(),"cats.fbx"), "Model", null, "ModelProcessor");
+           
         }
 
 
@@ -156,8 +206,8 @@ namespace AweEditor
         {
             Cursor = Cursors.WaitCursor;
 
-            // Switch to the Texture tab pane
-            tabControl1.SelectedIndex = 5;
+            // Switch to the Model tab pane
+            tabControl1.SelectedIndex = 1;
 
             // Unload any existing texture.
             textureViewerControl.Texture = null;
@@ -182,6 +232,8 @@ namespace AweEditor
                 MessageBox.Show(buildError, "Error");
             }
 
+            // Switch to the Texture tab pane
+            tabControl1.SelectedIndex = 5;
 
             Cursor = Cursors.Arrow;
         }
