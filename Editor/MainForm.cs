@@ -92,43 +92,98 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
+            MinecraftChunk[] mc = new MinecraftChunk[1024];
+            int mcNum = 0;
 
-      
+
+            for (int i = 0; i < 1024; i++)
+            {
+                mc[i] = null;
+            }
             OpenFileDialog fileDialog = new OpenFileDialog();
 
             fileDialog.InitialDirectory = ContentPath();
 
             fileDialog.Title = "Load MinecraftFile";
 
+            fileDialog.InitialDirectory = "%appdata%";
+
             fileDialog.Filter = "Region Files (*.mca)|*.mca|" +
                                 "Level Files (*.dat)|*.dat|" +
                                 "All Files (*.*)|*.*";
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
-                FileStream f = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read);
-                f.Flush();
-                byte[] bi= new byte[(int)f.Length];
-                f.Read(bi,0, (int)f.Length);
-
-                byte[] biC = new byte[(int)f.Length - 6];
-                byte[] biD = new byte[biC.Length];
-                int j = 0;
-                for (int i = 0; i < (int)f.Length-5; i++)
+                int localX = 0, localZ = 0;
+                int offset = 0;
+                int sectorNumber = 0;
+                int chunkL = 0;
+                char[] delm = { '\\', '.' };
+                string[] fn = fileDialog.FileName.Split(delm);
+                for (int i = 0; i < fn.Length; i++)
                 {
-                    if(i != 0)
+                    if (fn[i] == "r")
                     {
-                        if (i != 1)
-                        {
-                            biC[j] = bi[i];
-                            j++;
-                        }
+                        localX = Convert.ToInt32(fn[i+1]);
+                        localZ = Convert.ToInt32(fn[i+2]);
+                        break;
                     }
                 }
-                
-
-                DeflateStream ds = new DeflateStream(f, CompressionMode.Decompress);
-                ds.Flush();
-                ds.Read(biD, 0, biD.Length);
+                FileStream f = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read);
+                f.Flush();
+                byte[] hedder = new byte[8 * 1024];
+                f.Read(hedder, 0, 8 * 1024);
+                int chunkStart = 4 * ((localX & 31) + (localZ & 31) * 32);
+                while(chunkStart < 4096){
+                    f.Flush();
+                    byte[] buffer = new byte[5];
+                    f.Seek(chunkStart, SeekOrigin.Begin);
+                    f.Read(buffer, 0, 4);
+                    sectorNumber = buffer[3];
+                    offset = buffer[0] << 16 | buffer[1] << 8 | buffer[2];
+                    chunkStart += 4;
+                    if (offset != 0)
+                    {
+                        f.Seek(4096 * offset, SeekOrigin.Begin);
+                        f.Read(buffer, 0, 5);
+                        chunkL = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+                        byte[] chunk = new byte[chunkL - 1];
+                        f.Read(chunk, 0, chunkL - 1);
+                        int j = 0;
+                        byte[] chunkD = new byte[chunk.Length-6];
+                        for (int i = 0; i < chunk.Length - 4; i++)
+                        {
+                            if (i != 0)
+                            {
+                                if (i != 1)
+                                {
+                                    chunkD[j] = chunk[i];
+                                    j++;
+                                }
+                            }
+                        }
+                        DeflateStream dfs = new DeflateStream(new MemoryStream(chunkD), CompressionMode.Decompress);
+                        byte[] dChunk = new byte[chunkD.Length];
+                        dfs.Flush();
+                        dfs.Read(dChunk, 0, chunkD.Length);
+                        mc[mcNum] = new MinecraftChunk(dChunk);
+                        mcNum++;
+                        dfs.Close();
+                    }
+                }
+                f.Close();
+                MinecraftChunkParser[] mcpa = new MinecraftChunkParser[1024];
+                for (int i = 0; i < 1024; i++)
+                {
+                    if (mc[i] != null)
+                    {
+                        mcpa[i] = new MinecraftChunkParser(mc[i]);
+                        mcpa[i].Parse();
+                    }
+                    else
+                    {
+                        mcpa[i] = null;
+                    }
+                }
             }
 
         }
