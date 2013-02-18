@@ -108,16 +108,27 @@ namespace AweEditor
                 FileStream f = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read);
                 f.Flush();
                 byte[] bi= new byte[(int)f.Length];
-                f.Read(bi,0,(int)f.Length);
-                byte[] dcF = new byte[f.Length];
-                GZipStream gzs = new GZipStream(f, CompressionMode.Decompress);
-                gzs.Flush();
-                int l = gzs.ReadByte();
-                gzs.Read(dcF, 0, (int)f.Length);
-                gzs.Close();
-                //MincraftImporter mi = new MincraftImporter();
-                //byte[] dcf = mi.mincraftImport(fileDialog.FileName);
-        
+                f.Read(bi,0, (int)f.Length);
+
+                byte[] biC = new byte[(int)f.Length - 6];
+                byte[] biD = new byte[biC.Length];
+                int j = 0;
+                for (int i = 0; i < (int)f.Length-5; i++)
+                {
+                    if(i != 0)
+                    {
+                        if (i != 1)
+                        {
+                            biC[j] = bi[i];
+                            j++;
+                        }
+                    }
+                }
+                
+
+                DeflateStream ds = new DeflateStream(f, CompressionMode.Decompress);
+                ds.Flush();
+                ds.Read(biD, 0, biD.Length);
             }
 
         }
