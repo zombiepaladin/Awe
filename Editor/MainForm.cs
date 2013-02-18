@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Content;
@@ -93,6 +94,18 @@ namespace AweEditor
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
             // TODO: Import the file
+            OpenFileDialog fileDialog = new OpenFileDialog();
+
+            fileDialog.InitialDirectory = ContentPath();
+
+            fileDialog.Title = "Load Terrain";
+
+            fileDialog.Filter = "Minecraft Files (*.nbt;*.mca)|*.nbt;*.mca";
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                LoadTerrain(fileDialog.FileName);
+            }
         }
 
 
@@ -130,6 +143,12 @@ namespace AweEditor
             }
 
             Cursor = Cursors.Arrow;
+        }
+
+        void LoadTerrain(string filename)
+        {
+            byte[] uncompressedFile = File.ReadAllBytes(filename);
+            byte[] decompressedFile = Decompress(uncompressedFile);
         }
 
         private void ImportImageClicked(object sender, EventArgs e)
@@ -184,6 +203,29 @@ namespace AweEditor
 
 
             Cursor = Cursors.Arrow;
+        }
+
+        private static byte[] Decompress(byte[] data)
+        {
+            using (DeflateStream stream = new DeflateStream(new MemoryStream(data), CompressionMode.Decompress))
+            {
+                const int size = 4096 + 6;
+                byte[] buffer = new byte[size];
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    int count = 0;
+                    do
+                    {
+                        count = stream.Read(buffer, 0, size);
+                        if (count > 0)
+                        {
+                            memory.Write(buffer, 0, count);
+                        }
+                    }
+                    while (count > 0);
+                    return memory.ToArray();
+                }
+            }
         }
     }
 }
