@@ -5,14 +5,14 @@ using System.Text;
 
 namespace AweEditor
 {
-    class SubChunk
+    public class SubChunk
     {
-        int Y;
-        byte[] Blocks = new byte[4096];
-        byte[] Add = new byte[2048];
-        byte[] Data = new byte[2048];
-        byte[] BlockLight = new byte[2048];
-        byte[] SkyLight = new byte[2048];
+        public int Y;
+        public byte[] Blocks = new byte[4096];
+        public byte[] Add = new byte[2048];
+        public byte[] Data = new byte[2048];
+        public byte[] BlockLight = new byte[2048];
+        public byte[] SkyLight = new byte[2048];
 
         public SubChunk()
         {

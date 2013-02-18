@@ -8,10 +8,10 @@ namespace AweEditor
     class MinecraftChunk
     {
         public byte[] decryptedChunck;
-
         public MinecraftChunk(byte[] mc)
         {
             decryptedChunck = mc;
         }
+
     }
 }
