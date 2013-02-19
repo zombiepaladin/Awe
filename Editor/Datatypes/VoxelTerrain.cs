@@ -177,10 +177,15 @@ namespace AweEditor
     /// </summary>
     public class VoxelTerrain
     {
-        byte[] blockData;
-        public VoxelTerrain(byte[] bd)
+        List<SubChunk> sc;
+        int xPos;
+        int zPos;
+
+        public VoxelTerrain(List<SubChunk> i, int xP, int zP)
         {
-            blockData = bd;
+            sc = i;
+            xPos = xP;
+            zPos = zP;
         }
     }
 }

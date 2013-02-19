@@ -38,15 +38,15 @@ namespace AweEditor
                 MemoryStream ms = new MemoryStream(mc.decryptedChunck, false);
                 for (int i = 0; i < mc.decryptedChunck.Length; i++)
                 {
-                    if (mc.decryptedChunck[i] == 120 && (i + 1 < mc.decryptedChunck.Length && mc.decryptedChunck[i + 1] == 80))
+                    if (mc.decryptedChunck[i] == 120 && (i+1 <mc.decryptedChunck.Length && mc.decryptedChunck[i+1] == 80))
                     {
                         xPosLoc = i;
                     }
-                    if (mc.decryptedChunck[i] == 122 && (i + 1 < mc.decryptedChunck.Length && mc.decryptedChunck[i + 1] == 80))
+                    if (mc.decryptedChunck[i] == 122 && (i+1 <mc.decryptedChunck.Length && mc.decryptedChunck[i+1] == 80))
                     {
                         zPosLoc = i;
                     }
-                    if (mc.decryptedChunck[i] == 83 && (i + 1 < mc.decryptedChunck.Length && mc.decryptedChunck[i + 1] == 101))
+                    if (mc.decryptedChunck[i] == 83 && (i+1 <mc.decryptedChunck.Length && mc.decryptedChunck[i+1] == 101))
                     {
                         sectionLoc = i;
                     }
@@ -147,6 +147,7 @@ namespace AweEditor
                         if (Name.Contains("\0"))
                         {
                             break;
+                            i++;
                         }
                     }
                 }
