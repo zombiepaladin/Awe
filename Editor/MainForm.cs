@@ -31,7 +31,6 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager;
 
-
         /// <summary>
         /// Constructs the main form.
         /// </summary>
@@ -156,7 +155,7 @@ namespace AweEditor
             byte[] uncompressedFile = File.ReadAllBytes(filename);
             byte[][] decompressedChunkData = new byte[1024][];
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 1024; i++)
             {
                 // Find length of the chunk's sector and if it's zero assume the chunk is not populated and continue
                 byte locationLength = uncompressedFile.Skip(i * 4 + 3).Take(1).ToArray()[0];
@@ -189,18 +188,85 @@ namespace AweEditor
                 byte[] dataToDecomp = uncompressedFile.Skip(chunkLocation + 7).Take(chunkLength - 4).ToArray();
                 decompressedChunkData[i] = Decompress(dataToDecomp);
             }
-            byte[] nameLength = decompressedChunkData[3].Skip(4).Take(2).ToArray();
-            Array.Reverse(nameLength);
-            int num = BitConverter.ToInt16(nameLength, 0);
-            byte[] nameBytes = decompressedChunkData[3].Skip(6).Take(num).ToArray();
-            //Array.Reverse(nameBytes);
-            string name = ByteArrayToString(nameBytes);
+            foreach (byte[] b in decompressedChunkData)
+            {
+                if (b != null)
+                    ParseChunk(b);
+            }
             tabControl1.SelectedIndex = 3;
         }
 
         private void ParseChunk(byte[] data)
         {
+            Tag currentParent = null;
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte[] sizeBytes;
+                short size;
+                string name;
+                byte[] nameBytes;
 
+                int tempData = data[i];
+                switch (tempData)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    case 5:
+                        break;
+                    case 6:
+                        break;
+                    case 7:
+                        break;
+                    case 8:
+                        break;
+                    case 9:
+                        sizeBytes = data.Skip(i + 1).Take(2).ToArray();
+                        Array.Reverse(sizeBytes);
+                        size = BitConverter.ToInt16(sizeBytes, 0);
+
+                        if (size != 0)
+                        {
+                            nameBytes = data.Skip(i + 3).Take(size).ToArray();
+                            name = ByteArrayToString(nameBytes);
+                        }
+                        else
+                            name = null;
+
+                        int type = data.Skip(i + 3 + size).Take(1).ToArray()[0];
+                        TAG_List tag_l = new TAG_List(name, type);
+                        i = i + 3 + size + 4 - 1;
+
+                        break;
+                    case 10:
+                        sizeBytes = data.Skip(i + 1).Take(2).ToArray();
+                        Array.Reverse(sizeBytes);
+                        size = BitConverter.ToInt16(sizeBytes, 0);
+
+                        if (size != 0)
+                        {
+                            nameBytes = data.Skip(i + 3).Take(size).ToArray();
+                            name = ByteArrayToString(nameBytes);
+                        }
+                        else
+                            name = null;
+
+                        TAG_Compound tag_c = new TAG_Compound(name, currentParent);
+                        currentParent = tag_c;
+                        i = i + 3 + size - 1;
+
+                        break;
+                    case 11:
+                        break;
+                }
+            }
         }
 
         private void ImportImageClicked(object sender, EventArgs e)

@@ -80,17 +80,18 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Datatypes\VoxelTerrain.cs" />
-    <Compile Include="Terrain\Tags\TAG_Byte.cs" />
-    <Compile Include="Terrain\Tags\TAG_Byte_Array.cs" />
-    <Compile Include="Terrain\Tags\TAG_Compound.cs" />
-    <Compile Include="Terrain\Tags\TAG_Double.cs" />
-    <Compile Include="Terrain\Tags\TAG_End.cs" />
-    <Compile Include="Terrain\Tags\TAG_Float.cs" />
-    <Compile Include="Terrain\Tags\TAG_Int.cs" />
-    <Compile Include="Terrain\Tags\TAG_List.cs" />
-    <Compile Include="Terrain\Tags\TAG_Long.cs" />
-    <Compile Include="Terrain\Tags\TAG_Short.cs" />
-    <Compile Include="Terrain\Tags\TAG_String.cs" />
+    <Compile Include="Tags\Tag.cs" />
+    <Compile Include="Tags\TAG_Byte.cs" />
+    <Compile Include="Tags\TAG_Byte_Array.cs" />
+    <Compile Include="Tags\TAG_Compound.cs" />
+    <Compile Include="Tags\TAG_Double.cs" />
+    <Compile Include="Tags\TAG_Float.cs" />
+    <Compile Include="Tags\TAG_Int.cs" />
+    <Compile Include="Tags\TAG_Int_Array.cs" />
+    <Compile Include="Tags\TAG_List.cs" />
+    <Compile Include="Tags\TAG_Long.cs" />
+    <Compile Include="Tags\TAG_Short.cs" />
+    <Compile Include="Tags\TAG_String.cs" />
     <Compile Include="Utilities\ContentBuilder.cs" />
     <Compile Include="Controls\TerrainViewerControl.cs">
       <SubType>Component</SubType>
@@ -153,7 +154,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Terrain\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
