@@ -17,6 +17,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor.Datatypes;
 using System.Collections.Generic;
+using System.Text;
 #endregion
 
 namespace AweEditor
@@ -32,6 +33,11 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager;
 
+        int height = 0;
+        int length = 0;
+        int width = 0;
+
+        byte[] blockByteArray;
 
         /// <summary>
         /// Constructs the main form.
@@ -116,19 +122,47 @@ namespace AweEditor
             // Switch to the Terrain tab pane
             tabControl1.SelectedIndex = 3;
 
+            //TODO: populate terrain
+            //TODO: fix scaling issue
+            
             List<TerrainBlockInstance> blocks = new List<TerrainBlockInstance>();
 
-            //TODO: populate terrain
+#region Process file
+            FileStream fs = new FileStream(fileName, FileMode.Open);
+            BinaryReader bReader = new BinaryReader(fs);
 
-            //Populate w/ blocks for testing
-            for (int i = 0; i < 32; i++)
-                for(int j = 0; j < 32; j++)
-                    blocks.Add(new TerrainBlockInstance(i, i, j, BlockType.Stone));
-            
-            VoxelTerrain terrain = new VoxelTerrain(blocks);
-            terrainViewerControl.VoxelTerrain = terrain;
+            processTag(blocks, bReader);
 
-            #region Load Block Model
+            bReader.Close();
+            fs.Close();
+#endregion
+
+            //Extract from data
+            /*
+            int y, z, x;
+            x = y = z = 0;
+
+            for (int i = 0; i < blockByteArray.Length; i++)
+            {
+                if (blockByteArray[i] != 0)
+                    blocks.Add(new TerrainBlockInstance(x * 0.5f, z * 0.5f, y * 0.5f, BlockType.Stone));
+
+                x++;
+
+                if (x % width == 0)
+                {
+                    x = 0;
+                    z++;
+                    if (z % length == 0)
+                    {
+                        z = 0;
+                        y++;
+                    }
+                }
+            }*/
+             
+
+#region Load Block Model
             //TODO:move model load into VoxelTerrain
             contentManager.Unload();
 
@@ -150,7 +184,16 @@ namespace AweEditor
                 // If the build failed, display an error message.
                 MessageBox.Show(buildError, "Error");
             }
-            #endregion
+#endregion
+
+            //Populate w/ blocks for testing
+            for (int i = 0; i < 32; i++)
+                for(int j = 0; j < 32; j++)
+                    blocks.Add(new TerrainBlockInstance(i * 0.5f, i * 0.5f, j * 0.5f, BlockType.Stone)); 
+            
+
+            VoxelTerrain terrain = new VoxelTerrain(blocks);
+            terrainViewerControl.VoxelTerrain = terrain;
 
             Cursor = Cursors.Arrow;
         }
@@ -241,9 +284,207 @@ namespace AweEditor
                 // If the build failed, display an error message.
                 MessageBox.Show(buildError, "Error");
             }
-
-
+            
             Cursor = Cursors.Arrow;
+        }
+
+        private void processTag(List<TerrainBlockInstance> blocks, BinaryReader reader) {
+            byte _byte = reader.ReadByte();
+
+            switch (_byte)
+            {
+                case 1:
+                    processByte(blocks, reader);
+                    break;
+                 
+                case 2:
+                    processShort(blocks, reader);
+                    break;
+
+                case 3:
+                    processInt(blocks, reader);
+                    break;
+
+                case 4:
+                    processLong(blocks, reader);
+                    break;
+
+                case 7:
+                    processByteArray(blocks, reader);
+                    break;
+
+                case 8:
+                    processString(blocks, reader);
+                    break;
+
+                case 9:
+                    processList(blocks, reader);
+                    break;
+
+                case 10:
+                    processCompound(blocks, reader);
+                    break;
+            }
+        }
+
+        private string processName(BinaryReader reader)
+        {
+            UInt16 nameLength = BitConverter.ToUInt16(getBytes(reader, 2), 0);
+            return readString(reader, nameLength);
+        }
+
+        private void processCompound(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name;
+            if(named)
+                name = processName(reader);
+
+            byte _byte = (byte)reader.PeekChar();
+            while (_byte != 0) //process children
+            {
+                processTag(blocks, reader);
+                _byte = (byte)reader.PeekChar();
+            }
+
+            reader.ReadChar(); //get rid of 0 tag
+                    
+        }
+
+        private void processString(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name;
+            if (named)
+                name = processName(reader);
+            
+            UInt16 len = BitConverter.ToUInt16(getBytes(reader, 2), 0);
+            string s = readString(reader, len);
+        }
+
+        private void processByteArray(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name = "";
+            if (named)
+                name = processName(reader);
+
+            int BAPayloadCount = BitConverter.ToInt32(getBytes(reader, 4), 0);
+
+            if (BAPayloadCount == 0)
+                return;
+
+            if (name.Equals("Blocks")) //use info if blocks
+            {
+                blockByteArray = new byte[BAPayloadCount];
+
+                for (int i = 0; i < BAPayloadCount; i++)
+                {
+                    byte BAPayload = reader.ReadByte();
+                    blockByteArray[i] = BAPayload;
+                }
+            }
+            else //skip if not blocks
+                for (int i = 0; i < BAPayloadCount; i++)
+                    reader.ReadByte();
+        }
+
+        private void processList(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name;
+            if (named)
+                name = processName(reader);
+            
+            byte listType = reader.ReadByte();
+            int listPayloadCount = BitConverter.ToInt32(getBytes(reader, 4), 0);
+
+            if (listPayloadCount == 0)
+                return;
+
+            for (int i = 0; i < listPayloadCount; i++)
+            {
+                switch (listType)
+                {
+                    case 10:
+                        processCompound(blocks, reader, false);
+                        break;
+                    //TODO: other cases
+                }
+            }
+
+            //TODO
+        }
+
+        private long processLong(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name;
+            if (named)
+                name = processName(reader);
+            
+            return BitConverter.ToInt64(getBytes(reader, 8), 0);
+        }
+
+        private Int32 processInt(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name = "";
+            if (named)
+                name = processName(reader);
+
+            int val = BitConverter.ToInt32(getBytes(reader, 4), 0);
+
+            if (name.Equals("Height"))
+                height = val;
+            else if (name.Equals("Width"))
+                width = val;
+            else if (name.Equals("Length"))
+                length = val;
+
+            return val;
+        }
+
+        private short processShort(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name;
+            if (named)
+                name = processName(reader);
+            
+            return BitConverter.ToInt16(getBytes(reader, 2), 0);
+        }
+
+        private byte processByte(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
+        {
+            string name;
+            if (named)
+                name = processName(reader);
+            
+            return reader.ReadByte();
+        }
+
+        /// <summary>
+        /// Gets array of bytes converted to correct endianness
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="len"></param>
+        /// <returns></returns>
+        private byte[] getBytes(BinaryReader reader, int len)
+        {
+            byte[] bytes = new byte[len];
+
+            if(BitConverter.IsLittleEndian) //reverse bytes
+                for (int i = len - 1; i >= 0; i--)
+                    bytes[i] = reader.ReadByte();
+            else
+                for (int i = 0; i < len; i++)
+                    bytes[i] = reader.ReadByte();
+
+            return bytes;
+        }
+
+        private string readString(BinaryReader reader, int len)
+        {
+            string val = "";
+
+            for (int i = 0; i < len; i++)
+                val += reader.ReadChar();
+
+            return val;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AweEditor.Datatypes
         public Vector3 position;
         public Matrix transform;
 
-        public TerrainBlockInstance(int x, int y, int z, BlockType blockType)
+        public TerrainBlockInstance(float x, float y, float z, BlockType blockType)
         {
             this.blockType = blockType;
             
