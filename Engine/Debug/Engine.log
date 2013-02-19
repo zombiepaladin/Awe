@@ -1,4 +1,4 @@
-﻿Build started 2/18/2013 11:57:50 PM.
+﻿Build started 2/19/2013 12:44:39 AM.
      1>Project "C:\Users\Samuel\Documents\XNA Projects\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -14,4 +14,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.08
+Time Elapsed 00:00:00.07

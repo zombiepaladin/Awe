@@ -33,9 +33,9 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager;
 
-        int height = 0;
-        int length = 0;
-        int width = 0;
+        int blockHeight = 87;
+        int blockLength = 57;
+        int blockWidth = 41; //TODO: get these without hardcoding
 
         byte[] blockByteArray;
 
@@ -138,28 +138,28 @@ namespace AweEditor
 #endregion
 
             //Extract from data
-            /*
+            
             int y, z, x;
             x = y = z = 0;
 
             for (int i = 0; i < blockByteArray.Length; i++)
             {
                 if (blockByteArray[i] != 0)
-                    blocks.Add(new TerrainBlockInstance(x * 0.5f, z * 0.5f, y * 0.5f, BlockType.Stone));
+                    blocks.Add(new TerrainBlockInstance(x * 0.5f, y * 0.5f, z * 0.5f, BlockType.Stone));
 
                 x++;
 
-                if (x % width == 0)
+                if (x % blockWidth == 0)
                 {
                     x = 0;
                     z++;
-                    if (z % length == 0)
+                    if (z % blockLength == 0)
                     {
                         z = 0;
                         y++;
                     }
                 }
-            }*/
+            }
              
 
 #region Load Block Model
@@ -186,11 +186,11 @@ namespace AweEditor
             }
 #endregion
 
-            //Populate w/ blocks for testing
+            /*//Populate w/ blocks for testing
             for (int i = 0; i < 32; i++)
                 for(int j = 0; j < 32; j++)
                     blocks.Add(new TerrainBlockInstance(i * 0.5f, i * 0.5f, j * 0.5f, BlockType.Stone)); 
-            
+            */
 
             VoxelTerrain terrain = new VoxelTerrain(blocks);
             terrainViewerControl.VoxelTerrain = terrain;
@@ -289,7 +289,16 @@ namespace AweEditor
         }
 
         private void processTag(List<TerrainBlockInstance> blocks, BinaryReader reader) {
-            byte _byte = reader.ReadByte();
+            byte _byte;
+
+            try
+            {
+                _byte = reader.ReadByte();
+            }
+            catch (Exception e)
+            {
+                return;
+            }
 
             switch (_byte)
             {
@@ -347,7 +356,7 @@ namespace AweEditor
             }
 
             reader.ReadChar(); //get rid of 0 tag
-                    
+            processTag(blocks, reader);        
         }
 
         private void processString(List<TerrainBlockInstance> blocks, BinaryReader reader, bool named = true)
@@ -430,11 +439,11 @@ namespace AweEditor
             int val = BitConverter.ToInt32(getBytes(reader, 4), 0);
 
             if (name.Equals("Height"))
-                height = val;
+                blockHeight = val;
             else if (name.Equals("Width"))
-                width = val;
+                blockWidth = val;
             else if (name.Equals("Length"))
-                length = val;
+                blockLength = val;
 
             return val;
         }

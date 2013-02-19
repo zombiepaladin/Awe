@@ -87,6 +87,7 @@ namespace AweEditor
             float aspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
             float rotation = (float)timer.Elapsed.TotalSeconds;
+            //float rotation = 1.5f;
             Matrix world = Matrix.CreateRotationY(rotation);
 
             //Populate instances here to find max length for camera
@@ -105,13 +106,11 @@ namespace AweEditor
 
             //Continue camera setup
             Vector3 eyePosition = Vector3.Zero;
-            eyePosition.Z += maxDist;
-            eyePosition.Y += maxDist / 2f;
 
             float nearClip = maxDist / 50.0f;
             float farClip = maxDist * 50;
 
-            Matrix view = Matrix.CreateLookAt(eyePosition, Vector3.Zero, Vector3.Up);
+            Matrix view = Matrix.CreateLookAt(new Vector3(30, 20, 30), new Vector3(10, 20, 10), Vector3.Up);
             Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
                                                                 nearClip, farClip);
 
