@@ -156,7 +156,7 @@ namespace AweEditor
             byte[] uncompressedFile = File.ReadAllBytes(filename);
             byte[][] decompressedChunkData = new byte[1024][];
 
-            for (int i = 0; i < 1024; i++)
+            for (int i = 0; i < 5; i++)
             {
                 // Find length of the chunk's sector and if it's zero assume the chunk is not populated and continue
                 byte locationLength = uncompressedFile.Skip(i * 4 + 3).Take(1).ToArray()[0];
@@ -189,7 +189,17 @@ namespace AweEditor
                 byte[] dataToDecomp = uncompressedFile.Skip(chunkLocation + 7).Take(chunkLength - 4).ToArray();
                 decompressedChunkData[i] = Decompress(dataToDecomp);
             }
+            byte[] nameLength = decompressedChunkData[3].Skip(4).Take(2).ToArray();
+            Array.Reverse(nameLength);
+            int num = BitConverter.ToInt16(nameLength, 0);
+            byte[] nameBytes = decompressedChunkData[3].Skip(6).Take(num).ToArray();
+            //Array.Reverse(nameBytes);
+            string name = ByteArrayToString(nameBytes);
+            tabControl1.SelectedIndex = 3;
+        }
 
+        private void ParseChunk(byte[] data)
+        {
 
         }
 
@@ -268,6 +278,12 @@ namespace AweEditor
                     return memory.ToArray();
                 }
             }
+        }
+
+        private string ByteArrayToString(byte[] arr)
+        {
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            return enc.GetString(arr);
         }
     }
 }

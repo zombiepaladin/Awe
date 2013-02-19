@@ -63,3 +63,7 @@ packages/
 
 #Test files
 *.testsettings
+Editor/Content/*.mca
+Engine/Debug/*.tlog
+Engine/Debug/*.tlog
+*/*.tlog
