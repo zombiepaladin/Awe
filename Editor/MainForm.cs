@@ -11,6 +11,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Content;
@@ -145,10 +146,51 @@ namespace AweEditor
             Cursor = Cursors.Arrow;
         }
 
+        /// <summary>
+        /// Handles the loading of the voxel based terrain
+        /// </summary>
+        /// <param name="filename">The name of the terrain file to load</param>
         void LoadTerrain(string filename)
         {
+            // Read entire contents of region file into byte array
             byte[] uncompressedFile = File.ReadAllBytes(filename);
-            byte[] decompressedFile = Decompress(uncompressedFile);
+            byte[][] decompressedChunkData = new byte[1024][];
+
+            for (int i = 0; i < 1024; i++)
+            {
+                // Find length of the chunk's sector and if it's zero assume the chunk is not populated and continue
+                byte locationLength = uncompressedFile.Skip(i * 4 + 3).Take(1).ToArray()[0];
+                if (locationLength == 0)
+                {
+                    decompressedChunkData[i] = null;
+                    continue;
+                }
+
+                // Find the location of the chunk and the size of the chunk's sector (in bytes)
+                byte[] locationData = uncompressedFile.Skip(i * 4).Take(3).ToArray();
+                Array.Reverse(locationData);
+                int chunkLocation = (locationData[0] + (locationData[1] << 8) + (locationData[2] << 16)) * 4096;
+                int sectorLength = locationLength * 4096;
+
+                // Find the length of the compressed chunk data (in bytes)
+                byte[] temp = uncompressedFile.Skip(chunkLocation).Take(4).ToArray();
+                Array.Reverse(temp);
+                int chunkLength = BitConverter.ToInt32(temp, 0);
+
+                // Find the compression type of the chunk data and if we can't handle it, set that chunk to null and move on
+                byte compressionType = uncompressedFile.Skip(chunkLocation + 4).Take(1).ToArray()[0];
+                if (compressionType != 2)
+                {
+                    decompressedChunkData[i] = null;
+                    continue;
+                }
+
+                // Decompress the chunk data and store it in an array with the other chunk data
+                byte[] dataToDecomp = uncompressedFile.Skip(chunkLocation + 7).Take(chunkLength - 4).ToArray();
+                decompressedChunkData[i] = Decompress(dataToDecomp);
+            }
+
+
         }
 
         private void ImportImageClicked(object sender, EventArgs e)
@@ -209,7 +251,7 @@ namespace AweEditor
         {
             using (DeflateStream stream = new DeflateStream(new MemoryStream(data), CompressionMode.Decompress))
             {
-                const int size = 4096 + 6;
+                const int size = 1024 * 128;
                 byte[] buffer = new byte[size];
                 using (MemoryStream memory = new MemoryStream())
                 {
