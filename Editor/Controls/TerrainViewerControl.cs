@@ -76,6 +76,7 @@ namespace AweEditor
             if (voxelTerrain == null || voxelModel == null)
                 return;
 
+            //init bones
             if (instancedModelBones == null)
             {
                 instancedModelBones = new Matrix[voxelModel.Bones.Count];
@@ -83,51 +84,39 @@ namespace AweEditor
             }
 
             //Setup camera
-            float rotation = (float)timer.Elapsed.TotalSeconds;
-
-            Vector3 eyePosition = Vector3.Zero;
-
-            eyePosition.Z += 30 * 2;
-            eyePosition.Y += 30;
-
             float aspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
-            float nearClip = .33f;
-            float farClip = 30 * 100;
-            
+            float rotation = (float)timer.Elapsed.TotalSeconds;
             Matrix world = Matrix.CreateRotationY(rotation);
-            Matrix view = Matrix.CreateLookAt(new Vector3(10, 10, 10), Vector3.Zero, Vector3.Up);
-            Matrix projection = Matrix.CreatePerspectiveFieldOfView((float) (Math.PI / 2), aspectRatio,
-                                                                nearClip, farClip);
-            
+
+            //Populate instances here to find max length for camera
+            int maxDist = 0;
             Array.Resize(ref instanceTransforms, voxelTerrain.blocks.Count);
-            for(int i = 0; i < voxelTerrain.blocks.Count; i++)
+            for (int i = 0; i < voxelTerrain.blocks.Count; i++)
             {
-                instanceTransforms[i] = voxelTerrain.blocks[i].transform;
+                //find distance from origin
+                int distFromZero = (int) voxelTerrain.blocks[i].position.Length();
+                //update maxDist if bigger
+                if (distFromZero > maxDist)
+                    maxDist = distFromZero;
+
+                instanceTransforms[i] = voxelTerrain.blocks[i].transform * world;
             }
 
-            //DrawModelHardwareInstancing(voxelModel, instancedModelBones, instanceTransforms, view, projection);
+            //Continue camera setup
+            Vector3 eyePosition = Vector3.Zero;
+            eyePosition.Z += maxDist;
+            eyePosition.Y += maxDist / 2f;
+
+            float nearClip = maxDist / 50.0f;
+            float farClip = maxDist * 50;
+
+            Matrix view = Matrix.CreateLookAt(eyePosition, Vector3.Zero, Vector3.Up);
+            Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
+                                                                nearClip, farClip);
 
             //Draw
-            foreach (ModelMesh mesh in voxelModel.Meshes)
-            {
-                foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.View = view;
-                    effect.Projection = projection;
-
-                    effect.EnableDefaultLighting();
-                    effect.PreferPerPixelLighting = true;
-                    effect.SpecularPower = 16;
-
-                    foreach (TerrainBlockInstance block in voxelTerrain.blocks)
-                    {
-                        effect.World = block.transform * world;
-                        mesh.Draw();
-                    }
-                }
-            }
-             
+            DrawModelHardwareInstancing(voxelModel, instancedModelBones, instanceTransforms, view, projection);
         }
 
         /// <summary>

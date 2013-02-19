@@ -16,6 +16,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using System.Windows.Forms;
+using System.Reflection;
 #endregion
 
 namespace AweEditor
@@ -42,7 +44,8 @@ namespace AweEditor
             "Microsoft.Xna.Framework.Content.Pipeline.XImporter" + xnaVersion,
             "Microsoft.Xna.Framework.Content.Pipeline.TextureImporter" + xnaVersion,
             "Microsoft.Xna.Framework.Content.Pipeline.EffectImporter" + xnaVersion,
-
+            Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "../../../../Content/")) + "InstancedModelPipeline.dll"
+            
             // If you want to use custom importers or processors from
             // a Content Pipeline Extension Library, add them here.
             //

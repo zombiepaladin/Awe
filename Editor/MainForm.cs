@@ -123,18 +123,18 @@ namespace AweEditor
             //Populate w/ blocks for testing
             for (int i = 0; i < 32; i++)
                 for(int j = 0; j < 32; j++)
-                    blocks.Add(new TerrainBlockInstance(i, j, 0, BlockType.Stone));
+                    blocks.Add(new TerrainBlockInstance(i, i, j, BlockType.Stone));
             
             VoxelTerrain terrain = new VoxelTerrain(blocks);
             terrainViewerControl.VoxelTerrain = terrain;
 
-            #region Load Block
+            #region Load Block Model
             //TODO:move model load into VoxelTerrain
             contentManager.Unload();
 
             // Tell the ContentBuilder what to build.
             contentBuilder.Clear();
-            contentBuilder.Add(ContentPath() + "\\Cats.fbx", "Model", null, "ModelProcessor");
+            contentBuilder.Add(ContentPath() + "\\Cats.fbx", "Model", null, "InstancedModelProcessor");
 
             // Build this new model data.
             string buildError = contentBuilder.Build();
