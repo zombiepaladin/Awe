@@ -23,7 +23,7 @@ namespace AweEditor
     /// a voxel terrain. The main form class is responsible for loading
     /// the terrain: this control just displays it.
     /// </summary>
-    class TerrainViewerControl : GraphicsDeviceControl
+    class TerrainViewerControl : GraphicsDeviceControl //TODO: clean this whole class up
     {
         /// <summary>
         /// Gets or sets the current voxel terrain.
@@ -36,10 +36,13 @@ namespace AweEditor
 
         VoxelTerrain voxelTerrain;
         Matrix[] instancedModelBones;
-        public Model voxelModel;
+        public Model voxelModel; //TODO: need to support multiple voxel models (textures)
         Stopwatch timer;
         DynamicVertexBuffer instanceVertexBuffer;
         Matrix[] instanceTransforms;
+
+        //Creates a 1 block space between all blocks
+        public bool doubleSpaced = false;
 
         // To store instance transform matrices in a vertex buffer, we use this custom
         // vertex type which encodes 4x4 matrices as a set of four Vector4 values.
@@ -56,9 +59,18 @@ namespace AweEditor
         /// </summary>
         protected override void Initialize()
         {
+            loadModels();
+
             // Hook the idle event to constantly redraw our animation.
             Application.Idle += delegate { Invalidate(); };
             timer = Stopwatch.StartNew();
+        }
+
+        private void loadModels()
+        {
+            //currently just loads the 1 placeholder model
+            //TODO
+
         }
 
 
@@ -93,15 +105,30 @@ namespace AweEditor
             //Populate instances here to find max length for camera
             int maxDist = 0;
             Array.Resize(ref instanceTransforms, voxelTerrain.blocks.Count);
+            Vector3 position = new Vector3();
+            BlockData block = new BlockData();
+            Matrix transform = new Matrix();
+
+            float scale = 2;
+            if (doubleSpaced) //inverted because dividing by scale
+                scale = 1;
+
             for (int i = 0; i < voxelTerrain.blocks.Count; i++)
             {
+                block = voxelTerrain.blocks[i];
+
+                position.X = block.x / scale; //TODO: fix hardcoded scaling
+                position.Y = block.y / scale;
+                position.Z = block.z / scale;
+                
                 //find distance from origin
-                int distFromZero = (int) voxelTerrain.blocks[i].position.Length();
+                int distFromZero = (int) position.Length();
                 //update maxDist if bigger
                 if (distFromZero > maxDist)
                     maxDist = distFromZero;
 
-                instanceTransforms[i] = voxelTerrain.blocks[i].transform * world;
+                transform = Matrix.CreateTranslation(position);
+                instanceTransforms[(instanceTransforms.Length - i) - 1] = transform * world; //TODO: remove backwards test
             }
 
             //Continue camera setup
@@ -170,7 +197,7 @@ namespace AweEditor
 
                         GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
                                                                meshPart.NumVertices, meshPart.StartIndex,
-                                                               meshPart.PrimitiveCount, instances.Length);
+                                                               meshPart.PrimitiveCount, Math.Min(65000, instances.Length)); //TODO: should have warning or something when too big
                       
                     }
                 }

@@ -40,14 +40,21 @@ namespace AweEditor
         Emerald = 129,
     }
 
+    public struct BlockData
+    {
+        public short x, y, z;
+
+        //int type; //Exclude for now and just have 1 texture
+    }
+
     /// <summary>
     /// A class to represent voxel terrain
     /// </summary>
     public class VoxelTerrain
     {
-        public List<TerrainBlockInstance> blocks; //store as List for now, optimize later
+        public List<BlockData> blocks; //store as List for now, optimize later
 
-        public VoxelTerrain(List<TerrainBlockInstance> blocks)
+        public VoxelTerrain(List<BlockData> blocks)
         {
             this.blocks = blocks;
         }
