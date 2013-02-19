@@ -9,7 +9,11 @@ using zlib;
 namespace AweEditor
 {
 
-    
+    /*
+     * TerrainImporter: reads input file, finds and decompresses chunk 
+     * Reading chunk functionality not implemented.
+     * 
+     * */
     class TerrainImporter
     {
         static string fileName = "r.0.1.MCA";
@@ -18,8 +22,6 @@ namespace AweEditor
 
         public void importTerrain(TerrainViewerControl terrainViewerControl)
         {
-            int counter = 0;
-            string line;
             string path = fileName;
             string fullPath = System.IO.Path.GetFullPath(path);
 
@@ -39,51 +41,18 @@ namespace AweEditor
             byte[] decompressedChunk;
 
             DecompressData(data, out decompressedChunk);
-            /*
-            using (GZipStream gzipStream = new GZipStream(File.OpenRead(fullPath), CompressionMode.Decompress))
-            {
-                using(StreamReader sr = new StreamReader(gzipStream))
-                {
-                    //Matt try something like this as a hint / starting point 
-                    while((line = sr.ReadLine())!=null)
-                    {
-                        System.Console.WriteLine(line);
-                        counter++;
-                    }
-                    sr.Close();
-                }   
-            }
-            System.Console.WriteLine("There were {0} lines.", counter);
             
-            /*
-            // Read the file and display it line by line.
-            System.IO.StreamReader file =
-                new System.IO.StreamReader(fullPath);
-            while ((line = file.ReadLine()) != null)
-            {
-                //System.Console.WriteLine(line);
-                counter++;
-            }
-
-            file.Close();
-            System.Console.WriteLine("There were {0} lines.", counter);
-            // Suspend the screen.
-            System.Console.ReadLine();
-             * */
             VoxelTerrain terrain = new VoxelTerrain();
-            for (int x = 0; x < 100; x++)
+            int worldSize = terrain.getWorldSize();
+            for (int x = 0; x < worldSize; x++)
             {
-                for (int z = 0; z < 100; z++)
+                for (int z = 0; z < worldSize; z++)
                 {
-                    terrain.addBlock(x, 0, z, "defaultType");
+                    terrain.addBlock(x, 0, z, BlockType.Stone);
                 }
             }
-            for (int y = 0; y < 100; y++)
-            {
-                terrain.addBlock(50, y, 50, "defaultType");
-            }
-            terrain.addBlock(1, 1, 1, "defaultType");
-            //terrain.addBlock(0, 0, 0, "defaultType");
+
+            terrain.addBlock(1, 1, 1, BlockType.Stone);
             terrainViewerControl.VoxelTerrain = terrain;
         }
 

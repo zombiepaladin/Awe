@@ -102,6 +102,7 @@ namespace AweEditor
                 Matrix view = Matrix.CreateLookAt(eyePosition, modelCenter, Vector3.Up);
                 Matrix projection = Matrix.CreatePerspectiveFieldOfView(1, aspectRatio,
                                                                     nearClip, farClip);
+                //Draw for each axis
                 for (int x = 0; x < voxelTerrain.getWorldSize(); x++)
                 {
                     for (int y = 0; y < voxelTerrain.getWorldSize(); y++)
@@ -115,6 +116,7 @@ namespace AweEditor
                                 {
                                     foreach (BasicEffect effect in mesh.Effects)
                                     {
+                                        //world matrix changed so each box has size 1
                                         world = Matrix.CreateScale(1 / modelRadius) * Matrix.CreateTranslation(x, y, z);
                                         effect.World = boneTransforms[mesh.ParentBone.Index] * world;
                                         effect.View = view;
