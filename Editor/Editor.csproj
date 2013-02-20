@@ -76,14 +76,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controls\TextureViewerControl.cs">
+    <Compile Include="Controls\EditorViewerControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Datatypes\GameManifest.cs" />
     <Compile Include="Datatypes\VoxelTerrain.cs" />
     <Compile Include="Utilities\ContentBuilder.cs" />
-    <Compile Include="Controls\TerrainViewerControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Utilities\ErrorLogger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -95,9 +93,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Services\GraphicsDeviceService.cs" />
-    <Compile Include="Controls\ModelViewerControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">
