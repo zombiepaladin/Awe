@@ -15,24 +15,22 @@ namespace AweEditor.Utilities
         //Store block types in a flattened 3D array, block coords are [Y][Z][X] - need to unflatten or simulate 3D array indicies based on width/length/height to find XYZ
         private byte[] blockArray;
 
-        private string fileName;
-
         private BinaryReader reader;
 
         /// <summary>
         /// Currently only supports UNCOMPRESSED schematic files (Just unzip the .schematic and import the contained file)
         /// </summary>
         /// <param name="fileName"></param>
-        public TerrainImporter(string fileName)
+        public TerrainImporter()
         {
-            this.fileName = fileName;
+
         }
 
         /// <summary>
         /// Processes the file given in the constructor
         /// Kept as separate method so processing can be delayed if needed
         /// </summary>
-        public void processFile()
+        public void processFile(string fileName)
         {
             FileStream fs = new FileStream(fileName, FileMode.Open);
             reader = new BinaryReader(fs);
@@ -46,6 +44,15 @@ namespace AweEditor.Utilities
             reader = null;
             fs = null;
         }
+
+        public void processChunkData(string fileName)
+        {
+            width = 128; //why width?
+            length = 16;
+            height = 16;
+
+            blockArray = File.ReadAllBytes(fileName);
+        }
     
         /// <summary>
         /// Removes blocks that are bounded on all 6 sides
@@ -57,7 +64,7 @@ namespace AweEditor.Utilities
             //TODO: consider transparent blocks when implemented
 
             if (blockArray == null)
-                processFile();
+                return;
 
             byte[, ,] blocks = unflattenBlockArray();
 
@@ -116,7 +123,7 @@ namespace AweEditor.Utilities
         public List<BlockData> createTerrain()
         {
             if (blockArray == null)
-                processFile();
+                return new List<BlockData>();
 
             List<BlockData> blocks = new List<BlockData>(); //TODO: optimize
 
@@ -125,11 +132,12 @@ namespace AweEditor.Utilities
             BlockData blockData = new BlockData();
             for (int i = 0; i < blockArray.Length; i++)
             {
-                if (blockArray[i] != 0) //ignore air blocks
+                if (blockArray[i] != 0) //ignore air blocks //TODO: remove filter for dirt
                 {
                     blockData.x = x;
                     blockData.y = y;
                     blockData.z = z;
+                    blockData.type = blockArray[i];
 
                     blocks.Add(blockData);
                     //blocks.Add(new TerrainBlockInstance(x * 0.5f, y * 0.5f, z * 0.5f, BlockType.Stone)); //TODO: fix hardcoded scaling

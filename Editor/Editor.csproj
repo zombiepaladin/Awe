@@ -88,6 +88,7 @@
     <Compile Include="Controls\TerrainViewerControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Utilities\NBTProcessor.cs" />
     <Compile Include="Utilities\ErrorLogger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

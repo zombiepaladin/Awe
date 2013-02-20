@@ -33,13 +33,15 @@ namespace AweEditor
             get { return voxelTerrain; }
             set { voxelTerrain = value; }
         }
-
         VoxelTerrain voxelTerrain;
+        
         Matrix[] instancedModelBones;
-        public Model voxelModel; //TODO: need to support multiple voxel models (textures)
-        Stopwatch timer;
         DynamicVertexBuffer instanceVertexBuffer;
         Matrix[] instanceTransforms;
+
+        public Model voxelModel; //TODO: need to support multiple voxel models (textures)
+        
+        Stopwatch timer;
 
         //Creates a 1 block space between all blocks
         public bool doubleSpaced = false;
@@ -69,7 +71,7 @@ namespace AweEditor
         private void loadModels()
         {
             //currently just loads the 1 placeholder model
-            //TODO
+            //TODO:
 
         }
 
@@ -79,17 +81,15 @@ namespace AweEditor
         /// </summary>
         protected override void Draw()
         {
-
-            //Red background for testing
-            Color backColor = new Color(255, 0, 0);
+            Color backColor = Color.MidnightBlue;
             GraphicsDevice.Clear(backColor);
             
             //Quit if no terrain to render
-            if (voxelTerrain == null || voxelModel == null)
+            if (voxelTerrain == null)
                 return;
 
             //init bones
-            if (instancedModelBones == null)
+            if (instancedModelBones == null) //TODO: move to loadModels when implemented
             {
                 instancedModelBones = new Matrix[voxelModel.Bones.Count];
                 voxelModel.CopyAbsoluteBoneTransformsTo(instancedModelBones);
@@ -137,7 +137,7 @@ namespace AweEditor
             float nearClip = maxDist / 50.0f;
             float farClip = maxDist * 50;
 
-            Matrix view = Matrix.CreateLookAt(new Vector3(30, 20, 30), new Vector3(10, 20, 10), Vector3.Up);
+            Matrix view = Matrix.CreateLookAt(new Vector3(30, 30, 30), new Vector3(10, 30, 10), Vector3.Up);
             Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
                                                                 nearClip, farClip);
 

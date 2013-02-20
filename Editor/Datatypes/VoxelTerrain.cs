@@ -44,7 +44,7 @@ namespace AweEditor
     {
         public short x, y, z;
 
-        //int type; //Exclude for now and just have 1 texture
+        public short type;
     }
 
     /// <summary>

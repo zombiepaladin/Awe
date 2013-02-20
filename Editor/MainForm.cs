@@ -117,12 +117,13 @@ namespace AweEditor
             // Switch to the Terrain tab pane
             tabControl1.SelectedIndex = 3;
 
-            TerrainImporter terrainImporter = new TerrainImporter(fileName);
-            terrainImporter.processFile();
+            TerrainImporter terrainImporter = new TerrainImporter();
+            //terrainImporter.processFile(fileName);
+            terrainImporter.processChunkData(fileName);
             //terrainImporter.makeHollow(); //Do this to improve performance
             List<BlockData> blocks = terrainImporter.createTerrain();
 
-#region Load Block Model
+            #region Load Block Model
             //TODO:move model load into VoxelTerrain
             contentManager.Unload();
 
@@ -144,7 +145,7 @@ namespace AweEditor
                 // If the build failed, display an error message.
                 MessageBox.Show(buildError, "Error");
             }
-#endregion
+            #endregion
 
             VoxelTerrain terrain = new VoxelTerrain(blocks);
             terrainViewerControl.VoxelTerrain = terrain;
@@ -239,7 +240,7 @@ namespace AweEditor
                 // If the build failed, display an error message.
                 MessageBox.Show(buildError, "Error");
             }
-            
+
             Cursor = Cursors.Arrow;
         }
 
