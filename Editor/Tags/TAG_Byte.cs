@@ -7,7 +7,7 @@ namespace AweEditor
 {
     public class TAG_Byte : Tag
     {
-        byte data { get; set; }
+        override byte data { get; set; }
 
         public TAG_Byte(byte _data, string _name, Tag _parent)
         {

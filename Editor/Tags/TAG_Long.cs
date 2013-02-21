@@ -7,7 +7,7 @@ namespace AweEditor
 {
     public class TAG_Long : Tag
     {
-        long data { get; set; }
+        override long data { get; set; }
 
         public TAG_Long(long _data, string _name, Tag _parent)
         {

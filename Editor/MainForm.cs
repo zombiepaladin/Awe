@@ -155,7 +155,7 @@ namespace AweEditor
             byte[] uncompressedFile = File.ReadAllBytes(filename);
             byte[][] decompressedChunkData = new byte[1024][];
 
-            for (int i = 0; i < 1024; i++)
+            for (int i = 0; i < 200; i++)
             {
                 // Find length of the chunk's sector and if it's zero assume the chunk is not populated and continue
                 byte locationLength = uncompressedFile.Skip(i * 4 + 3).Take(1).ToArray()[0];
@@ -198,6 +198,7 @@ namespace AweEditor
 
         private void ParseChunk(byte[] data)
         {
+            int[] tagSize = { 0, 1, 2, 4, 8, 4, 8, -1, -2, -3, -4, -5 };
             Tag currentParent = null;
             for (int i = 0; i < data.Length; i++)
             {
@@ -241,8 +242,21 @@ namespace AweEditor
                             name = null;
 
                         int type = data.Skip(i + 3 + size).Take(1).ToArray()[0];
-                        TAG_List tag_l = new TAG_List(name, type);
-                        i = i + 3 + size + 4 - 1;
+                        TAG_List tag_l = new TAG_List(name, type, currentParent);
+
+                        byte[] tempArr = data.Skip(i + 3 + size + 1).Take(4).ToArray();
+                        Array.Reverse(tempArr);
+                        int sizeOfList = BitConverter.ToInt32(tempArr, 0);
+                        int sizeOfData = tagSize[type];
+                        if (sizeOfData == 0)
+                            throw new InvalidOperationException();
+                        else if (sizeOfData < 1)
+                        {
+
+                        }
+
+                        // Sets the index to one before the next tag id
+                        i = i + 3 + size + 5 - 1;
 
                         break;
                     case 10:

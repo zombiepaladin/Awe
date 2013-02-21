@@ -7,7 +7,7 @@ namespace AweEditor
 {
     public class TAG_Double : Tag
     {
-        double data { get; set; }
+        override double data { get; set; }
 
         public TAG_Double(double _data, string _name, Tag _parent)
         {

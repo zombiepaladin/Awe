@@ -22,6 +22,8 @@ namespace AweEditor
             TAG_String,
         }
 
+        public abstract int data;
+
         public Tag parent { get; set; }
 
         public TagType tagType { get; set; }

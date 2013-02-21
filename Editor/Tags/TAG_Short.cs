@@ -7,7 +7,7 @@ namespace AweEditor
 {
     public class TAG_Short : Tag
     {
-        short data { get; set; }
+        override short data { get; set; }
 
         public TAG_Short(short _data, string _name, Tag _parent)
         {

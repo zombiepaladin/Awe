@@ -7,14 +7,15 @@ namespace AweEditor
 {
     public class TAG_List : Tag
     {
-        List<Tag> data { get; set; }
+        override List<Tag> data { get; set; }
 
         TagType type { get; set; }
 
-        public TAG_List(string _name, int _type)
+        public TAG_List(string _name, int _type, Tag _parent)
         {
             this.data = new List<Tag>();
             this.name = _name;
+            this.parent = _parent;
             this.type = (TagType)_type;
             this.tagType = TagType.TAG_List;
         }

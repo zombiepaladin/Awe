@@ -7,7 +7,7 @@ namespace AweEditor
 {
     public class TAG_String : Tag
     {
-        string data { get; set; }
+        override string data { get; set; }
 
         public TAG_String(string _data, string _name, Tag _parent)
         {

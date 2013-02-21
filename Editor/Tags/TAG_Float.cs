@@ -7,7 +7,7 @@ namespace AweEditor
 {
     public class TAG_Float : Tag
     {
-        float data { get; set; }
+        override float data { get; set; }
 
         public TAG_Float(float _data, string _name, Tag _parent)
         {
