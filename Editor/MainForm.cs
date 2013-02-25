@@ -160,31 +160,6 @@ namespace AweEditor
                     //TODO: show file not supported message
                     return;
             }
-            /*
-            #region Load Block Model
-            //TODO:move model load into VoxelTerrain
-            contentManager.Unload();
-
-            // Tell the ContentBuilder what to build.
-            contentBuilder.Clear();
-            contentBuilder.Add(ContentPath() + "\\Cats.fbx", "Model", null, "InstancedModelProcessor");
-
-            // Build this new model data.
-            string buildError = contentBuilder.Build();
-
-            if (string.IsNullOrEmpty(buildError))
-            {
-                // If the build succeeded, use the ContentManager to
-                // load the temporary .xnb file that we just created.
-                editorViewerControl.voxelPlaceHolderModel = contentManager.Load<Model>("Model");
-            }
-            else
-            {
-                // If the build failed, display an error message.
-                MessageBox.Show(buildError, "Error");
-            }
-            #endregion
-            */
 
             editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
             Cursor = Cursors.Arrow;
