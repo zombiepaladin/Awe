@@ -42,9 +42,9 @@ namespace AweEditor
 
     public struct BlockData
     {
-        public short x, y, z;
+        public int x, y, z;
 
-        public short type;
+        public byte type;
     }
 
     /// <summary>

@@ -44,7 +44,7 @@ namespace AweEditor
             "Microsoft.Xna.Framework.Content.Pipeline.XImporter" + xnaVersion,
             "Microsoft.Xna.Framework.Content.Pipeline.TextureImporter" + xnaVersion,
             "Microsoft.Xna.Framework.Content.Pipeline.EffectImporter" + xnaVersion,
-            Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "../../../../Content/")) + "InstancedModelPipeline.dll"
+            Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "../../../../Content/")) + "InstancedModelPipeline.dll" //TODO: can we link this better?
             
             // If you want to use custom importers or processors from
             // a Content Pipeline Extension Library, add them here.

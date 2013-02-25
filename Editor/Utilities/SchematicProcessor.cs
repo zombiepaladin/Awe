@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using AweEditor.Datatypes;
+using System.IO.Compression;
 
 namespace AweEditor.Utilities
 {
@@ -55,15 +56,8 @@ namespace AweEditor.Utilities
         /// Processes the given schematic file.
         /// </summary>
         /// <param name="fileName"></param>
-        public SchematicProcessor(string fileName)
-        {
-            FileStream fs = new FileStream(fileName, FileMode.Open);
-            reader = new BinaryReader(fs);
-
-            processTag();
-
-            reader.Close();
-            fs.Close();
+        public SchematicProcessor(string fileName) : this(File.ReadAllBytes(fileName)){
+            //converts file to byte array and passes it to the byte array constructor
         }
 
         /// <summary>
@@ -72,22 +66,47 @@ namespace AweEditor.Utilities
         /// <param name="byteArray"></param>
         public SchematicProcessor(byte[] byteArray)
         {
+            byteArray = decompressIfNeeded(byteArray);
+
             reader = new BinaryReader(new MemoryStream(byteArray));
 
             processTag();
         }
 
-        /// <summary>
-        /// Processes the schematic file data given by the BinaryReader.
-        /// </summary>
-        /// <param name="binaryReader"></param>
-        public SchematicProcessor(BinaryReader binaryReader)
+        private byte[] decompressIfNeeded(byte[] byteArray)
         {
-            reader = binaryReader;
+            if (byteArray.Length < 3)
+                throw new Exception("Invalid byte array sent to decompressIfNeeded");
 
-            processTag();
+            //GZip starts with 1F 8B 08
+            if (byteArray[0] == 0x1F && byteArray[1] == 0x8B && byteArray[2] == 0x08) //does endianness matter here?
+            {
+                // Create a GZIP stream with decompression mode.
+                // ... Then create a buffer and write into while reading from the GZIP stream.
+                using (GZipStream stream = new GZipStream(new MemoryStream(byteArray), CompressionMode.Decompress))
+                {
+                    const int size = 4096;
+                    byte[] buffer = new byte[size];
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        int count = 0;
+                        do
+                        {
+                            count = stream.Read(buffer, 0, size);
+                            if (count > 0)
+                            {
+                                memory.Write(buffer, 0, count);
+                            }
+                        }
+                        while (count > 0);
+                        return memory.ToArray();
+                    }
+                }
+            }
+            else
+                return byteArray;
         }
-   
+
         /// <summary>
         /// Creates a List of BlockData structs from the schematic.
         /// Set parameter to false to keep air blocks.
@@ -97,7 +116,10 @@ namespace AweEditor.Utilities
         public List<BlockData> generateBlockData(bool ignoreAir = true)
         {
             if (blockArray == null)
+            {
+                //TODO:show error reading file
                 return new List<BlockData>();
+            }
 
             List<BlockData> blocks = new List<BlockData>();
 
@@ -145,11 +167,11 @@ namespace AweEditor.Utilities
             {
                 _byte = reader.ReadByte();
             }
-            catch (Exception)
+            catch (EndOfStreamException)
             {
                 return;
             }
-
+    
             switch (_byte)
             {
                 case 1:
@@ -247,7 +269,7 @@ namespace AweEditor.Utilities
             if (named)
                 name = processName();
 
-            int BAPayloadCount = processInt(false);
+            int BAPayloadCount = BitConverter.ToInt32(getBytes(4), 0);
 
             if (BAPayloadCount == 0)
                 return;
@@ -258,13 +280,13 @@ namespace AweEditor.Utilities
 
                 for (int i = 0; i < BAPayloadCount; i++)
                 {
-                    byte BAPayload = processByte(false);
+                    byte BAPayload = reader.ReadByte();
                     blockArray[i] = BAPayload;
                 }
             }
             else //read through and do nothing if not blocks
                 for (int i = 0; i < BAPayloadCount; i++)
-                    processByte(false);
+                    reader.ReadByte();
         }
 
         private void processIntArray(bool named = true)
@@ -296,7 +318,22 @@ namespace AweEditor.Utilities
 
             for (int i = 0; i < listPayloadCount; i++)
             {
-                processTag();
+                switch (listType)
+                {
+                    case 5:
+                        processFloat(false);
+                        break;
+                    case 6:
+                        processDouble(false);
+                        break;
+                    case 10:
+                        processCompound(false);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+
+                    //TODO: other cases
+                }
             }
         }
 
@@ -366,12 +403,18 @@ namespace AweEditor.Utilities
         {
             byte[] bytes = new byte[len];
 
+            /* Not sure if endianness needs to be checked
             if (BitConverter.IsLittleEndian) //reverse bytes
                 for (int i = len - 1; i >= 0; i--)
                     bytes[i] = reader.ReadByte();
             else
                 for (int i = 0; i < len; i++)
                     bytes[i] = reader.ReadByte();
+
+             */
+
+            for (int i = len - 1; i >= 0; i--)
+                bytes[i] = reader.ReadByte();
 
             return bytes;
         }

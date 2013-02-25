@@ -59,17 +59,6 @@ namespace AweEditor
             gameManifest = new GameManifest();
         }
 
-            //If looping is an issue for some reason, it can be replaced with tabControl1.SelectedIndex = 1
-            //since the modelViewerControl is the one used in the contentManager
-            for (int i = 0; i < tabControl1.TabCount; i++)
-                tabControl1.SelectedIndex = i;
-            
-            tabControl1.SelectedIndex = originalIndex;
-            
-            base.OnLoad(e);
-        }
-
-
         /// <summary>
         /// Event handler for the Open menu option
         /// </summary>
@@ -139,11 +128,11 @@ namespace AweEditor
         {
             OpenFileDialog fd = new OpenFileDialog();
 
-            fd.InitialDirectory = ContentPath();
+            fd.InitialDirectory = ContentPath() + "/Terrains";
 
             fd.Title = "Import Voxel Terrain";
 
-            fd.Filter = "Decompressed Schematic Files (*.*)|*.*";
+            fd.Filter = "Schematic Files (*.schematic)|*.schematic";
 
             if (fd.ShowDialog() == DialogResult.OK)
             {
@@ -155,12 +144,23 @@ namespace AweEditor
         {
             Cursor = Cursors.WaitCursor;
 
-            // Switch to the Terrain tab pane
-            tabControl1.SelectedIndex = 3;
+            string extension = Path.GetExtension(fileName).ToLower();
 
-            SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
-            List<BlockData> blocks = schematicProcessor.generateBlockData();
+            List<BlockData> blocks;
+            switch(extension)
+            {
+                case ".schematic":
+                    SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
+                    blocks = schematicProcessor.generateBlockData();
+                    break;
 
+                //TODO: region file case
+
+                default:
+                    //TODO: show file not supported message
+                    return;
+            }
+            /*
             #region Load Block Model
             //TODO:move model load into VoxelTerrain
             contentManager.Unload();
@@ -176,7 +176,7 @@ namespace AweEditor
             {
                 // If the build succeeded, use the ContentManager to
                 // load the temporary .xnb file that we just created.
-                terrainViewerControl.voxelModel = contentManager.Load<Model>("Model");
+                editorViewerControl.voxelPlaceHolderModel = contentManager.Load<Model>("Model");
             }
             else
             {
@@ -184,11 +184,9 @@ namespace AweEditor
                 MessageBox.Show(buildError, "Error");
             }
             #endregion
+            */
 
-            VoxelTerrain terrain = new VoxelTerrain(blocks);
-            terrainViewerControl.VoxelTerrain = terrain;
-            terrainViewerControl.doubleSpaced = false;
-
+            editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
             Cursor = Cursors.Arrow;
         }
 
