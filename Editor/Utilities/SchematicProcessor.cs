@@ -8,41 +8,55 @@ using AweEditor.Datatypes;
 namespace AweEditor.Utilities
 {
 
-    public class TerrainImporter
+    public class SchematicProcessor
     {
-        private enum DataFormat
+        //Dimensions
+        private short width, length, height;
+
+        /// <summary>
+        /// Height in blocks
+        /// </summary>
+        public short Height
         {
-            Schematic = 0,
-            Chunk = 1,
+            get { return height; }
         }
 
-        //Dimensions of the block array for the imported file
-        private short width, length, height;
+        /// <summary>
+        /// Length in blocks
+        /// </summary>
+        public short Length
+        {
+            get { return length; }
+        }
+
+        /// <summary>
+        /// Width in blocks
+        /// </summary>
+        public short Width
+        {
+            get { return width; }
+        }
 
         //Store block types in a flattened 3D array, block coords are [Y][Z][X] - need to unflatten or simulate 3D array indicies based on width/length/height to find XYZ
         private byte[] blockArray;
 
-        private BinaryReader reader;
-
-        private DataFormat dataFormat;
-
         /// <summary>
-        /// Currently only supports UNCOMPRESSED schematic files (Just unzip the .schematic and import the contained file)
+        /// The raw byte data for the block types.
         /// </summary>
-        /// <param name="fileName"></param>
-        public TerrainImporter()
+        public byte[] BlockArray
         {
-
+            get { return blockArray; }
         }
 
-        /// <summary>
-        /// Processes the file given in the constructor
-        /// Kept as separate method so processing can be delayed if needed
-        /// </summary>
-        public void processFile(string fileName)
-        {
-            dataFormat = DataFormat.Schematic;
+        //Used to read byte data
+        private BinaryReader reader;
 
+        /// <summary>
+        /// Processes the given schematic file.
+        /// </summary>
+        /// <param name="fileName"></param>
+        public SchematicProcessor(string fileName)
+        {
             FileStream fs = new FileStream(fileName, FileMode.Open);
             reader = new BinaryReader(fs);
 
@@ -50,102 +64,50 @@ namespace AweEditor.Utilities
 
             reader.Close();
             fs.Close();
-
-            //set to null just because it seems nice
-            reader = null;
-            fs = null;
         }
 
-        public void processChunkData(string fileName)
-        {
-            dataFormat = DataFormat.Chunk;
-
-            width = 16;
-            length = 16;
-            height = 128;
-
-            blockArray = File.ReadAllBytes(fileName);
-        }
-    
         /// <summary>
-        /// Removes blocks that are bounded on all 6 sides
-        /// No support for transparent blocks yet
-        /// Call BEFORE createTerrain
+        /// Processes byte array containing the data of a schematic file.
         /// </summary>
-        public void makeHollow()
+        /// <param name="byteArray"></param>
+        public SchematicProcessor(byte[] byteArray)
         {
-            //TODO: consider transparent blocks when implemented
+            reader = new BinaryReader(new MemoryStream(byteArray));
 
-            if (blockArray == null)
-                return;
-
-            byte[, ,] blocks = unflattenBlockArray();
-
-            //1 to edge - 1 because edges are never surrounded
-            for(int y = 1; y < height - 1; y++)
-                for(int z = 1; z < length - 1 ; z++)
-                    for (int x = 1; x < width - 1; x++)
-                    {
-                        if (blocks[y - 1, z, x] != 0 && blocks[y + 1, z, x] != 0 && //Check y
-                            blocks[y, z - 1, x] != 0 && blocks[y, z + 1, x] != 0 && //Check z
-                            blocks[y, z, x - 1] != 0 && blocks[y, z, x + 1] != 0)   //Check x
-                        {
-                            blockArray[y * (length * width) + z * (width) + x] = 0;
-                        }
-                    }
+            processTag();
         }
 
-        private byte[, ,] unflattenBlockArray()
+        /// <summary>
+        /// Processes the schematic file data given by the BinaryReader.
+        /// </summary>
+        /// <param name="binaryReader"></param>
+        public SchematicProcessor(BinaryReader binaryReader)
         {
-            byte[, ,] unflattenedBlockArray = new byte[height, length, width];
+            reader = binaryReader;
 
-            short y, z, x;
-            x = y = z = 0;
-            
-            BlockData blockData = new BlockData();
-
-            for (int i = 0; i < blockArray.Length; i++)
-            {
-                if (blockArray[i] != 0) //ignore air blocks
-                {
-                    blockData.x = x;
-                    blockData.y = y;
-                    blockData.z = z;
-
-                    unflattenedBlockArray[y, z, x] = blockArray[i];
-                    //blocks.Add(new TerrainBlockInstance(x * 0.5f, y * 0.5f, z * 0.5f, BlockType.Stone)); //TODO: fix hardcoded scaling
-                }
-
-                //simulate 3D array
-                x++;
-                if (x == width)
-                {
-                    x = 0;
-                    z++;
-                    if (z == length)
-                    {
-                        z = 0;
-                        y++; //y is leftmost index so it won't need to cycle
-                    }
-                }
-            }
-
-            return unflattenedBlockArray;
+            processTag();
         }
-
-        public List<BlockData> createTerrain()
+   
+        /// <summary>
+        /// Creates a List of BlockData structs from the schematic.
+        /// Set parameter to false to keep air blocks.
+        /// </summary>
+        /// <param name="ignoreAir"></param>
+        /// <returns></returns>
+        public List<BlockData> generateBlockData(bool ignoreAir = true)
         {
             if (blockArray == null)
                 return new List<BlockData>();
 
-            List<BlockData> blocks = new List<BlockData>(); //TODO: optimize
+            List<BlockData> blocks = new List<BlockData>();
 
+            //variables used in loop
             short y, z, x;
             x = y = z = 0;
             BlockData blockData = new BlockData();
             for (int i = 0; i < blockArray.Length; i++)
             {
-                if (blockArray[i] != 0) //ignore air blocks //TODO: remove filter for dirt
+                if (!ignoreAir || blockArray[i] != 0)
                 {
                     blockData.x = x;
                     blockData.y = y;
@@ -153,31 +115,7 @@ namespace AweEditor.Utilities
                     blockData.type = blockArray[i];
 
                     blocks.Add(blockData);
-                    //blocks.Add(new TerrainBlockInstance(x * 0.5f, y * 0.5f, z * 0.5f, BlockType.Stone)); //TODO: fix hardcoded scaling
                 }
-
-                if (dataFormat == DataFormat.Chunk)
-                {
-                    #region Chunk Processing
-                    /*
-                //simulate 3D array
-                y++;
-                if (y == height)
-                {
-                    y = 0;
-                    z++;
-                    if (z == length)
-                    {
-                        z = 0;
-                        x++; //y is leftmost index so it won't need to cycle
-                    }
-                }
-                */
-                    #endregion
-                }
-                else
-                {
-                    #region Schematic Processing
 
                     //simulate 3D array
                     x++;
@@ -188,20 +126,16 @@ namespace AweEditor.Utilities
                         if (z == length)
                         {
                             z = 0;
-                            y++; //y is leftmost index so it won't need to cycle
+                            y++;
                         }
                     }
 
-                    #endregion
-                }
             }
 
             return blocks;
         }
         
         #region Tag Processing Methods
-
-        //optional named parameter indicates whether or not the tag is followed by the standard name bytes, use false when parsing tags with no names
 
         private void processTag()
         {
@@ -259,7 +193,7 @@ namespace AweEditor.Utilities
                     break;
 
                 case 11:
-                    throw new NotImplementedException();
+                    processIntArray();
                     break;
             }
         }
@@ -270,6 +204,7 @@ namespace AweEditor.Utilities
             return readString(nameLength);
         }
 
+        //optional named parameter indicates whether or not the tag is followed by the standard name bytes, use false when parsing tags with no names
         private float processFloat(bool named = true)
         {
             string name;
@@ -312,7 +247,7 @@ namespace AweEditor.Utilities
             if (named)
                 name = processName();
 
-            int BAPayloadCount = BitConverter.ToInt32(getBytes(4), 0);
+            int BAPayloadCount = processInt(false);
 
             if (BAPayloadCount == 0)
                 return;
@@ -323,13 +258,28 @@ namespace AweEditor.Utilities
 
                 for (int i = 0; i < BAPayloadCount; i++)
                 {
-                    byte BAPayload = reader.ReadByte();
+                    byte BAPayload = processByte(false);
                     blockArray[i] = BAPayload;
                 }
             }
             else //read through and do nothing if not blocks
                 for (int i = 0; i < BAPayloadCount; i++)
-                    reader.ReadByte();
+                    processByte(false);
+        }
+
+        private void processIntArray(bool named = true)
+        {
+            string name = "";
+            if (named)
+                name = processName();
+
+            int BAPayloadCount = processInt(false);
+
+            if (BAPayloadCount == 0)
+                return;
+
+            for (int i = 0; i < BAPayloadCount; i++)
+                processInt(false);
         }
 
         private void processList(bool named = true)
@@ -346,25 +296,8 @@ namespace AweEditor.Utilities
 
             for (int i = 0; i < listPayloadCount; i++)
             {
-                switch (listType)
-                {
-                    case 5:
-                        processFloat(false);
-                        break;
-                    case 6:
-                        processDouble(false);
-                        break;
-                    case 10:
-                        processCompound(false);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                    
-                    //TODO: other cases
-                }
+                processTag();
             }
-
-            //TODO
         }
 
         private double processDouble(bool named = true)

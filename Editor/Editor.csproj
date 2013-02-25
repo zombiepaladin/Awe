@@ -88,6 +88,7 @@
     <Compile Include="Controls\TerrainViewerControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Utilities\SchematicProcessor.cs" />
     <Compile Include="Utilities\NBTProcessor.cs" />
     <Compile Include="Utilities\ErrorLogger.cs" />
     <Compile Include="MainForm.cs">
@@ -106,7 +107,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\InstancedModelProcessor.cs" />
-    <Compile Include="Utilities\TerrainImporter.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MainForm.cs</DependentUpon>

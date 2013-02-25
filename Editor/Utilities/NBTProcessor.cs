@@ -7,92 +7,34 @@ using AweEditor.Datatypes;
 
 namespace AweEditor.Utilities
 {
-
-    public class TerrainImporter
+    public class NBTProcessor
     {
-        private enum DataFormat
-        {
-            Schematic = 0,
-            Chunk = 1,
-        }
-
         //Dimensions of the block array for the imported file
         private short width, length, height;
 
         //Store block types in a flattened 3D array, block coords are [Y][Z][X] - need to unflatten or simulate 3D array indicies based on width/length/height to find XYZ
         private byte[] blockArray;
 
+        //For reading uncompressed schematics
         private BinaryReader reader;
-
-        private DataFormat dataFormat;
 
         /// <summary>
         /// Currently only supports UNCOMPRESSED schematic files (Just unzip the .schematic and import the contained file)
         /// </summary>
         /// <param name="fileName"></param>
-        public TerrainImporter()
+        public NBTProcessor()
         {
 
         }
 
         /// <summary>
-        /// Processes the file given in the constructor
-        /// Kept as separate method so processing can be delayed if needed
+        /// Processes the given file for 
         /// </summary>
-        public void processFile(string fileName)
+        public void process(byte[] byteArray)
         {
-            dataFormat = DataFormat.Schematic;
-
-            FileStream fs = new FileStream(fileName, FileMode.Open);
-            reader = new BinaryReader(fs);
-
+            reader = new BinaryReader(new MemoryStream(byteArray));
             processTag();
-
             reader.Close();
-            fs.Close();
-
-            //set to null just because it seems nice
-            reader = null;
-            fs = null;
-        }
-
-        public void processChunkData(string fileName)
-        {
-            dataFormat = DataFormat.Chunk;
-
-            width = 16;
-            length = 16;
-            height = 128;
-
-            blockArray = File.ReadAllBytes(fileName);
-        }
-    
-        /// <summary>
-        /// Removes blocks that are bounded on all 6 sides
-        /// No support for transparent blocks yet
-        /// Call BEFORE createTerrain
-        /// </summary>
-        public void makeHollow()
-        {
-            //TODO: consider transparent blocks when implemented
-
-            if (blockArray == null)
-                return;
-
-            byte[, ,] blocks = unflattenBlockArray();
-
-            //1 to edge - 1 because edges are never surrounded
-            for(int y = 1; y < height - 1; y++)
-                for(int z = 1; z < length - 1 ; z++)
-                    for (int x = 1; x < width - 1; x++)
-                    {
-                        if (blocks[y - 1, z, x] != 0 && blocks[y + 1, z, x] != 0 && //Check y
-                            blocks[y, z - 1, x] != 0 && blocks[y, z + 1, x] != 0 && //Check z
-                            blocks[y, z, x - 1] != 0 && blocks[y, z, x + 1] != 0)   //Check x
-                        {
-                            blockArray[y * (length * width) + z * (width) + x] = 0;
-                        }
-                    }
         }
 
         private byte[, ,] unflattenBlockArray()
@@ -145,7 +87,7 @@ namespace AweEditor.Utilities
             BlockData blockData = new BlockData();
             for (int i = 0; i < blockArray.Length; i++)
             {
-                if (blockArray[i] != 0) //ignore air blocks //TODO: remove filter for dirt
+                if (blockArray[i] != 0) //ignore air blocks
                 {
                     blockData.x = x;
                     blockData.y = y;
@@ -156,43 +98,17 @@ namespace AweEditor.Utilities
                     //blocks.Add(new TerrainBlockInstance(x * 0.5f, y * 0.5f, z * 0.5f, BlockType.Stone)); //TODO: fix hardcoded scaling
                 }
 
-                if (dataFormat == DataFormat.Chunk)
-                {
-                    #region Chunk Processing
-                    /*
                 //simulate 3D array
-                y++;
-                if (y == height)
+                x++;
+                if (x == width)
                 {
-                    y = 0;
+                    x = 0;
                     z++;
                     if (z == length)
                     {
                         z = 0;
-                        x++; //y is leftmost index so it won't need to cycle
+                        y++; //y is leftmost index so it won't need to cycle
                     }
-                }
-                */
-                    #endregion
-                }
-                else
-                {
-                    #region Schematic Processing
-
-                    //simulate 3D array
-                    x++;
-                    if (x == width)
-                    {
-                        x = 0;
-                        z++;
-                        if (z == length)
-                        {
-                            z = 0;
-                            y++; //y is leftmost index so it won't need to cycle
-                        }
-                    }
-
-                    #endregion
                 }
             }
 

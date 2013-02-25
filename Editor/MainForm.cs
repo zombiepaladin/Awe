@@ -50,6 +50,21 @@ namespace AweEditor
             ///this.Shown += OpenMenuClicked;
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            
+            int originalIndex = tabControl1.SelectedIndex;
+
+            //If looping is an issue for some reason, it can be replaced with tabControl1.SelectedIndex = 1
+            //since the modelViewerControl is the one used in the contentManager
+            for (int i = 0; i < tabControl1.TabCount; i++)
+                tabControl1.SelectedIndex = i;
+            
+            tabControl1.SelectedIndex = originalIndex;
+            
+            base.OnLoad(e);
+        }
+
 
         /// <summary>
         /// Event handler for the Exit menu option.
@@ -117,11 +132,8 @@ namespace AweEditor
             // Switch to the Terrain tab pane
             tabControl1.SelectedIndex = 3;
 
-            TerrainImporter terrainImporter = new TerrainImporter();
-            //terrainImporter.processFile(fileName);
-            terrainImporter.processChunkData(fileName);
-            //terrainImporter.makeHollow(); //Do this to improve performance
-            List<BlockData> blocks = terrainImporter.createTerrain();
+            SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
+            List<BlockData> blocks = schematicProcessor.generateBlockData();
 
             #region Load Block Model
             //TODO:move model load into VoxelTerrain
