@@ -79,8 +79,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Datatypes\GameManifest.cs" />
-    <Compile Include="Datatypes\TerrainOctree.cs" />
-    <Compile Include="Datatypes\TerrainBlockInstance.cs" />
     <Compile Include="Datatypes\VoxelTerrain.cs" />
     <Compile Include="Utilities\ContentBuilder.cs" />
     <Compile Include="Utilities\SchematicProcessor.cs" />
