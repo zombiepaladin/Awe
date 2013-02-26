@@ -203,6 +203,9 @@ namespace AweEditor
             Color backColor = new Color(BackColor.R, BackColor.G, BackColor.B);
             GraphicsDevice.Clear(backColor);
 
+            GraphicsDevice.BlendState = BlendState.Opaque;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+
             // Render according to current editor state
             switch (editorState)
             {
@@ -232,7 +235,6 @@ namespace AweEditor
         {
             #region Terrain Rendering Setup
 
-            int maxSize = 65000;
 
             //Stop if no terrain to render
             if (voxelTerrain == null || voxelPlaceHolderModel == null)
@@ -254,7 +256,11 @@ namespace AweEditor
 
             //Populate instances here to find max length for camera
             int maxDist = 0;
+
+            int maxSize = Math.Min(1048574, voxelTerrain.blocks.Count);
+
             Array.Resize(ref instanceTransforms, maxSize);
+
             Vector3 position = new Vector3();
             BlockData block = new BlockData();
             Matrix transform = new Matrix();
@@ -263,13 +269,27 @@ namespace AweEditor
             if (doubleSpaceBlocks) //inverted because dividing by scale
                 scale = 1;
 
-            for (long i = currentDrawIndex; i < Math.Min(currentDrawIndex + maxSize, voxelTerrain.blocks.Count); i++)
+            int maxX, maxY, maxZ;
+            maxX = maxY = maxZ = 0;
+
+            int minX, minY, minZ;
+            minX = minY = minZ = int.MaxValue;
+
+            for (long i = 0; i < maxSize; i++)
             {
                 block = voxelTerrain.blocks[(int)i];
 
                 position.X = block.x / scale; //TODO: fix hardcoded scaling
                 position.Y = block.y / scale;
                 position.Z = block.z / scale;
+
+                maxX = Math.Max(maxX, (int)position.X);
+                maxY = Math.Max(maxY, (int)position.Y);
+                maxZ = Math.Max(maxZ, (int)position.Z);
+
+                minX = Math.Min(minX, (int)position.X);
+                minY = Math.Min(minY, (int)position.Y);
+                minZ = Math.Min(minZ, (int)position.Z);
 
                 //find distance from origin
                 int distFromZero = (int)position.Length();
@@ -278,21 +298,42 @@ namespace AweEditor
                     maxDist = distFromZero;
 
                 transform = Matrix.CreateTranslation(position);
-                instanceTransforms[(instanceTransforms.Length - (i - currentDrawIndex)) - 1] = transform * world; //TODO: remove backwards test
+                instanceTransforms[(instanceTransforms.Length - (i /*- currentDrawIndex*/)) - 1] = transform * world; //TODO: remove backwards test
             }
             //Debug.WriteLine("{0}", voxelTerrain.blocks[65000]);
-            currentDrawIndex = ((currentDrawIndex + maxSize) > voxelTerrain.blocks.Count) ? 0 : currentDrawIndex + maxSize;
+            //currentDrawIndex = ((currentDrawIndex + maxSize) > voxelTerrain.blocks.Count) ? 0 : currentDrawIndex + maxSize;
 
             //Continue camera setup
+            //Vector3 eyePosition = Vector3.Zero;
+
+            //float nearClip = maxDist / 50.0f;
+            //float farClip = maxDist * 50;
+
+            //Matrix view = Matrix.CreateLookAt(new Vector3(40, 300, 30), new Vector3(0, 0, 0), Vector3.Up);
+            //Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
+            //                                                    nearClip, farClip);
+
+            modelCenter = new Vector3((minX + maxX) / 2, (minY + maxY)/2, (minZ + maxZ) / 2);
             Vector3 eyePosition = Vector3.Zero;
 
-            float nearClip = maxDist / 50.0f;
-            float farClip = maxDist * 50;
+            eyePosition.Z = minZ + 20;// maxZ + 1;
+            eyePosition.X = minX - 5;// maxX + 1;
+            eyePosition.Y = maxY - 1;
 
-            Matrix view = Matrix.CreateLookAt(new Vector3(30, 300, 30), new Vector3(10, 30, 10), Vector3.Up);
-            Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
+            Debug.WriteLine("Max = ({0},{1},{2})", maxX, maxY, maxZ);
+            Debug.WriteLine("Min = ({0},{1},{2})", minX, minY, minZ);
+            Debug.WriteLine("EyePosition = ({0},{1},{2})", eyePosition.X, eyePosition.Y, eyePosition.Z);
+            Debug.WriteLine("ModelCenter = ({0},{1},{2})", modelCenter.X, modelCenter.Y, modelCenter.Z);
+
+            aspectRatio = GraphicsDevice.Viewport.AspectRatio;
+
+            float nearClip = 128 / 100f;
+            float farClip = 128 * 100;
+
+            world = Matrix.CreateRotationY(rotation);
+            Matrix view = Matrix.CreateLookAt(eyePosition, modelCenter, Vector3.Up);
+            Matrix projection = Matrix.CreatePerspectiveFieldOfView(1, aspectRatio,
                                                                 nearClip, farClip);
-
 
             #endregion
 
@@ -351,7 +392,7 @@ namespace AweEditor
 
                         GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
                                                                meshPart.NumVertices, meshPart.StartIndex,
-                                                               meshPart.PrimitiveCount, Math.Min(65000, instances.Length)); //TODO: should have warning or something when too big
+                                                               meshPart.PrimitiveCount, Math.Min(1048574, instances.Length)); //TODO: should have warning or something when too big
                       
                         
                     }
