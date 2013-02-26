@@ -132,7 +132,8 @@ namespace AweEditor
 
             fd.Title = "Import Voxel Terrain";
 
-            fd.Filter = "Schematic Files (*.schematic)|*.schematic";
+            fd.Filter = "Schematic and Region Files (*.schematic; *.mcr)|*.schematic;*.mcr|"+
+                        "All File (*.*)|*.*";
 
             if (fd.ShowDialog() == DialogResult.OK)
             {
@@ -154,10 +155,16 @@ namespace AweEditor
                     blocks = schematicProcessor.generateBlockData();
                     break;
 
-                //TODO: region file case
+                case ".mcr":
+                    List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(fileName);
+                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
+                    break;
+
+                //TODO: Handle Anvil region files
+                case ".mca": //Letting it fall through to default for now
 
                 default:
-                    //TODO: show file not supported message
+                    MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
                     return;
             }
 

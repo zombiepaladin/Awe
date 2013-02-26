@@ -39,6 +39,8 @@ namespace AweEditor
     /// </summary>
     class EditorViewerControl : GraphicsDeviceControl
     {
+        long currentDrawIndex = 1000;
+
         EditorState editorState = EditorState.None;
 
         // Timer controls the rotation speed.
@@ -230,6 +232,8 @@ namespace AweEditor
         {
             #region Terrain Rendering Setup
 
+            int maxSize = 65000;
+
             //Stop if no terrain to render
             if (voxelTerrain == null || voxelPlaceHolderModel == null)
                 return;
@@ -246,11 +250,11 @@ namespace AweEditor
 
             float rotation = (float)timer.Elapsed.TotalSeconds;
             //float rotation = 1.5f;
-            Matrix world = Matrix.CreateRotationY(rotation);
+            Matrix world = Matrix.CreateRotationY(0);//rotation);
 
             //Populate instances here to find max length for camera
             int maxDist = 0;
-            Array.Resize(ref instanceTransforms, voxelTerrain.blocks.Count);
+            Array.Resize(ref instanceTransforms, maxSize);
             Vector3 position = new Vector3();
             BlockData block = new BlockData();
             Matrix transform = new Matrix();
@@ -259,9 +263,9 @@ namespace AweEditor
             if (doubleSpaceBlocks) //inverted because dividing by scale
                 scale = 1;
 
-            for (int i = 0; i < voxelTerrain.blocks.Count; i++)
+            for (long i = currentDrawIndex; i < Math.Min(currentDrawIndex + maxSize, voxelTerrain.blocks.Count); i++)
             {
-                block = voxelTerrain.blocks[i];
+                block = voxelTerrain.blocks[(int)i];
 
                 position.X = block.x / scale; //TODO: fix hardcoded scaling
                 position.Y = block.y / scale;
@@ -274,8 +278,10 @@ namespace AweEditor
                     maxDist = distFromZero;
 
                 transform = Matrix.CreateTranslation(position);
-                instanceTransforms[(instanceTransforms.Length - i) - 1] = transform * world; //TODO: remove backwards test
+                instanceTransforms[(instanceTransforms.Length - (i - currentDrawIndex)) - 1] = transform * world; //TODO: remove backwards test
             }
+            //Debug.WriteLine("{0}", voxelTerrain.blocks[65000]);
+            currentDrawIndex = ((currentDrawIndex + maxSize) > voxelTerrain.blocks.Count) ? 0 : currentDrawIndex + maxSize;
 
             //Continue camera setup
             Vector3 eyePosition = Vector3.Zero;
@@ -283,7 +289,7 @@ namespace AweEditor
             float nearClip = maxDist / 50.0f;
             float farClip = maxDist * 50;
 
-            Matrix view = Matrix.CreateLookAt(new Vector3(30, 30, 30), new Vector3(10, 30, 10), Vector3.Up);
+            Matrix view = Matrix.CreateLookAt(new Vector3(30, 300, 30), new Vector3(10, 30, 10), Vector3.Up);
             Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
                                                                 nearClip, farClip);
 
@@ -332,7 +338,7 @@ namespace AweEditor
                     // Set up the instance rendering effect.
                     Effect effect = meshPart.Effect;
                     
-                    //effect.CurrentTechnique = effect.Techniques["HardwareInstancing"];
+                    effect.CurrentTechnique = effect.Techniques["HardwareInstancing"];
                     
                     effect.Parameters["World"].SetValue(modelBones[mesh.ParentBone.Index]);
                     effect.Parameters["View"].SetValue(view);
@@ -347,6 +353,7 @@ namespace AweEditor
                                                                meshPart.NumVertices, meshPart.StartIndex,
                                                                meshPart.PrimitiveCount, Math.Min(65000, instances.Length)); //TODO: should have warning or something when too big
                       
+                        
                     }
                 }
             }
