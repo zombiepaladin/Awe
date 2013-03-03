@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework;
 
 
 namespace AweEditor.Utilities.MarchingCubes
@@ -43,7 +44,13 @@ namespace AweEditor.Utilities.MarchingCubes
 				if (simple)
 				{
 					index = ProcessSlices(slice1, slice2);
-					AddToMesh(mBuilder, index, z);
+                    for (int x = 0; x < WORLD_WIDTH - 1; x++)
+                    {
+                        for (int y = 0; y < WORLD_HEIGHT - 1; y++)
+                        {
+                            ProcessIndex(mBuilder, index[x, y], x, y, z);
+                        }
+                    }
 				}
 				else
 				{
@@ -132,23 +139,28 @@ namespace AweEditor.Utilities.MarchingCubes
 		{
 			byte[,] indicies = meshIndicies;
 
-            mBuilder.AddTriangleVertex(mBuilder.CreatePosition());
-
 			for (int x = 0; x < WORLD_WIDTH - 1; x++)
 			{
 				for (int y = 0; y < WORLD_HEIGHT - 1; y++)
 				{
-					ProcessIndex(indicies[x, y], x, y, z);
+					ProcessIndex(mBuilder, indicies[x, y], x, y, z);
 				}
 			}
-
-			throw new NotImplementedException();
 		}
 
-		private void ProcessIndex(byte index, int x, int y, int z)
+        /// <summary>
+        /// Adds triangle verticies to the MeshBuilder based on the index given.
+        /// </summary>
+        /// <param name="mBuilder"></param>
+        /// <param name="index"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+		private void ProcessIndex(MeshBuilder mBuilder, byte index, int x, int y, int z)
 		{
 			switch (index)
 			{
+                //v8v7v6v5 v4v3v2v1
 				#region 0-99
 				#region 0-9
 				case (0):
@@ -705,25 +717,61 @@ namespace AweEditor.Utilities.MarchingCubes
 					break;
 				#endregion;
 				#region 250-255
-				case (250):
+				case (250): //1111 1010
 					break;
-				case (251):
+				case (251): //1111 1011
 					break;
-				case (252):
+				case (252): //1111 1100
 					break;
-				case (253):
+				case (253): //1111 1101
 					break;
-				case (254):
-					break;
-				case (255):
+				case (254): //1111 1110
+                    mBuilder.AddTriangleVertex(mBuilder.CreatePosition(GetVertex(1, x, y, z)));
+                    mBuilder.AddTriangleVertex(mBuilder.CreatePosition(GetVertex(5, x, y, z)));
+                    mBuilder.AddTriangleVertex(mBuilder.CreatePosition(GetVertex(4, x, y, z)));
+                    break;
+				case (255): //1111 1111
+                    //Do nothing.
 					break;
 				#endregion
 				#endregion
 				default:
 					break;
 			}
-			throw new NotImplementedException();
 		}
+
+        private Vector3 GetVertex(int vertex, int x, int y, int z)
+        {
+            switch (vertex)
+            {
+                case 1:
+                    return new Vector3(2 * x + 1, 2 * y, 2 * z);
+                case 2:
+                    return new Vector3(2 * x + 2, 2 * y + 1, 2 * z);
+                case 3:
+                    return new Vector3(2 * x + 1, 2 * y + 2, 2 * z);
+                case 4:
+                    return new Vector3(2 * x, 2 * y + 1, 2 * z);
+                case 5:
+                    return new Vector3(2 * x, 2 * y, 2 * z + 1);
+                case 6:
+                    return new Vector3(2 * x + 2, 2 * y, 2 * z + 1);
+                case 7:
+                    return new Vector3(2 * x + 2, 2 * y + 2, 2 * z + 1);
+                case 8:
+                    return new Vector3(2 * x, 2 * y + 2, 2 * z + 1);
+                case 9:
+                    return new Vector3(2 * x + 1, 2 * y, 2 * z + 2);
+                case 10:
+                    return new Vector3(2 * x + 2, 2 * y + 1, 2 * z + 2);
+                case 11:
+                    return new Vector3(2 * x + 1, 2 * y + 2, 2 * z + 2);
+                case 12:
+                    return new Vector3(2 * x, 2 * y + 2, 2 * z + 2);
+                default:
+                    throw new Exception("Unknown vertex");
+            }
+        }
 
 		private Tuple<byte,byte[]>[,] ProcessTexturedSlices(byte[,] slice1, byte[,] slice2)
 		{
