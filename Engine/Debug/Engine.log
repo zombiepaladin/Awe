@@ -1,4 +1,4 @@
-﻿Build started 3/1/2013 1:59:31 PM.
+﻿Build started 3/3/2013 2:39:03 PM.
      1>Project "C:\Users\Matthew Hart\Documents\Game Development\3D\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Touching "Debug\Engine.unsuccessfulbuild".
@@ -25,4 +25,4 @@
 
 Build FAILED.
 
-Time Elapsed 00:00:00.68
+Time Elapsed 00:00:01.62
