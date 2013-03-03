@@ -2,29 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 
 namespace AweEditor.Utilities.MarchingCubes
 {
 	class MarchingCubesGenerator
 	{
-		private static int WORLD_WIDTH;
-		private static int WORLD_LENGTH;
-		private static int WORLD_HEIGHT;
+		private int WORLD_WIDTH;
+		private int WORLD_LENGTH;
+		private int WORLD_HEIGHT;
+
+        public string MeshName { get; set; }
 
 		public MarchingCubesGenerator()
-			: this(512, 256, 512)
+			: this(512, 256, 512, "Default")
 		{
 		}
 
-		public MarchingCubesGenerator(int x, int y, int z)
+		public MarchingCubesGenerator(int x, int y, int z, string meshName)
 		{
 			WORLD_WIDTH = x;
 			WORLD_HEIGHT = y;
 			WORLD_LENGTH = z;
+            MeshName = meshName;
 		}
 
-		public void March(List<BlockData> blockList, bool simple)
+		public MeshContent March(List<BlockData> blockList, bool simple)
 		{
+            MeshBuilder mBuilder = MeshBuilder.StartMesh(MeshName);
 			byte[,] slice1 = GetSlice(blockList, 0, simple);
 			byte[,] slice2 = GetSlice(blockList, 1, simple);
 			byte[,] slice3 = GetSlice(blockList, 2, simple);
@@ -37,7 +42,7 @@ namespace AweEditor.Utilities.MarchingCubes
 				if (simple)
 				{
 					index = ProcessSlices(slice1, slice2);
-					AddToMesh(index, z);
+					AddToMesh(mBuilder, index, z);
 				}
 				else
 				{
@@ -48,6 +53,8 @@ namespace AweEditor.Utilities.MarchingCubes
 				slice3 = slice4;
 				slice4 = GetSlice(blockList, z + 4, simple);
 			}
+
+            return mBuilder.FinishMesh();
 		}
 
 		private byte[,] GetSlice(List<BlockData> blockList, int z, bool simple)
@@ -118,11 +125,11 @@ namespace AweEditor.Utilities.MarchingCubes
 			return index;
 		}
 
-		private void AddToMesh(byte[,] meshIndicies,int z)
+		private void AddToMesh(MeshBuilder mBuilder, byte[,] meshIndicies,int z)
 		{
 			byte[,] indicies = meshIndicies;
-			
-			throw new NotImplementedException();
+
+            mBuilder.AddTriangleVertex(mBuilder.CreatePosition());
 		}
 
 		private Tuple<byte,byte[]>[,] ProcessTexturedSlices(byte[,] slice1, byte[,] slice2)
