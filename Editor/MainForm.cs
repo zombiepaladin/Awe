@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Content;
@@ -30,6 +31,7 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager;
         GameManifest gameManifest;
+        string saveLocation;
 
         /// <summary>
         /// Constructs the main form.
@@ -45,6 +47,9 @@ namespace AweEditor
 
             // Automatically start with an empty game manifest
             gameManifest = new GameManifest();
+
+            // Don't start with a default save location
+            saveLocation = null;
         }
 
         /// <summary>
@@ -69,8 +74,14 @@ namespace AweEditor
         /// </summary>
         void SaveMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Save game manifest and resources to a file
-            throw new NotImplementedException();
+            if (saveLocation == null)
+            {
+                SaveAsMenuClicked(null, null);
+            }
+            else
+            {
+                SaveGameManifest(saveLocation);
+            }
         }
 
         /// <summary>
@@ -78,8 +89,23 @@ namespace AweEditor
         /// </summary>
         void SaveAsMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Save game manifest and resources to a new file
-            throw new NotImplementedException();
+            OpenFileDialog fileDialog = new OpenFileDialog();
+
+            fileDialog.InitialDirectory = ContentPath();
+
+            fileDialog.Title = "Load Game Data File";
+
+            fileDialog.Filter = "Awe Game Data Files (*.awed)|*.awed";
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // If save was successful, store the filepath
+                // so that we can use the save button later.
+                if (SaveGameManifest(fileDialog.FileName))
+                {
+                    saveLocation = fileDialog.FileName;
+                }
+            }
         }
 
         /// <summary>
@@ -94,9 +120,23 @@ namespace AweEditor
         #region Asset Importing Event Handlers & Helpers
 
         /// <summary>
+        /// Handles the serialization and saving of the game manifest
+        /// </summary>
+        /// <param name="fileName">The path to save the game manifest at</param>
+        /// <returns>A boolean indicating whether the save was successful</returns>
+        private bool SaveGameManifest(string fileName)
+        {
+            // TODO: Serialization of game data
+
+            // TODO: Zip up files and save to disk
+
+            return false;
+        }
+
+        /// <summary>
         /// Event handler for the Import Model menu option.
         /// </summary>
-        void ImportModelMenuClicked(object sender, EventArgs e)
+        private void ImportModelMenuClicked(object sender, EventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
 
@@ -115,8 +155,6 @@ namespace AweEditor
             }
         }
 
-        
-
         /// <summary>
         /// Loads a new minecraft terrain file into the TerrainViewerControl.
         /// </summary>
@@ -125,12 +163,11 @@ namespace AweEditor
             // TODO: Import the file
         }
 
-
         /// <summary>
         /// Loads a new 3D model file into the Game Project and displays
         /// it in the editorViewerControl.
         /// </summary>
-        void LoadModel(string fileName)
+        private void LoadModel(string fileName)
         {
             Cursor = Cursors.WaitCursor;
 
@@ -193,7 +230,7 @@ namespace AweEditor
         /// and displays it in the editorViewerControl
         /// </summary>
         /// <param name="fileName">The texture file to import</param>
-        protected void LoadTexture(string fileName)
+        private void LoadTexture(string fileName)
         {
             Cursor = Cursors.WaitCursor;
             
