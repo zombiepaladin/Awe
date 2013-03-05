@@ -12,9 +12,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Collections;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor.Datatypes;
+using System.Collections.Generic;
+using System.Text;
+using AweEditor.Utilities;
 #endregion
 
 namespace AweEditor
@@ -122,7 +126,50 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Import the file
+            OpenFileDialog fd = new OpenFileDialog();
+
+            fd.InitialDirectory = ContentPath() + "/Terrains";
+
+            fd.Title = "Import Voxel Terrain";
+
+            fd.Filter = "Schematic and Region Files (*.schematic; *.mcr)|*.schematic;*.mcr|"+
+                        "All File (*.*)|*.*";
+
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                LoadVoxelTerrain(fd.FileName);
+            }
+        }
+
+        private void LoadVoxelTerrain(string fileName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            string extension = Path.GetExtension(fileName).ToLower();
+
+            List<BlockData> blocks;
+            switch(extension)
+            {
+                case ".schematic":
+                    SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
+                    blocks = schematicProcessor.generateBlockData();
+                    break;
+
+                case ".mcr":
+                    List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(fileName);
+                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
+                    break;
+
+                //TODO: Handle Anvil region files
+                case ".mca": //Letting it fall through to default for now
+
+                default:
+                    MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
+                    return;
+            }
+
+            editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
+            Cursor = Cursors.Arrow;
         }
 
 
