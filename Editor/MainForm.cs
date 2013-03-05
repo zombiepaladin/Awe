@@ -19,6 +19,8 @@ using AweEditor.Datatypes;
 using System.Collections.Generic;
 using System.Text;
 using AweEditor.Utilities;
+using AweEditor.Utilities.MarchingCubes;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 #endregion
 
 namespace AweEditor
@@ -94,7 +96,6 @@ namespace AweEditor
             Close();
         }
 
-
         #region Asset Importing Event Handlers & Helpers
 
         /// <summary>
@@ -139,6 +140,8 @@ namespace AweEditor
             {
                 LoadVoxelTerrain(fd.FileName);
             }
+
+            createMeshToolStripMenuItem.Enabled = true;
         }
 
         private void LoadVoxelTerrain(string fileName)
@@ -275,6 +278,31 @@ namespace AweEditor
             Cursor = Cursors.Arrow;
         }
 
+        void CreateMeshMenuItemClicked(object sender, EventArgs e)
+        {
+            CreateMesh(editorViewerControl.VoxelTerrain, "Default");
+        }
+
+        void CreateMesh(VoxelTerrain terrian, string meshName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            MarchingCubesGenerator generator = new MarchingCubesGenerator(512, 216, 512, meshName);
+
+            MeshContent mesh;
+            try
+            {
+                mesh = generator.March(terrian.blocks, true); //Simple until we get the textures working.
+                gameManifest.Meshes.Add(meshName, mesh);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occured while generating the mesh:\n" + ex.Message, "Error");
+            }
+
+            Cursor = Cursors.Default;
+        }
+
         #endregion
 
         #region Helper Methods
@@ -293,5 +321,7 @@ namespace AweEditor
         }
 
         #endregion
+
+        
     }
 }

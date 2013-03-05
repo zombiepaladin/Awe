@@ -17,6 +17,7 @@ using AweEditor;
 using Microsoft.Xna.Framework.Content;
 using System.IO;
 using System.Reflection;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 #endregion
 
 namespace AweEditor
@@ -30,6 +31,7 @@ namespace AweEditor
         VoxelTerrain,
         Model,
         Texture,
+        Mesh,
     }
 
     /// <summary>
@@ -147,6 +149,23 @@ namespace AweEditor
 
         #endregion
 
+        #region Mesh Fields
+
+        public MeshContent Mesh
+        {
+            get
+            {
+                return mesh;
+            }
+            set
+            {
+                mesh = value;
+            }
+        }
+
+        private MeshContent mesh;
+
+        #endregion
 
         /// <summary>
         /// Initializes the control.
@@ -219,6 +238,10 @@ namespace AweEditor
 
                 case EditorState.Texture:
                     DrawTexture();
+                    break;
+
+                case EditorState.Mesh:
+                    DrawMesh();
                     break;
 
                 default:
@@ -456,6 +479,11 @@ namespace AweEditor
                 spriteBatch.Draw(texture, textureBounds, Color.White);
                 spriteBatch.End();
             }
+        }
+
+        public void DrawMesh()
+        {
+            ModelMesh mMesh = new ModelMesh();
         }
 
         #endregion

@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 
 namespace AweEditor.Datatypes
 {
@@ -31,5 +32,10 @@ namespace AweEditor.Datatypes
         /// </summary>
         public Dictionary<string, Texture2D> Textures = new Dictionary<string, Texture2D>();
 
+        /// <summary>
+        /// A Dictionary of MeshContent used withing the game,
+        /// keyed by the asset name
+        /// </summary>
+        public Dictionary<string, MeshContent> Meshes = new Dictionary<string, MeshContent>();
     }
 }
