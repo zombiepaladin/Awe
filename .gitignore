@@ -21,3 +21,6 @@ obj
 
 # mstest test results
 TestResults
+
+#That pesky database file
+*.sdf

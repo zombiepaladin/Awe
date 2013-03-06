@@ -162,6 +162,10 @@ namespace AweEditor
 
                 //TODO: Handle Anvil region files
                 case ".mca": //Letting it fall through to default for now
+                    //TODO:Delete
+                    VoxelTerrainImporter.LoadTerrain(fileName);
+                    blocks = new List<BlockData>();
+                    break;
 
                 default:
                     MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
