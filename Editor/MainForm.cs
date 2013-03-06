@@ -12,10 +12,12 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using System.Xml.Serialization;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor.Datatypes;
+using Ionic.Zip;
 #endregion
 
 namespace AweEditor
@@ -89,7 +91,7 @@ namespace AweEditor
         /// </summary>
         void SaveAsMenuClicked(object sender, EventArgs e)
         {
-            OpenFileDialog fileDialog = new OpenFileDialog();
+            SaveFileDialog fileDialog = new SaveFileDialog();
 
             fileDialog.InitialDirectory = ContentPath();
 
@@ -101,10 +103,8 @@ namespace AweEditor
             {
                 // If save was successful, store the filepath
                 // so that we can use the save button later.
-                if (SaveGameManifest(fileDialog.FileName))
-                {
-                    saveLocation = fileDialog.FileName;
-                }
+                SaveGameManifest(fileDialog.FileName);
+                saveLocation = fileDialog.FileName;
             }
         }
 
@@ -124,13 +124,40 @@ namespace AweEditor
         /// </summary>
         /// <param name="fileName">The path to save the game manifest at</param>
         /// <returns>A boolean indicating whether the save was successful</returns>
-        private bool SaveGameManifest(string fileName)
+        private void SaveGameManifest(string fileName)
         {
+            Cursor = Cursors.WaitCursor;
+
+            int num = 16;
+
             // TODO: Serialization of game data
+            using (MemoryStream mStream = new MemoryStream())
+            {
+                XmlSerializer serializer = new XmlSerializer(num.GetType());
+                serializer.Serialize(mStream, num);
+                mStream.Seek(0, SeekOrigin.Begin);
 
-            // TODO: Zip up files and save to disk
+                // TODO: Zip up files and save to disk
+                using (ZipFile zipFile = new ZipFile())
+                {
+                    //foreach (PropertyInfo property in properties)
+                    //{
+                    //    zipFile.AddDirectoryByName(property.Name);
+                    //}
+                    //zipFile.AddDirectoryByName("Models");
+                    //zipFile.AddDirectoryByName("Textures");
+                    //zipFile.AddDirectoryByName("Voxel Terrain");
+                    zipFile.AddEntry(@"Integers\number.xml", mStream);
+                    zipFile.Save(fileName);
+                }
+            }
 
-            return false;
+            // Rename file to .zip for debugging
+            string[] tokens = fileName.Split('.');
+            string newFileName = tokens[0] + ".zip";
+            File.Move(fileName, newFileName);
+
+            Cursor = Cursors.Arrow;
         }
 
         /// <summary>
