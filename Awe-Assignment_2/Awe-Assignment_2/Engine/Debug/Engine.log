@@ -1,0 +1,36 @@
+﻿Build started 3/7/2013 4:03:44 PM.
+     1>Project "C:\Users\Pavel\visStudioWorkspace\Awe-Assignment_2\Awe-Assignment_2\Engine\Engine.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Touching "Debug\Engine.unsuccessfulbuild".
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\DXUT11\Core /I..\DXUT11\Optional /ZI /nologo /W4 /WX- /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /arch:SSE2 /fp:fast /Zc:wchar_t /Zc:forScope /openmp- /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\DXUT11\Core\DXUT.cpp ..\DXUT11\Core\DXUTDevice11.cpp ..\DXUT11\Core\DXUTDevice9.cpp ..\DXUT11\Core\DXUTmisc.cpp ..\DXUT11\Optional\DXUTcamera.cpp ..\DXUT11\Optional\DXUTgui.cpp ..\DXUT11\Optional\DXUTres.cpp ..\DXUT11\Optional\DXUTsettingsdlg.cpp ..\DXUT11\Optional\SDKmesh.cpp ..\DXUT11\Optional\SDKmisc.cpp D3D11App.cpp D3D9App.cpp
+         D3D9App.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         D3D11App.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         SDKmisc.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         SDKmesh.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTsettingsdlg.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTres.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTgui.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTcamera.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTmisc.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTDevice9.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUTDevice11.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         DXUT.cpp
+     1>c:\users\pavel\visstudioworkspace\awe-assignment_2\awe-assignment_2\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+         Generating Code...
+     1>Done Building Project "C:\Users\Pavel\visStudioWorkspace\Awe-Assignment_2\Awe-Assignment_2\Engine\Engine.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:06.58
