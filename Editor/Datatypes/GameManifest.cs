@@ -36,6 +36,6 @@ namespace AweEditor.Datatypes
         /// A Dictionary of MeshContent used withing the game,
         /// keyed by the asset name
         /// </summary>
-        public Dictionary<string, MeshContent> Meshes = new Dictionary<string, MeshContent>();
+        public Dictionary<string, Model> TerrianModels = new Dictionary<string, Model>();
     }
 }

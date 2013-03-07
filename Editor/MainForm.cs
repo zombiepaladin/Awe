@@ -296,6 +296,7 @@ namespace AweEditor
                 MeshContent terrianMesh = generator.March(terrian.blocks, true); //Simple until we get the textures working.
                 ModelContent terrianModel = processor.Process(terrianMesh, new ContentProcessorContext());
                 
+                //contentBuilder.Add(meshName, meshName, string.Empty, "VoxelTerrianMeshPipeline");
             }
             catch (Exception ex)
             {

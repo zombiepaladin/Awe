@@ -1,28 +1,17 @@
-﻿Build started 3/3/2013 2:39:03 PM.
-     1>Project "C:\Users\Matthew Hart\Documents\Game Development\3D\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
+﻿Build started 3/5/2013 3:42:07 PM.
+     1>Project "C:\Users\Devin\Documents\Visual Studio 2010\Projects\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
-         Touching "Debug\Engine.unsuccessfulbuild".
+         Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          All outputs are up-to-date.
-       ManifestResourceCompile:
-         All outputs are up-to-date.
        Link:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Matthew Hart\Documents\Game Development\3D\Awe\Debug\Engine.exe" /INCREMENTAL /NOLOGO d3dcompiler.lib d3dx11d.lib d3dx9d.lib dxerr.lib dxguid.lib winmm.lib comctl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Matthew Hart\Documents\Game Development\3D\Awe\Debug\Engine.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Matthew Hart\Documents\Game Development\3D\Awe\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
-         Debug\DXUT.obj
-         Debug\DXUTDevice11.obj
-         Debug\DXUTDevice9.obj
-         Debug\DXUTmisc.obj
-         Debug\DXUTcamera.obj
-         Debug\DXUTgui.obj
-         Debug\DXUTres.obj
-         Debug\DXUTsettingsdlg.obj
-         Debug\SDKmesh.obj
-         Debug\SDKmisc.obj
-         Debug\D3D9App.obj
-         Debug\D3D11App.obj
-     1>LINK : fatal error LNK1123: failure during conversion to COFF: file invalid or corrupt
-     1>Done Building Project "C:\Users\Matthew Hart\Documents\Game Development\3D\Awe\Engine\Engine.vcxproj" (build target(s)) -- FAILED.
+         All outputs are up-to-date.
+         Engine.vcxproj -> C:\Users\Devin\Documents\Visual Studio 2010\Projects\Awe\Debug\Engine.exe
+       FinalizeBuildStatus:
+         Deleting file "Debug\Engine.unsuccessfulbuild".
+         Touching "Debug\Engine.lastbuildstate".
+     1>Done Building Project "C:\Users\Devin\Documents\Visual Studio 2010\Projects\Awe\Engine\Engine.vcxproj" (build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:01.62
+Time Elapsed 00:00:00.59
