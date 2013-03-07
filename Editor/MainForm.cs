@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using AweEditor.Utilities;
 using AweEditor.Utilities.MarchingCubes;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 #endregion
 
@@ -280,20 +281,21 @@ namespace AweEditor
 
         void CreateMeshMenuItemClicked(object sender, EventArgs e)
         {
-            CreateMesh(editorViewerControl.VoxelTerrain, "Default");
+            CreateTerrianModel(editorViewerControl.VoxelTerrain, "Default");
         }
 
-        void CreateMesh(VoxelTerrain terrian, string meshName)
+        void CreateTerrianModel(VoxelTerrain terrian, string meshName)
         {
             Cursor = Cursors.WaitCursor;
 
             MarchingCubesGenerator generator = new MarchingCubesGenerator(512, 216, 512, meshName);
-
-            MeshContent mesh;
+            ModelProcessor processor = new ModelProcessor();
+            
             try
             {
-                mesh = generator.March(terrian.blocks, true); //Simple until we get the textures working.
-                gameManifest.Meshes.Add(meshName, mesh);
+                MeshContent terrianMesh = generator.March(terrian.blocks, true); //Simple until we get the textures working.
+                ModelContent terrianModel = processor.Process(terrianMesh, new ContentProcessorContext());
+                
             }
             catch (Exception ex)
             {
