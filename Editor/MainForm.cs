@@ -22,6 +22,8 @@ using AweEditor.Utilities;
 using AweEditor.Utilities.MarchingCubes;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using Microsoft.Xna.Framework.Content.Pipeline;
 #endregion
 
 namespace AweEditor
@@ -295,8 +297,10 @@ namespace AweEditor
             {
                 MeshContent terrianMesh = generator.March(terrian.blocks, true); //Simple until we get the textures working.
                 ModelContent terrianModel = processor.Process(terrianMesh, new ContentProcessorContext());
-                
-                //contentBuilder.Add(meshName, meshName, string.Empty, "VoxelTerrianMeshPipeline");
+
+
+                editorViewerControl.TerrianModel = terrianModel;
+                gameManifest.TerrianModels.Add(meshName, terrianModel);
             }
             catch (Exception ex)
             {
@@ -324,7 +328,5 @@ namespace AweEditor
         }
 
         #endregion
-
-        
     }
 }

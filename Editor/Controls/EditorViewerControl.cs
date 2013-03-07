@@ -31,7 +31,7 @@ namespace AweEditor
         VoxelTerrain,
         Model,
         Texture,
-        Mesh,
+        TerrianModel,
     }
 
     /// <summary>
@@ -149,21 +149,22 @@ namespace AweEditor
 
         #endregion
 
-        #region Mesh Fields
+        #region Terrian Model Fields
 
-        public MeshContent Mesh
+        public Model TerrianModel
         {
             get
             {
-                return mesh;
+                return terrianModel;
             }
             set
             {
-                mesh = value;
+                terrianModel = value;
+                editorState = EditorState.TerrianModel;
             }
         }
 
-        private MeshContent mesh;
+        private Model terrianModel;
 
         #endregion
 

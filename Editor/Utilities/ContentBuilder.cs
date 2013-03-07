@@ -206,12 +206,6 @@ namespace AweEditor
             projectItems.Add(item);
         }
 
-        public void Add<T>(T item, string name, string processor)
-        {
-            ProjectItem pItem = buildProject.AddItem("Compile", filename)[0];
-        }
-
-
         /// <summary>
         /// Removes all content files from the MSBuild project.
         /// </summary>
