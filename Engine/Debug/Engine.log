@@ -1,4 +1,4 @@
-﻿Build started 2/28/2013 4:41:37 PM.
+﻿Build started 3/7/2013 4:12:42 PM.
      1>Project "C:\Users\Pavel\visStudioWorkspace\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Touching "Debug\Engine.unsuccessfulbuild".
@@ -9,19 +9,19 @@
          D3D11App.cpp
      1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
          SDKmisc.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\optional\sdkmisc.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.pdb'
          SDKmesh.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\optional\sdkmesh.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.pdb'
          DXUTsettingsdlg.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\optional\dxutsettingsdlg.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.idb'
          DXUTres.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\optional\dxutres.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.idb'
          DXUTgui.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\optional\dxutgui.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.idb'
          DXUTcamera.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\optional\dxutcamera.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.idb'
          DXUTmisc.cpp
-     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
+     1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxutmisc.cpp : fatal error C1033: cannot open program database 'c:\users\pavel\visstudioworkspace\awe\engine\debug\vc100.pdb'
          DXUTDevice9.cpp
      1>c:\users\pavel\visstudioworkspace\awe\dxut11\core\dxut.h(14): fatal error C1083: Cannot open include file: 'dxsdkver.h': No such file or directory
          DXUTDevice11.cpp
@@ -33,4 +33,4 @@
 
 Build FAILED.
 
-Time Elapsed 00:00:09.50
+Time Elapsed 00:00:00.82

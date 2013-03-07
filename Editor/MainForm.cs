@@ -12,8 +12,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Collections;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using AweEditor.Datatypes;
+using System.Collections.Generic;
+using System.Text;
+using AweEditor.Utilities;
 #endregion
 
 namespace AweEditor
@@ -28,8 +33,7 @@ namespace AweEditor
     {
         ContentBuilder contentBuilder;
         ContentManager contentManager;
-        TerrainImporter terrainImporter;
-
+        GameManifest gameManifest;
 
         /// <summary>
         /// Constructs the main form.
@@ -40,15 +44,47 @@ namespace AweEditor
 
             contentBuilder = new ContentBuilder();
 
-            contentManager = new ContentManager(modelViewerControl.Services,
+            contentManager = new ContentManager(editorViewerControl.Services,
                                                 contentBuilder.OutputDirectory);
 
-            terrainImporter = new TerrainImporter();
-
-            /// Automatically bring up the "Load Model" dialog when we are first shown.
-            ///this.Shown += OpenMenuClicked;
+            // Automatically start with an empty game manifest
+            gameManifest = new GameManifest();
         }
 
+        /// <summary>
+        /// Event handler for the New menu option
+        /// </summary>
+        void NewMenuClicked(object sender, EventArgs e)
+        {
+            gameManifest = new GameManifest();
+        }
+
+        /// <summary>
+        /// Event handler for the Open menu option
+        /// </summary>
+        void OpenMenuClicked(object sender, EventArgs e)
+        {
+            // TODO: Load game manifest and associated game resources from file
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Event handler for the Save menu option
+        /// </summary>
+        void SaveMenuClicked(object sender, EventArgs e)
+        {
+            // TODO: Save game manifest and resources to a file
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Event handler for the SaveAs menu option
+        /// </summary>
+        void SaveAsMenuClicked(object sender, EventArgs e)
+        {
+            // TODO: Save game manifest and resources to a new file
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Event handler for the Exit menu option.
@@ -58,6 +94,8 @@ namespace AweEditor
             Close();
         }
 
+
+        #region Asset Importing Event Handlers & Helpers
 
         /// <summary>
         /// Event handler for the Import Model menu option.
@@ -81,88 +119,74 @@ namespace AweEditor
             }
         }
 
-        private static string ContentPath()
-        {
-            // Default to the directory which contains our content files.
-            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            string relativePath = Path.Combine(assemblyLocation, "../../../../Content");
-            string contentPath = Path.GetFullPath(relativePath);
-            return contentPath;
-        }
+        
 
         /// <summary>
         /// Loads a new minecraft terrain file into the TerrainViewerControl.
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Import the file
-            Cursor = Cursors.WaitCursor;
+            OpenFileDialog fd = new OpenFileDialog();
 
-            
+            fd.InitialDirectory = ContentPath() + "/Terrains";
 
-            terrainImporter.importTerrain(terrainViewerControl);
+            fd.Title = "Import Voxel Terrain";
 
-            LoadTerrainModel();
+            fd.Filter = "Schematic and Region Files (*.schematic; *.mcr)|*.schematic;*.mcr|"+
+                        "All File (*.*)|*.*";
 
-            Cursor = Cursors.Arrow;
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                LoadVoxelTerrain(fd.FileName);
+            }
         }
 
-        private void LoadTerrainModel()
+        private void LoadVoxelTerrain(string fileName)
         {
             Cursor = Cursors.WaitCursor;
 
-            // Switch to the Model tab pane
-            tabControl1.SelectedIndex = 1;
+            string extension = Path.GetExtension(fileName).ToLower();
 
-            // Unload any existing model.
-            terrainViewerControl.Model = null;
-            contentManager.Unload();
-
-            // Tell the ContentBuilder what to build.
-            contentBuilder.Clear();
-            contentBuilder.Add(Path.Combine(ContentPath(), "cats.fbx"), "Model", null, "ModelProcessor");
-
-            // Build this new model data.
-            string buildError = contentBuilder.Build();
-
-            if (string.IsNullOrEmpty(buildError))
+            List<BlockData> blocks;
+            switch(extension)
             {
-                // If the build succeeded, use the ContentManager to
-                // load the temporary .xnb file that we just created.
-                terrainViewerControl.Model = contentManager.Load<Model>("Model");
-            }
-            else
-            {
-                // If the build failed, display an error message.
-                MessageBox.Show(buildError, "Error");
+                case ".schematic":
+                    SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
+                    blocks = schematicProcessor.generateBlockData();
+                    break;
+
+                case ".mcr":
+                    List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(fileName);
+                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
+                    break;
+
+                //TODO: Handle Anvil region files
+                case ".mca": //Letting it fall through to default for now
+
+                default:
+                    MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
+                    return;
             }
 
-            // Switch to the Terrain tab pane
-            tabControl1.SelectedIndex = 3;
-
+            editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
             Cursor = Cursors.Arrow;
-           // contentBuilder.Add(Path.Combine(ContentPath(),"cats.fbx"), "Model", null, "ModelProcessor");
-           
         }
 
 
         /// <summary>
-        /// Loads a new 3D model file into the ModelViewerControl.
+        /// Loads a new 3D model file into the Game Project and displays
+        /// it in the editorViewerControl.
         /// </summary>
         void LoadModel(string fileName)
         {
             Cursor = Cursors.WaitCursor;
 
-            // Switch to the Model tab pane
-            tabControl1.SelectedIndex = 1;
-
-            // Unload any existing model.
-            modelViewerControl.Model = null;
-            contentManager.Unload();
+            // Determine the model's path
+            string path = Path.Combine("Models", Path.GetFileNameWithoutExtension(fileName));
 
             // Tell the ContentBuilder what to build.
             contentBuilder.Clear();
-            contentBuilder.Add(fileName, "Model", null, "ModelProcessor");
+            contentBuilder.Add(fileName, path, null, "ModelProcessor");
 
             // Build this new model data.
             string buildError = contentBuilder.Build();
@@ -171,7 +195,13 @@ namespace AweEditor
             {
                 // If the build succeeded, use the ContentManager to
                 // load the temporary .xnb file that we just created.
-                modelViewerControl.Model = contentManager.Load<Model>("Model");
+                Model model = contentManager.Load<Model>(path);
+                
+                // Display the model in our EditorViewerControl
+                editorViewerControl.Model = model;
+
+                // Also store the model in our game manifest
+                gameManifest.Models.Add(path, model);
             }
             else
             {
@@ -182,7 +212,10 @@ namespace AweEditor
             Cursor = Cursors.Arrow;
         }
 
-        private void ImportImageClicked(object sender, EventArgs e)
+        /// <summary>
+        /// Imports a texture file 
+        /// </summary>
+        private void ImportTextureClicked(object sender, EventArgs e)
         {
             OpenFileDialog fd = new OpenFileDialog();
 
@@ -202,20 +235,21 @@ namespace AweEditor
 
         }
 
+        /// <summary>
+        /// Loads a new a texture from a file into the game project
+        /// and displays it in the editorViewerControl
+        /// </summary>
+        /// <param name="fileName">The texture file to import</param>
         protected void LoadTexture(string fileName)
         {
             Cursor = Cursors.WaitCursor;
-
-            // Switch to the Model tab pane
-            tabControl1.SelectedIndex = 1;
-
-            // Unload any existing texture.
-            textureViewerControl.Texture = null;
-            contentManager.Unload();
+            
+            // Determine the texture's path
+            string path = Path.Combine("Textures", Path.GetFileNameWithoutExtension(fileName));
 
             // Tell the ContentBuilder what to build.
             contentBuilder.Clear();
-            contentBuilder.Add(fileName, "Texture", null, "TextureProcessor");
+            contentBuilder.Add(fileName, path, null, "TextureProcessor");
 
             // Build this new texture data.
             string buildError = contentBuilder.Build();
@@ -224,7 +258,13 @@ namespace AweEditor
             {
                 // If the build succeeded, use the ContentManager to
                 // load the temporary .xnb file that we just created.
-                textureViewerControl.Texture = contentManager.Load<Texture2D>("Texture");
+                Texture2D texture = contentManager.Load<Texture2D>(path);
+
+                // Display the texture in the EditorViewControl
+                editorViewerControl.Texture = texture;
+
+                // Store the texture in our game manifest
+                gameManifest.Textures.Add(path, texture);
             }
             else
             {
@@ -232,10 +272,26 @@ namespace AweEditor
                 MessageBox.Show(buildError, "Error");
             }
 
-            // Switch to the Texture tab pane
-            tabControl1.SelectedIndex = 5;
-
             Cursor = Cursors.Arrow;
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Returns the directory containing content files
+        /// </summary>
+        /// <returns>The directory containing content files</returns>
+        private static string ContentPath()
+        {
+            // Default to the directory which contains our content files.
+            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            string relativePath = Path.Combine(assemblyLocation, "../../../../Content");
+            string contentPath = Path.GetFullPath(relativePath);
+            return contentPath;
+        }
+
+        #endregion
     }
 }

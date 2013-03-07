@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework;
+using AweEditor.Datatypes;
 
 namespace AweEditor
 {
@@ -14,58 +14,51 @@ namespace AweEditor
     {
         Air = 0,
         Stone = 1,
-        GrassBlock = 2,
-        WoodenPlanks = 5,
-        Water = 8,
+        Grass = 2,
+        Dirt = 3,
+        Bedrock = 7,
+        Water = 9,
+        Lava = 11,
         Sand = 12,
-        CobbleStone = 4,
         Gravel = 13,
+        Gold = 14,
+        Iron = 15,
+        Coal = 16,
         Wood = 17,
         Leaves = 18,
-        Glass = 20,
-        TallGrass = 31,
-        Snow = 78,
+        Sandstone = 24,
+        Moss = 48,
+        Obsidian = 49,
+        Diamond = 56,
         Ice = 79,
-        BlockOfGold = 41,
-        BlockOfIron = 42,
-        Bricks = 45,
-        IronDoor = 71,
-        BookShelf = 47,
-        Fire = 51
+        Snow = 80,
+        Pumpkin = 86,
+        Jack_o_Lantern = 91,
+        Melon = 103,
+        Netherrack = 87,
+        Mycelium = 110,
+        Emerald = 129,
+    }
 
-        // TODO: Implement remaining block types
+    public struct BlockData
+    {
+        public int x, y, z;
+
+        public byte type;
     }
 
     /// <summary>
-    /// A class to represent voxel terrain in 3d matrix
+    /// A class to represent voxel terrain
     /// </summary>
     public class VoxelTerrain
     {
-        public VoxelTerrain()
-        {
-            WorldSize = 100;
-        }
+        public List<BlockData> blocks; //store as List for now, optimize later
 
-        public static int WorldSize = 100;
-
-        private int[, ,] terrainMatrix = new int[WorldSize, WorldSize, WorldSize];
-        // TODO: Complete class
-        internal void addBlock(int x, int y, int z, BlockType blockType)
+        public VoxelTerrain(List<BlockData> blocks)
         {
-            if (x < WorldSize && y < WorldSize && z < WorldSize)
-            {
-                terrainMatrix[x, y, z] = 1;
-            }
+            this.blocks = blocks;
         }
         
-        public int getWorldSize()
-        {
-            return WorldSize;
-        }
-        
-        public int[, ,] getTerrainMatrix()
-        {
-            return terrainMatrix;
-        }
     }
+
 }
