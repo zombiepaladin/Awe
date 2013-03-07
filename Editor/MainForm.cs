@@ -290,21 +290,28 @@ namespace AweEditor
         {
             Cursor = Cursors.WaitCursor;
 
-            MarchingCubesGenerator generator = new MarchingCubesGenerator(512, 216, 512, meshName);
-            ModelProcessor processor = new ModelProcessor();
-            
-            try
-            {
-                MeshContent terrianMesh = generator.March(terrian.blocks, true); //Simple until we get the textures working.
-                ModelContent terrianModel = processor.Process(terrianMesh, new ContentProcessorContext());
+            //Save the voxel terrian to a tempory file.
+            string terrianFile = Path.Combine(Path.GetTempPath(), meshName);
+            terrian.SaveTo(terrianFile);
 
+            //Pull the file through the pipeline.
+            contentBuilder.Clear();
+            contentBuilder.Add(terrianFile, meshName, "VoxelTerrianImporter", "ModelProcessor");
+
+            string buildError = contentBuilder.Build();
+
+            //Now we can treat the terrian as a normal model.
+            if(string.IsNullOrEmpty(buildError))
+            {
+                Model terrianModel = contentManager.Load<Model>(meshName);
 
                 editorViewerControl.TerrianModel = terrianModel;
+
                 gameManifest.TerrianModels.Add(meshName, terrianModel);
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("An error occured while generating the mesh:\n" + ex.Message, "Error");
+                MessageBox.Show("An error occured while generating the mesh:\n" + buildError, "Error");
             }
 
             Cursor = Cursors.Default;

@@ -234,15 +234,15 @@ namespace AweEditor
                     break;
 
                 case EditorState.Model:
-                    DrawModel();
+                    DrawModel(model);
                     break;
 
                 case EditorState.Texture:
                     DrawTexture();
                     break;
 
-                case EditorState.Mesh:
-                    DrawMesh();
+                case EditorState.TerrianModel:
+                    DrawModel(terrianModel);
                     break;
 
                 default:
@@ -428,7 +428,7 @@ namespace AweEditor
         /// <summary>
         /// Draw the current model
         /// </summary>
-        private void DrawModel()
+        private void DrawModel(Model model)
         {
             if (model != null)
             {
@@ -480,11 +480,6 @@ namespace AweEditor
                 spriteBatch.Draw(texture, textureBounds, Color.White);
                 spriteBatch.End();
             }
-        }
-
-        public void DrawMesh()
-        {
-            ModelMesh mMesh = new ModelMesh();
         }
 
         #endregion
