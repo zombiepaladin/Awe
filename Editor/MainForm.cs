@@ -291,12 +291,12 @@ namespace AweEditor
             Cursor = Cursors.WaitCursor;
 
             //Save the voxel terrian to a tempory file.
-            string terrianFile = Path.Combine(Path.GetTempPath(), meshName);
+            string terrianFile = Path.Combine(Path.GetTempPath(), meshName + ".vox");
             terrian.SaveTo(terrianFile);
 
             //Pull the file through the pipeline.
             contentBuilder.Clear();
-            contentBuilder.Add(terrianFile, meshName, "VoxelTerrianImporter", "ModelProcessor");
+            contentBuilder.Add(terrianFile, meshName, "", "VoxelTerrianModelProcessor");
 
             string buildError = contentBuilder.Build();
 
