@@ -14,6 +14,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Xml;
+using System.Xml.Serialization;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -174,7 +175,11 @@ namespace AweEditor
                                     LoadTexture(xmlReader.Value, true);
                                 else if (dataType == "VoxelTerrains")
                                 {
-                                    // TODO: Load Voxel Terrains
+                                    //XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
+                                    //XmlTextReader voxelReader = new XmlTextReader(dirInfo.FullName + @"\VoxelTerrains" + xmlReader.Value + ".xml");
+                                    //if (!gameManifest.VoxelTerrains.ContainsKey(xmlReader.Value))
+                                    //    gameManifest.VoxelTerrains.Add(xmlReader.Value, (VoxelTerrain)voxelSerializer.Deserialize(voxelReader));
+                                    //voxelReader.Close();
                                 }
                             }
                             loadData = false;
@@ -229,15 +234,15 @@ namespace AweEditor
                     }
                     xmlWriter.WriteEndElement();
 
-                    // TODO: Write the Voxel Terrain Information
-                    //xmlWriter.WriteStartElement("VoxelTerrains");
-                    //foreach (KeyValuePair<string, VoxelTerrain> terrainPair in gameManifest.VoxelTerrainr)
+                    // Write the Voxel Terrain Information
+                    xmlWriter.WriteStartElement("VoxelTerrains");
+                    //foreach (KeyValuePair<string, VoxelTerrain> terrainPair in gameManifest.VoxelTerrains)
                     //{
                     //    string[] tokens = terrainPair.Key.Split('\\');
                     //    int index = (tokens.Length == 2) ? 1 : 0;
-                    //    xmlWriter.WriteElementString("Name", tokens[index]);
+                    //    xmlWriter.WriteElementString("Name", terrainPair.Key);
                     //}
-                    //xmlWriter.WriteEndElement();
+                    xmlWriter.WriteEndElement();
 
                     // End the Xml Documents and Flush the Data to the Memory Stream
                     xmlWriter.WriteEndElement();
@@ -252,8 +257,23 @@ namespace AweEditor
                     {
                         if (Directory.Exists(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups")))
                             zipFile.AddDirectory(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups"));
+                        //MemoryStream voxelStream = new MemoryStream();
+                        //if (gameManifest.VoxelTerrains.Count > 0)
+                        //{
+                        //    zipFile.AddDirectoryByName("VoxelTerrains");
+                        //    XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
+                        //    foreach (KeyValuePair<string, VoxelTerrain> voxelPair in gameManifest.VoxelTerrains)
+                        //    {
+                        //        voxelStream.Position = 0;
+                        //        voxelStream.SetLength(0);
+                        //        voxelSerializer.Serialize(voxelStream, voxelPair.Value);
+                        //        voxelStream.Seek(0, SeekOrigin.Begin);
+                        //        zipFile.AddEntry(@"VoxelTerrains\" + voxelPair.Key + ".xml", voxelStream);
+                        //    }
+                        //}
                         zipFile.AddEntry("Manifest.xml", mStream);
                         zipFile.Save(fileName);
+                        //voxelStream.Close();
                     }
                 }
             }
