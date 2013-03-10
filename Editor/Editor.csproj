@@ -80,7 +80,7 @@
     </Compile>
     <Compile Include="Datatypes\GameManifest.cs" />
     <Compile Include="Datatypes\VoxelTerrain.cs" />
-    <Compile Include="Services\VoxelTerrianModelProcessor.cs" />
+    <Compile Include="Services\VoxelTerrianFileImporter.cs" />
     <Compile Include="Services\VoxelTerrainImporter.cs" />
     <Compile Include="Utilities\ContentBuilder.cs" />
     <Compile Include="Utilities\SchematicProcessor.cs" />

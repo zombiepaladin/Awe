@@ -107,7 +107,7 @@ namespace AweEditor
 
                 if (model != null)
                 {
-                    MeasureModel();
+                    MeasureModel(model);
                 }
 
                 editorState = EditorState.Model;
@@ -160,6 +160,8 @@ namespace AweEditor
             set
             {
                 terrianModel = value;
+                if (terrianModel != null)
+                    MeasureModel(terrianModel);
                 editorState = EditorState.TerrianModel;
             }
         }
@@ -504,7 +506,7 @@ namespace AweEditor
         /// it is and where it is centered. This lets us automatically zoom
         /// the display, so we can correctly handle models of any scale.
         /// </summary>
-        void MeasureModel()
+        void MeasureModel(Model model)
         {
             // Look up the absolute bone transforms for this model.
             boneTransforms = new Matrix[model.Bones.Count];

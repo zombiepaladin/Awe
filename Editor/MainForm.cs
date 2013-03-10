@@ -296,7 +296,7 @@ namespace AweEditor
 
             //Pull the file through the pipeline.
             contentBuilder.Clear();
-            contentBuilder.Add(terrianFile, meshName, "", "VoxelTerrianModelProcessor");
+            contentBuilder.Add(terrianFile, meshName, "VoxelTerrianImporter", "ModelProcessor");
 
             string buildError = contentBuilder.Build();
 
