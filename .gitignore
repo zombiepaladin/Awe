@@ -21,3 +21,10 @@ obj
 
 # mstest test results
 TestResults
+Engine/Debug/*.*
+Engine/Release/*.*
+Editor/Debug/*.*
+Editor/Release/*.*
+Debug/*.*
+Release/*.*
+Awe.sdf
