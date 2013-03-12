@@ -16,7 +16,7 @@ namespace VoxelTerrianMeshPipeline
     /// <summary>
     /// Holder for Triangle verticies indexes.
     /// </summary>
-    private struct Triangle
+    public struct Triangle
     {
         public int Vertex1Index;
         public int Vertex2Index;
