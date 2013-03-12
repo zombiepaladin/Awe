@@ -14,6 +14,10 @@ using System.Windows.Forms;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor;
+using Microsoft.Xna.Framework.Content;
+using System.IO;
+using System.Reflection;
+using System.Collections.Generic;
 #endregion
 
 namespace AweEditor
@@ -36,6 +40,10 @@ namespace AweEditor
     /// </summary>
     class EditorViewerControl : GraphicsDeviceControl
     {
+        EventHandler invalid;
+
+        long currentDrawIndex = 1000;
+
         EditorState editorState = EditorState.None;
 
         // Timer controls the rotation speed.
@@ -43,6 +51,11 @@ namespace AweEditor
 
         // SpriteBatch draws sprites on-screen
         SpriteBatch spriteBatch;
+
+        ContentBuilder contentBuilder;
+        ContentManager contentManager; //TODO: should we be using the ones declared in MainForm instead?
+
+        public bool Paused { get; set; }
 
         #region Terrain Fields
 
@@ -52,13 +65,40 @@ namespace AweEditor
         public VoxelTerrain VoxelTerrain
         {
             get { return voxelTerrain; }
-            set { 
+            set
+            {
                 voxelTerrain = value;
                 editorState = EditorState.VoxelTerrain;
             }
         }
-
         VoxelTerrain voxelTerrain;
+
+        //Generic block to render, will need different types later
+        public Model voxelPlaceHolderModel;
+
+        //Used for hardware rendering
+        private Matrix[] instancedModelBones;
+        private DynamicVertexBuffer instanceVertexBuffer;
+        private Matrix[] instanceTransforms;
+
+        // To store instance transform matrices in a vertex buffer, we use this custom
+        // vertex type which encodes 4x4 matrices as a set of four Vector4 values.
+        static VertexDeclaration instanceVertexDeclaration = new VertexDeclaration
+        (
+            new VertexElement(0, VertexElementFormat.Vector4, VertexElementUsage.BlendWeight, 0),
+            new VertexElement(16, VertexElementFormat.Vector4, VertexElementUsage.BlendWeight, 1),
+            new VertexElement(32, VertexElementFormat.Vector4, VertexElementUsage.BlendWeight, 2),
+            new VertexElement(48, VertexElementFormat.Vector4, VertexElementUsage.BlendWeight, 3)
+        );
+
+        //Can be useful for seeing the interior of solid structures
+        private bool doubleSpaceBlocks = false;
+
+
+        public Vector3 CamPosition { get; set; }
+        public float CamYaw { get; set; }
+        public float CamPitch { get; set; }
+        public float CamRoll { get; set; }
 
         #endregion
 
@@ -85,7 +125,7 @@ namespace AweEditor
         }
 
         Model model;
-        
+
         // Cache information about the model size and position.
         Matrix[] boneTransforms;
         Vector3 modelCenter;
@@ -98,10 +138,11 @@ namespace AweEditor
         /// <summary>
         /// Gets or sets the current texture
         /// </summary>
-        public Texture2D Texture 
+        public Texture2D Texture
         {
             get { return texture; }
-            set { 
+            set
+            {
                 texture = value;
 
                 if (texture != null)
@@ -125,6 +166,16 @@ namespace AweEditor
         /// </summary>
         protected override void Initialize()
         {
+            this.CamPosition = Vector3.Zero;
+            this.CamYaw = 0;
+            this.CamPitch = 0;
+            this.CamRoll = 0;
+
+            contentBuilder = new ContentBuilder();
+            contentManager = new ContentManager(this.Services, contentBuilder.OutputDirectory);
+
+            loadModels();
+
             // Start the animation timer.
             timer = Stopwatch.StartNew();
 
@@ -132,23 +183,77 @@ namespace AweEditor
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Hook the idle event to constantly redraw our animation.
-            Application.Idle += delegate { Invalidate(); };
+            this.Paused = true;
+            invalid = delegate { Invalidate(); };
+            UnpauseForm();
         }
 
+        public void PauseForm()
+        {
+            if (!this.Paused)
+            {
+                Application.Idle -= invalid;
+                this.Paused = true;
+            }
+        }
+
+        public void UnpauseForm()
+        {
+            if (this.Paused)
+            {
+                Application.Idle += invalid;
+                this.Paused = false;
+            }
+        }
+
+        private void loadModels()
+        {
+            #region Load Placeholder Block Model
+            contentManager.Unload();
+
+            // Tell the ContentBuilder what to build.
+            contentBuilder.Clear();
+            contentBuilder.Add(Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "../../../../Content")) + "\\Cats.fbx", "Model", null, "InstancedModelProcessor");
+
+            // Build this new model data.
+            string buildError = contentBuilder.Build();
+
+            if (string.IsNullOrEmpty(buildError))
+            {
+                // If the build succeeded, use the ContentManager to
+                // load the temporary .xnb file that we just created.
+                voxelPlaceHolderModel = contentManager.Load<Model>("Model");
+            }
+            else
+            {
+                // If the build failed, display an error message.
+                MessageBox.Show(buildError, "Error");
+            }
+            #endregion
+        }
+
+        private void PrepGraphicsDevice()
+        {
+            // Clear to the default control background color.
+            Color backColor = new Color(BackColor.R, BackColor.G, BackColor.B);
+            GraphicsDevice.Clear(backColor);
+
+            GraphicsDevice.BlendState = BlendState.Opaque;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        }
 
         /// <summary>
         /// Draws the control.
         /// </summary>
         protected override void Draw()
         {
-            // Clear to the default control background color.
-            Color backColor = new Color(BackColor.R, BackColor.G, BackColor.B);
-            GraphicsDevice.Clear(backColor);
+            PrepGraphicsDevice();
 
             // Render according to current editor state
             switch (editorState)
             {
                 case EditorState.VoxelTerrain:
+                    DrawVoxelTerrain();
                     break;
 
                 case EditorState.Model:
@@ -169,8 +274,145 @@ namespace AweEditor
         /// <summary>
         /// Draw the current voxel terrain
         /// </summary>
-        private void DrawVoxelTerrain()
+
+        public void DrawVoxelTerrain()
         {
+            PrepGraphicsDevice();
+
+            //Lets do some sanity checking
+            if (voxelTerrain == null || voxelPlaceHolderModel == null)
+                return;
+
+            Matrix[] transformInstances;
+            Matrix view;
+            Matrix projection;
+            Matrix world = Matrix.CreateWorld(Vector3.Zero, Vector3.Backward, Vector3.Up);
+
+            //Lets see where we want to put the camera
+            //We will go ahead and use the CamPosition we already have
+            //Now we just need the rotation
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(this.CamYaw, this.CamPitch, this.CamRoll);
+            Vector3 camLookAt = this.CamPosition + Vector3.Transform(Vector3.Forward, rotationMatrix);
+
+            float nearClip = 128 / 100f;
+            float farClip = 128 * 100;
+
+            float aspectRatio = GraphicsDevice.Viewport.AspectRatio;
+
+            view = Matrix.CreateLookAt(this.CamPosition, camLookAt, Vector3.Up);
+            projection = Matrix.CreatePerspectiveFieldOfView(1, aspectRatio, nearClip, farClip);
+
+            //We'll need to initialize our bones if they haven't been
+            if (instancedModelBones == null)
+            {
+                instancedModelBones = new Matrix[voxelPlaceHolderModel.Bones.Count];
+                voxelPlaceHolderModel.CopyAbsoluteBoneTransformsTo(instancedModelBones);
+            }
+
+            const int maxBatchSize = 65536; //16x16x256
+            int numberOfBlocks = voxelTerrain.blocks.Count;
+
+            //This will be used as an index for instance transforms. i % maxBatchSize
+            int matrixIndex;
+
+            //Marks the offset of the block
+            Vector3 tempPosition;
+            Matrix tempTransform;
+
+            //marks the block itself
+            BlockData block;
+
+            const float scale = 2;
+
+            transformInstances = new Matrix[maxBatchSize];
+
+            int batchNumber = (numberOfBlocks / maxBatchSize);
+            if ((numberOfBlocks % maxBatchSize) > 0) batchNumber++;
+            int matrixSize;
+
+            for(int x = 0; x < batchNumber; x++)
+            {
+                matrixSize = maxBatchSize;
+                if (x == batchNumber - 1) matrixSize = numberOfBlocks % maxBatchSize;
+
+                for (int i = 0; i < matrixSize; i++)
+                {
+                    block = voxelTerrain.blocks[(x * maxBatchSize) + i];
+
+                    tempPosition = Vector3.Divide(new Vector3(block.x, block.y, block.z), scale);
+
+                    tempTransform = Matrix.CreateTranslation(tempPosition);
+
+                    transformInstances[i] = tempTransform * world;
+                }
+
+                Array.Clear(transformInstances, matrixSize, transformInstances.Length - matrixSize);
+
+                DrawModelHardwareInstancing
+                    (
+                    voxelPlaceHolderModel, instancedModelBones, 
+                    transformInstances, view, projection
+                    );
+            }
+        }
+
+        /// <summary>
+        /// Taken from XNA model instancing example
+        /// Efficiently draws several copies of a piece of geometry using hardware instancing.
+        /// </summary>
+        void DrawModelHardwareInstancing(Model model, Matrix[] modelBones,
+                                         Matrix[] instances, Matrix view, Matrix projection)
+        {
+            if (instances.Length == 0)
+                return;
+
+            // If we have more instances than room in our vertex buffer, grow it to the neccessary size.
+            if ((instanceVertexBuffer == null) ||
+                (instances.Length > instanceVertexBuffer.VertexCount))
+            {
+                if (instanceVertexBuffer != null)
+                    instanceVertexBuffer.Dispose();
+
+                instanceVertexBuffer = new DynamicVertexBuffer(GraphicsDevice, instanceVertexDeclaration,
+                                                               instances.Length, BufferUsage.WriteOnly);
+            }
+
+            // Transfer the latest instance transform matrices into the instanceVertexBuffer.
+            instanceVertexBuffer.SetData(instances, 0, instances.Length, SetDataOptions.Discard);
+
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                foreach (ModelMeshPart meshPart in mesh.MeshParts)
+                {
+                    // Tell the GPU to read from both the model vertex buffer plus our instanceVertexBuffer.
+                    GraphicsDevice.SetVertexBuffers(
+                        new VertexBufferBinding(meshPart.VertexBuffer, meshPart.VertexOffset, 0),
+                        new VertexBufferBinding(instanceVertexBuffer, 0, 1)
+                    );
+
+                    GraphicsDevice.Indices = meshPart.IndexBuffer;
+
+                    // Set up the instance rendering effect.
+                    Effect effect = meshPart.Effect;
+
+                    effect.CurrentTechnique = effect.Techniques["HardwareInstancing"];
+
+                    effect.Parameters["World"].SetValue(modelBones[mesh.ParentBone.Index]);
+                    effect.Parameters["View"].SetValue(view);
+                    effect.Parameters["Projection"].SetValue(projection);
+
+                    // Draw all the instance copies in a single call.
+                    foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+
+                        GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
+                                                               meshPart.NumVertices, meshPart.StartIndex,
+                                                               meshPart.PrimitiveCount, Math.Min(1048574, instances.Length)); //TODO: should have warning or something when too big
+
+                    }
+                }
+            }
         }
 
 
@@ -257,7 +499,7 @@ namespace AweEditor
         {
             // Look up the absolute bone transforms for this model.
             boneTransforms = new Matrix[model.Bones.Count];
-            
+
             model.CopyAbsoluteBoneTransformsTo(boneTransforms);
 
             // Compute an (approximate) model center position by
@@ -286,11 +528,11 @@ namespace AweEditor
                 Vector3 meshCenter = Vector3.Transform(meshBounds.Center, transform);
 
                 float transformScale = transform.Forward.Length();
-                
+
                 float meshRadius = (meshCenter - modelCenter).Length() +
                                    (meshBounds.Radius * transformScale);
 
-                modelRadius = Math.Max(modelRadius,  meshRadius);
+                modelRadius = Math.Max(modelRadius, meshRadius);
             }
         }
 
