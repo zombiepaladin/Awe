@@ -280,16 +280,6 @@ namespace VoxelTerrianMeshPipeline
 
         #endregion
 
-        /// <summary>
-        /// Holder for Triangle verticies indexes.
-        /// </summary>
-        private struct Triangle
-        {
-            public int Vertex1Index;
-            public int Vertex2Index;
-            public int Vertex3Index;
-        }
-
         private int WORLD_WIDTH;
         private int WORLD_LENGTH;
         private int WORLD_HEIGHT;
@@ -333,6 +323,9 @@ namespace VoxelTerrianMeshPipeline
             byte[,] index;
             Tuple<byte, byte[]>[,] tIndex;
             List<Triangle> allTriangles = new List<Triangle>();
+
+            mBuilder.MergeDuplicatePositions = true;
+            mBuilder.MergePositionTolerance = 1.0f;
 
             for (int z = 0; z < WORLD_LENGTH - 1; z++)
             {
@@ -493,7 +486,8 @@ namespace VoxelTerrianMeshPipeline
             List<Triangle> indexTriangles = new List<Triangle>();
             for (int i = 0; TRI_TABLE[index, i] != -1; i += 3)
             {
-                indexTriangles.Add(new Triangle() {
+                indexTriangles.Add(new Triangle()
+                {
                     Vertex1Index = mBuilder.CreatePosition(GetVertex(TRI_TABLE[index, i], x, y, z)),
                     Vertex2Index = mBuilder.CreatePosition(GetVertex(TRI_TABLE[index, i + 1], x, y, z)),
                     Vertex3Index = mBuilder.CreatePosition(GetVertex(TRI_TABLE[index, i + 2], x, y, z))
@@ -542,12 +536,5 @@ namespace VoxelTerrianMeshPipeline
                     throw new Exception("Unknown vertex");
             }
         }
-    }
-
-    public struct BlockData
-    {
-        public int x, y, z;
-
-        public byte type;
     }
 }
