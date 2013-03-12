@@ -16,6 +16,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using System.Windows.Forms;
+using System.Reflection;
 #endregion
 
 namespace AweEditor
@@ -42,7 +44,8 @@ namespace AweEditor
             "Microsoft.Xna.Framework.Content.Pipeline.XImporter" + xnaVersion,
             "Microsoft.Xna.Framework.Content.Pipeline.TextureImporter" + xnaVersion,
             "Microsoft.Xna.Framework.Content.Pipeline.EffectImporter" + xnaVersion,
-
+            Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "../../../../Content/")) + "InstancedModelPipeline.dll", //TODO: can we link this better?
+            Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "VoxelTerrianMeshPipeline.dll")),
             // If you want to use custom importers or processors from
             // a Content Pipeline Extension Library, add them here.
             //
@@ -162,7 +165,7 @@ namespace AweEditor
             buildProject = new Project(projectRootElement);
 
             buildProject.SetProperty("XnaPlatform", "Windows");
-            buildProject.SetProperty("XnaProfile", "Reach");
+            buildProject.SetProperty("XnaProfile", "HiDef");
             buildProject.SetProperty("XnaFrameworkVersion", "v4.0");
             buildProject.SetProperty("Configuration", "Release");
             buildProject.SetProperty("OutputPath", outputPath);
@@ -202,7 +205,6 @@ namespace AweEditor
 
             projectItems.Add(item);
         }
-
 
         /// <summary>
         /// Removes all content files from the MSBuild project.

@@ -21,3 +21,6 @@ obj
 
 # mstest test results
 TestResults
+/Debug
+/Engine/Debug
+*.sdf
