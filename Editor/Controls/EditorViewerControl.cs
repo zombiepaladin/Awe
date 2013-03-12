@@ -17,6 +17,7 @@ using AweEditor;
 using Microsoft.Xna.Framework.Content;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 #endregion
 
@@ -41,6 +42,8 @@ namespace AweEditor
     /// </summary>
     class EditorViewerControl : GraphicsDeviceControl
     {
+        EventHandler invalid;
+
         long currentDrawIndex = 1000;
 
         EditorState editorState = EditorState.None;
@@ -54,6 +57,8 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager; //TODO: should we be using the ones declared in MainForm instead?
 
+        public bool Paused { get; set; }
+
         #region Terrain Fields
 
         /// <summary>
@@ -62,13 +67,14 @@ namespace AweEditor
         public VoxelTerrain VoxelTerrain
         {
             get { return voxelTerrain; }
-            set { 
+            set
+            {
                 voxelTerrain = value;
                 editorState = EditorState.VoxelTerrain;
             }
         }
         VoxelTerrain voxelTerrain;
-        
+
         //Generic block to render, will need different types later
         public Model voxelPlaceHolderModel;
 
@@ -76,7 +82,7 @@ namespace AweEditor
         private Matrix[] instancedModelBones;
         private DynamicVertexBuffer instanceVertexBuffer;
         private Matrix[] instanceTransforms;
-        
+
         // To store instance transform matrices in a vertex buffer, we use this custom
         // vertex type which encodes 4x4 matrices as a set of four Vector4 values.
         static VertexDeclaration instanceVertexDeclaration = new VertexDeclaration
@@ -89,6 +95,12 @@ namespace AweEditor
 
         //Can be useful for seeing the interior of solid structures
         private bool doubleSpaceBlocks = false;
+
+
+        public Vector3 CamPosition { get; set; }
+        public float CamYaw { get; set; }
+        public float CamPitch { get; set; }
+        public float CamRoll { get; set; }
 
         #endregion
 
@@ -115,7 +127,7 @@ namespace AweEditor
         }
 
         Model model;
-        
+
         // Cache information about the model size and position.
         Matrix[] boneTransforms;
         Vector3 modelCenter;
@@ -128,10 +140,11 @@ namespace AweEditor
         /// <summary>
         /// Gets or sets the current texture
         /// </summary>
-        public Texture2D Texture 
+        public Texture2D Texture
         {
             get { return texture; }
-            set { 
+            set
+            {
                 texture = value;
 
                 if (texture != null)
@@ -175,6 +188,11 @@ namespace AweEditor
         /// </summary>
         protected override void Initialize()
         {
+            this.CamPosition = Vector3.Zero;
+            this.CamYaw = 0;
+            this.CamPitch = 0;
+            this.CamRoll = 0;
+
             contentBuilder = new ContentBuilder();
             contentManager = new ContentManager(this.Services, contentBuilder.OutputDirectory);
 
@@ -187,7 +205,27 @@ namespace AweEditor
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Hook the idle event to constantly redraw our animation.
-            Application.Idle += delegate { Invalidate(); };
+            this.Paused = true;
+            invalid = delegate { Invalidate(); };
+            UnpauseForm();
+        }
+
+        public void PauseForm()
+        {
+            if (!this.Paused)
+            {
+                Application.Idle -= invalid;
+                this.Paused = true;
+            }
+        }
+
+        public void UnpauseForm()
+        {
+            if (this.Paused)
+            {
+                Application.Idle += invalid;
+                this.Paused = false;
+            }
         }
 
         private void loadModels()
@@ -216,10 +254,7 @@ namespace AweEditor
             #endregion
         }
 
-        /// <summary>
-        /// Draws the control.
-        /// </summary>
-        protected override void Draw()
+        private void PrepGraphicsDevice()
         {
             // Clear to the default control background color.
             Color backColor = new Color(BackColor.R, BackColor.G, BackColor.B);
@@ -227,6 +262,14 @@ namespace AweEditor
 
             GraphicsDevice.BlendState = BlendState.Opaque;
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        }
+
+        /// <summary>
+        /// Draws the control.
+        /// </summary>
+        protected override void Draw()
+        {
+            PrepGraphicsDevice();
 
             // Render according to current editor state
             switch (editorState)
@@ -257,116 +300,89 @@ namespace AweEditor
         /// <summary>
         /// Draw the current voxel terrain
         /// </summary>
-        private void DrawVoxelTerrain()
+
+        public void DrawVoxelTerrain()
         {
-            #region Terrain Rendering Setup
+            PrepGraphicsDevice();
 
-
-            //Stop if no terrain to render
+            //Lets do some sanity checking
             if (voxelTerrain == null || voxelPlaceHolderModel == null)
                 return;
 
-            //init bones
-            if (instancedModelBones == null) //TODO: move to loadModels when implemented
+            Matrix[] transformInstances;
+            Matrix view;
+            Matrix projection;
+            Matrix world = Matrix.CreateWorld(Vector3.Zero, Vector3.Backward, Vector3.Up);
+
+            //Lets see where we want to put the camera
+            //We will go ahead and use the CamPosition we already have
+            //Now we just need the rotation
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(this.CamYaw, this.CamPitch, this.CamRoll);
+            Vector3 camLookAt = this.CamPosition + Vector3.Transform(Vector3.Forward, rotationMatrix);
+
+            float nearClip = 128 / 100f;
+            float farClip = 128 * 100;
+
+            float aspectRatio = GraphicsDevice.Viewport.AspectRatio;
+
+            view = Matrix.CreateLookAt(this.CamPosition, camLookAt, Vector3.Up);
+            projection = Matrix.CreatePerspectiveFieldOfView(1, aspectRatio, nearClip, farClip);
+
+            //We'll need to initialize our bones if they haven't been
+            if (instancedModelBones == null)
             {
                 instancedModelBones = new Matrix[voxelPlaceHolderModel.Bones.Count];
                 voxelPlaceHolderModel.CopyAbsoluteBoneTransformsTo(instancedModelBones);
             }
 
-            //Setup camera
-            float aspectRatio = GraphicsDevice.Viewport.AspectRatio;
+            const int maxBatchSize = 65536; //16x16x256
+            int numberOfBlocks = voxelTerrain.blocks.Count;
 
-            float rotation = (float)timer.Elapsed.TotalSeconds;
-            //float rotation = 1.5f;
-            Matrix world = Matrix.CreateRotationY(0);//rotation);
+            //This will be used as an index for instance transforms. i % maxBatchSize
+            int matrixIndex;
 
-            //Populate instances here to find max length for camera
-            int maxDist = 0;
+            //Marks the offset of the block
+            Vector3 tempPosition;
+            Matrix tempTransform;
 
-            int maxSize = Math.Min(1048574, voxelTerrain.blocks.Count);
+            //marks the block itself
+            BlockData block;
 
-            Array.Resize(ref instanceTransforms, maxSize);
+            const float scale = 2;
 
-            Vector3 position = new Vector3();
-            BlockData block = new BlockData();
-            Matrix transform = new Matrix();
+            transformInstances = new Matrix[maxBatchSize];
 
-            float scale = 2;
-            if (doubleSpaceBlocks) //inverted because dividing by scale
-                scale = 1;
+            int batchNumber = (numberOfBlocks / maxBatchSize);
+            if ((numberOfBlocks % maxBatchSize) > 0) batchNumber++;
+            int matrixSize;
 
-            int maxX, maxY, maxZ;
-            maxX = maxY = maxZ = 0;
-
-            int minX, minY, minZ;
-            minX = minY = minZ = int.MaxValue;
-
-            for (long i = 0; i < maxSize; i++)
+            for(int x = 0; x < batchNumber; x++)
             {
-                block = voxelTerrain.blocks[(int)i];
+                matrixSize = maxBatchSize;
+                if (x == batchNumber - 1) matrixSize = numberOfBlocks % maxBatchSize;
 
-                position.X = block.x / scale; //TODO: fix hardcoded scaling
-                position.Y = block.y / scale;
-                position.Z = block.z / scale;
+                for (int i = 0; i < matrixSize; i++)
+                {
+                    block = voxelTerrain.blocks[(x * maxBatchSize) + i];
 
-                maxX = Math.Max(maxX, (int)position.X);
-                maxY = Math.Max(maxY, (int)position.Y);
-                maxZ = Math.Max(maxZ, (int)position.Z);
+                    tempPosition = Vector3.Divide(new Vector3(block.x, block.y, block.z), scale);
 
-                minX = Math.Min(minX, (int)position.X);
-                minY = Math.Min(minY, (int)position.Y);
-                minZ = Math.Min(minZ, (int)position.Z);
+                    tempTransform = Matrix.CreateTranslation(tempPosition);
 
-                //find distance from origin
-                int distFromZero = (int)position.Length();
-                //update maxDist if bigger
-                if (distFromZero > maxDist)
-                    maxDist = distFromZero;
+                    transformInstances[i] = tempTransform * world;
+                }
 
-                transform = Matrix.CreateTranslation(position);
-                instanceTransforms[(instanceTransforms.Length - (i /*- currentDrawIndex*/)) - 1] = transform * world; //TODO: remove backwards test
+                Array.Clear(transformInstances, matrixSize, transformInstances.Length - matrixSize);
+
+                DrawModelHardwareInstancing
+                    (
+                    voxelPlaceHolderModel, instancedModelBones, 
+                    transformInstances, view, projection
+                    );
             }
-            //Debug.WriteLine("{0}", voxelTerrain.blocks[65000]);
-            //currentDrawIndex = ((currentDrawIndex + maxSize) > voxelTerrain.blocks.Count) ? 0 : currentDrawIndex + maxSize;
-
-            //Continue camera setup
-            //Vector3 eyePosition = Vector3.Zero;
-
-            //float nearClip = maxDist / 50.0f;
-            //float farClip = maxDist * 50;
-
-            //Matrix view = Matrix.CreateLookAt(new Vector3(40, 300, 30), new Vector3(0, 0, 0), Vector3.Up);
-            //Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)(Math.PI / 2), aspectRatio,
-            //                                                    nearClip, farClip);
-
-            modelCenter = new Vector3((minX + maxX) / 2, (minY + maxY)/2, (minZ + maxZ) / 2);
-            Vector3 eyePosition = Vector3.Zero;
-
-            eyePosition.Z = minZ + 20;// maxZ + 1;
-            eyePosition.X = minX - 5;// maxX + 1;
-            eyePosition.Y = maxY - 1;
-
-            Debug.WriteLine("Max = ({0},{1},{2})", maxX, maxY, maxZ);
-            Debug.WriteLine("Min = ({0},{1},{2})", minX, minY, minZ);
-            Debug.WriteLine("EyePosition = ({0},{1},{2})", eyePosition.X, eyePosition.Y, eyePosition.Z);
-            Debug.WriteLine("ModelCenter = ({0},{1},{2})", modelCenter.X, modelCenter.Y, modelCenter.Z);
-
-            aspectRatio = GraphicsDevice.Viewport.AspectRatio;
-
-            float nearClip = 128 / 100f;
-            float farClip = 128 * 100;
-
-            world = Matrix.CreateRotationY(rotation);
-            Matrix view = Matrix.CreateLookAt(eyePosition, modelCenter, Vector3.Up);
-            Matrix projection = Matrix.CreatePerspectiveFieldOfView(1, aspectRatio,
-                                                                nearClip, farClip);
-
-            #endregion
-
-            DrawModelHardwareInstancing(voxelPlaceHolderModel, instancedModelBones, instanceTransforms, view, projection);
         }
 
-          /// <summary>
+        /// <summary>
         /// Taken from XNA model instancing example
         /// Efficiently draws several copies of a piece of geometry using hardware instancing.
         /// </summary>
@@ -404,13 +420,13 @@ namespace AweEditor
 
                     // Set up the instance rendering effect.
                     Effect effect = meshPart.Effect;
-                    
+
                     effect.CurrentTechnique = effect.Techniques["HardwareInstancing"];
-                    
+
                     effect.Parameters["World"].SetValue(modelBones[mesh.ParentBone.Index]);
                     effect.Parameters["View"].SetValue(view);
                     effect.Parameters["Projection"].SetValue(projection);
-                    
+
                     // Draw all the instance copies in a single call.
                     foreach (EffectPass pass in effect.CurrentTechnique.Passes)
                     {
@@ -419,13 +435,12 @@ namespace AweEditor
                         GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
                                                                meshPart.NumVertices, meshPart.StartIndex,
                                                                meshPart.PrimitiveCount, Math.Min(1048574, instances.Length)); //TODO: should have warning or something when too big
-                      
-                        
+
                     }
                 }
             }
         }
-    
+
 
         /// <summary>
         /// Draw the current model
@@ -510,7 +525,7 @@ namespace AweEditor
         {
             // Look up the absolute bone transforms for this model.
             boneTransforms = new Matrix[model.Bones.Count];
-            
+
             model.CopyAbsoluteBoneTransformsTo(boneTransforms);
 
             // Compute an (approximate) model center position by
@@ -539,11 +554,11 @@ namespace AweEditor
                 Vector3 meshCenter = Vector3.Transform(meshBounds.Center, transform);
 
                 float transformScale = transform.Forward.Length();
-                
+
                 float meshRadius = (meshCenter - modelCenter).Length() +
                                    (meshBounds.Radius * transformScale);
 
-                modelRadius = Math.Max(modelRadius,  meshRadius);
+                modelRadius = Math.Max(modelRadius, meshRadius);
             }
         }
 

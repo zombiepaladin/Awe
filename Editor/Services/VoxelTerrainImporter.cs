@@ -420,7 +420,8 @@ namespace AweEditor
                     NamedBinaryTag topLevel = new NamedBinaryTag();
 
                     GetTagList(decompressedBlock, 0, topLevel);
-                    if (FindTag("Section", topLevel) == null)
+
+                    if (FindTag("Sections", topLevel) == null)
                     {
                         NamedBinaryTag xPos = FindTag("xPos", topLevel);
                         NamedBinaryTag zPos = FindTag("zPos", topLevel);
@@ -430,10 +431,14 @@ namespace AweEditor
                             throw new NullReferenceException("One or more tags not found");
                         else
                         {
-                            
-                            chunkList.Add(new Chunk(new Vector2((float)xPos.GetInt(),(float)zPos.GetInt()), Blocks));
+
+                            chunkList.Add(new Chunk(new Vector2((float)xPos.GetInt(), (float)zPos.GetInt()), Blocks));
                             //terrain.ConvertChunkToBlocks(xPos.GetInt(), zPos.GetInt(), Blocks.GetByteArray(), 128);
                         }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("FOUND A SECTION");
                     }
                         
                 }
@@ -774,7 +779,7 @@ namespace AweEditor
 
                             //TODO:Change the Status route, throw an error
                             //Here we need to check our guard (and increment it)
-                            if (infiniteGuard++ > int.MaxValue - 4) { UpdateStatus("Woah! Infinite Loop Dected, pulling out"); break; }
+                            if (infiniteGuard++ > int.MaxValue - 4) { UpdateStatus("Woah! Infinite Loop Detected, pulling out"); break; }
                         }
 
                         break;
@@ -867,6 +872,9 @@ namespace AweEditor
                 // 10 TAG_Compound = Any number of fully formed named binary tags, terminates with a TAG_End
                 case TagType.TAG_Compound:
                     {
+                        if (currentTag.Name == tagName)
+                            return currentTag;
+
                         List<NamedBinaryTag> children = (List<NamedBinaryTag>)currentTag.Payload;
 
                         NamedBinaryTag result = null;
@@ -883,6 +891,105 @@ namespace AweEditor
                 default:
                     throw new IndexOutOfRangeException("A non-existent tag was found");
             }
+        }
+
+        private static void PrintTag(NamedBinaryTag currentTag)
+        {
+            string tag = "";
+            statusIndention++;
+            switch (currentTag.Type)
+            {
+                // ID Type = Payload
+
+                // 0 TAG_End = None [No name]
+                case TagType.TAG_End:
+                    tag = "End";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+
+                // 1 TAG_Byte = 1 byte signed
+                case TagType.TAG_Byte:
+                    tag = "Byte";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 2 TAG_Short = 2 bytes, signed, big endian
+                case TagType.TAG_Short:
+                    tag = "Short";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 3 TAG_Int = 4 bytes, signed, big endian
+                case TagType.TAG_Int:
+                    tag = "Int";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 4 TAG_Long = 8 bytes, signed, big endian
+                case TagType.TAG_Long:
+                    tag = "Long";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 5 TAG_Float = 4 bytes, signed, big endian
+                case TagType.TAG_Float:
+                    tag = "Float";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 6 TAG_Double = 8 bytes, signed, big endian
+                case TagType.TAG_Double:
+                    tag = "Double";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 7 TAG_Byte_Array = [Int] size for size # of [Byte] payloads
+                case TagType.TAG_Byte_Array:
+                    tag = "Byte Array";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 8 TAG_String = [Short] size for size # of [UTF-8] characters
+                case TagType.TAG_String:
+                    tag = "String";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+                // 11 TAG_Int_Array = [Int] size for size # of [Int] payloads
+                case TagType.TAG_Int_Array:
+                    tag = "Int Array";
+            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+                    break;
+
+
+                // 9 TAG_List = [Byte] for tagID, [Int] for size, size # of payloads of type tagID. [contains unnamed tags]
+                case TagType.TAG_List:
+                    {
+                        tag = "List";
+                        UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+
+                        List<NamedBinaryTag> children = currentTag.GetList();
+
+                        foreach (NamedBinaryTag nbt in children)
+                        {
+                            PrintTag(nbt);
+                        }
+
+                        break;
+                    }
+                // 10 TAG_Compound = Any number of fully formed named binary tags, terminates with a TAG_End
+                case TagType.TAG_Compound:
+                    {
+                        tag = "Compound";
+                        UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
+
+                        List<NamedBinaryTag> children = currentTag.GetList();
+
+                        foreach (NamedBinaryTag nbt in children)
+                        {
+                            PrintTag(nbt);
+                        }
+
+                        break;
+                    }
+
+                default:
+                    throw new IndexOutOfRangeException("A non-existent tag was found");
+            }
+
+            statusIndention--;
         }
     }
 }
