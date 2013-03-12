@@ -1,17 +1,17 @@
-﻿Build started 3/5/2013 6:17:29 PM.
-     1>Project "C:\Users\Nick\School\Spring 2013\CIS 585 - Game Engine Design\The Game (Engine)\Sams Repo\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
+﻿Build started 3/12/2013 4:54:43 PM.
+     1>Project "C:\Users\Nick\School\Spring 2013\CIS 585 - Game Engine Design\The Game (Engine)\Awe\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          All outputs are up-to-date.
        Link:
          All outputs are up-to-date.
-         Engine.vcxproj -> C:\Users\Nick\School\Spring 2013\CIS 585 - Game Engine Design\The Game (Engine)\Sams Repo\Awe\Debug\Engine.exe
+         Engine.vcxproj -> C:\Users\Nick\School\Spring 2013\CIS 585 - Game Engine Design\The Game (Engine)\Awe\Debug\Engine.exe
        FinalizeBuildStatus:
          Deleting file "Debug\Engine.unsuccessfulbuild".
          Touching "Debug\Engine.lastbuildstate".
-     1>Done Building Project "C:\Users\Nick\School\Spring 2013\CIS 585 - Game Engine Design\The Game (Engine)\Sams Repo\Awe\Engine\Engine.vcxproj" (build target(s)).
+     1>Done Building Project "C:\Users\Nick\School\Spring 2013\CIS 585 - Game Engine Design\The Game (Engine)\Awe\Engine\Engine.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.11
+Time Elapsed 00:00:00.39

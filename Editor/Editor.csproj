@@ -78,6 +78,9 @@
     <Compile Include="Controls\EditorViewerControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\TablessTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Datatypes\GameManifest.cs" />
     <Compile Include="Datatypes\VoxelTerrain.cs" />
     <Compile Include="Services\VoxelTerrainImporter.cs" />
