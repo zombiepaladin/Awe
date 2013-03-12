@@ -165,7 +165,7 @@ namespace AweEditor
             buildProject = new Project(projectRootElement);
 
             buildProject.SetProperty("XnaPlatform", "Windows");
-            buildProject.SetProperty("XnaProfile", "Reach");
+            buildProject.SetProperty("XnaProfile", "HiDef");
             buildProject.SetProperty("XnaFrameworkVersion", "v4.0");
             buildProject.SetProperty("Configuration", "Release");
             buildProject.SetProperty("OutputPath", outputPath);

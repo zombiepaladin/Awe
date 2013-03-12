@@ -96,7 +96,6 @@
     <Compile Include="Services\GraphicsDeviceService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\MarchingCubes\MarchingCubesGenerator.cs" />
     <Compile Include="Utilities\InstancedModelProcessor.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
