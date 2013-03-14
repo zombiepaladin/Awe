@@ -63,6 +63,8 @@ namespace AweEditor
             this.tpModelControls = new System.Windows.Forms.TabPage();
             this.tpTextureControls = new System.Windows.Forms.TabPage();
             this.editorViewerControl = new AweEditor.EditorViewerControl();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createTerrianModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.ttcControlPanel.SuspendLayout();
@@ -80,7 +82,8 @@ namespace AweEditor
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.toolsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(792, 24);
@@ -442,7 +445,10 @@ namespace AweEditor
             // 
             // editorViewerControl
             // 
+            this.editorViewerControl.CamPitch = 0F;
             this.editorViewerControl.CamPosition = new Microsoft.Xna.Framework.Vector3(0F, 0F, 0F);
+            this.editorViewerControl.CamRoll = 0F;
+            this.editorViewerControl.CamYaw = 0F;
             this.editorViewerControl.Dock = System.Windows.Forms.DockStyle.Top;
             this.editorViewerControl.Location = new System.Drawing.Point(0, 0);
             this.editorViewerControl.Margin = new System.Windows.Forms.Padding(2);
@@ -451,9 +457,26 @@ namespace AweEditor
             this.editorViewerControl.Paused = false;
             this.editorViewerControl.Size = new System.Drawing.Size(792, 455);
             this.editorViewerControl.TabIndex = 5;
+            this.editorViewerControl.TerrianModel = null;
             this.editorViewerControl.Text = "editorViewerControl";
             this.editorViewerControl.Texture = null;
             this.editorViewerControl.VoxelTerrain = null;
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.createTerrianModelToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // createTerrianModelToolStripMenuItem
+            // 
+            this.createTerrianModelToolStripMenuItem.Enabled = false;
+            this.createTerrianModelToolStripMenuItem.Name = "createTerrianModelToolStripMenuItem";
+            this.createTerrianModelToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.createTerrianModelToolStripMenuItem.Text = "Create Terrian Model";
+            this.createTerrianModelToolStripMenuItem.Click += new System.EventHandler(this.CreateMeshMenuItemClicked);
             // 
             // MainForm
             // 
@@ -522,6 +545,8 @@ namespace AweEditor
         private System.Windows.Forms.TabPage tpModelControls;
         private System.Windows.Forms.TabPage tpTextureControls;
         private System.Windows.Forms.Button btnToggle;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createTerrianModelToolStripMenuItem;
 
     }
 }

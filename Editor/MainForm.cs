@@ -24,6 +24,9 @@ using AweEditor.Datatypes;
 using Ionic.Zip;
 using System.Text;
 using AweEditor.Utilities;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using Microsoft.Xna.Framework.Content.Pipeline;
 #endregion
 
 namespace AweEditor
@@ -128,7 +131,6 @@ namespace AweEditor
         {
             Close();
         }
-
 
         #region Asset Importing Event Handlers & Helpers
 
@@ -332,6 +334,8 @@ namespace AweEditor
                 RepositionCamera();
                 editorViewerControl.PauseForm();
             }
+
+            createTerrianModelToolStripMenuItem.Enabled = true;
         }
 
         private void LoadVoxelTerrain(string fileName)
@@ -359,7 +363,6 @@ namespace AweEditor
                     VoxelTerrainImporter.LoadTerrain(fileName);
                     blocks = new List<BlockData>();
                     break;
-
                 default:
                     MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
                     return;
@@ -538,6 +541,44 @@ namespace AweEditor
             }
         }
 
+
+        void CreateMeshMenuItemClicked(object sender, EventArgs e)
+        {
+            CreateTerrianModel(editorViewerControl.VoxelTerrain, "Default");
+        }
+
+        void CreateTerrianModel(VoxelTerrain terrian, string meshName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            //Save the voxel terrian to a tempory file.
+            string terrianFile = Path.Combine(Path.GetTempPath(), meshName + ".vox");
+            terrian.SaveTo(terrianFile);
+
+            //Pull the file through the pipeline.
+            contentBuilder.Clear();
+            contentBuilder.Add(terrianFile, meshName, "VoxelTerrianImporter", "ModelProcessor");
+
+            string buildError = contentBuilder.Build();
+
+            //Now we can treat the terrian as a normal model.
+            if(string.IsNullOrEmpty(buildError))
+            {
+                Model terrianModel = contentManager.Load<Model>(meshName);
+
+
+                editorViewerControl.UnpauseForm();
+                editorViewerControl.TerrianModel = terrianModel;
+
+                gameManifest.TerrianModels.Add(meshName, terrianModel);
+            }
+            else
+            {
+                MessageBox.Show("An error occured while generating the mesh:\n" + buildError, "Error");
+            }
+
+            Cursor = Cursors.Default;
+        }
         #endregion
 
         #region Helper Methods

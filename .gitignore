@@ -26,5 +26,7 @@ Debug/*.*
 
 # mstest test results
 TestResults
-Awe.sdf
-Awe.opensdf
+/Debug
+/Engine/Debug
+/*.opensdf
+/*.sdf

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AweEditor.Datatypes;
+using System.IO;
 
 namespace AweEditor
 {
@@ -54,6 +55,30 @@ namespace AweEditor
     [Serializable]
     public class VoxelTerrain
     {
+        public static VoxelTerrain LoadFrom(string filename)
+        {
+            List<BlockData> blocks = new List<BlockData>();
+
+            using (StreamReader input = new StreamReader(File.OpenRead(filename)))
+            {
+                string buffer;
+                while ((buffer = input.ReadLine()) != null)
+                {
+                    string[] data = buffer.Split(',');
+                    BlockData block = new BlockData()
+                    {
+                        x = Int32.Parse(data[0]),
+                        y = Int32.Parse(data[1]),
+                        z = Int32.Parse(data[2]),
+                        type = Byte.Parse(data[3])
+                    };
+                    blocks.Add(block);
+                }
+            }
+
+            return new VoxelTerrain(blocks);
+        }
+
         public List<BlockData> blocks; //store as List for now, optimize later
 
         public VoxelTerrain() { }
@@ -62,7 +87,19 @@ namespace AweEditor
         {
             this.blocks = blocks;
         }
-        
-    }
 
+        public void SaveTo(string filename)
+        {
+            using (StreamWriter output = new StreamWriter(File.Create(filename)))
+            {
+                foreach (BlockData block in blocks)
+                {
+                    output.WriteLine(string.Format("{0}, {1}, {2}, {3}", block.x, block.y, block.z, block.type));
+                }
+
+                output.Flush();
+                output.Close();
+            }
+        }
+    }
 }

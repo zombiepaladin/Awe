@@ -18,6 +18,7 @@ using Microsoft.Xna.Framework.Content;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 #endregion
 
 namespace AweEditor
@@ -31,6 +32,7 @@ namespace AweEditor
         VoxelTerrain,
         Model,
         Texture,
+        TerrianModel,
     }
 
     /// <summary>
@@ -117,7 +119,7 @@ namespace AweEditor
 
                 if (model != null)
                 {
-                    MeasureModel();
+                    MeasureModel(model);
                 }
 
                 editorState = EditorState.Model;
@@ -160,6 +162,26 @@ namespace AweEditor
 
         #endregion
 
+        #region Terrian Model Fields
+
+        public Model TerrianModel
+        {
+            get
+            {
+                return terrianModel;
+            }
+            set
+            {
+                terrianModel = value;
+                if (terrianModel != null)
+                    MeasureModel(terrianModel);
+                editorState = EditorState.TerrianModel;
+            }
+        }
+
+        private Model terrianModel;
+
+        #endregion
 
         /// <summary>
         /// Initializes the control.
@@ -257,11 +279,15 @@ namespace AweEditor
                     break;
 
                 case EditorState.Model:
-                    DrawModel();
+                    DrawModel(model);
                     break;
 
                 case EditorState.Texture:
                     DrawTexture();
+                    break;
+
+                case EditorState.TerrianModel:
+                    DrawModel(terrianModel);
                     break;
 
                 default:
@@ -419,7 +445,7 @@ namespace AweEditor
         /// <summary>
         /// Draw the current model
         /// </summary>
-        private void DrawModel()
+        private void DrawModel(Model model)
         {
             if (model != null)
             {
@@ -495,7 +521,7 @@ namespace AweEditor
         /// it is and where it is centered. This lets us automatically zoom
         /// the display, so we can correctly handle models of any scale.
         /// </summary>
-        void MeasureModel()
+        void MeasureModel(Model model)
         {
             // Look up the absolute bone transforms for this model.
             boneTransforms = new Matrix[model.Bones.Count];

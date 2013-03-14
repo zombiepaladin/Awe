@@ -35,7 +35,6 @@ namespace InstancedModelPipeline
             return base.Process(input, context);
         }
 
-
         /// <summary>
         /// Override the ConvertMaterial method to apply our custom InstancedModel.fx shader.
         /// </summary>
