@@ -21,7 +21,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor.Datatypes;
-using Ionic.Zip
+using Ionic.Zip;
 using System.Text;
 using AweEditor.Utilities;
 #endregion
@@ -179,11 +179,11 @@ namespace AweEditor
                                     LoadTexture(xmlReader.Value, true);
                                 else if (dataType == "VoxelTerrains")
                                 {
-                                    //XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
-                                    //XmlTextReader voxelReader = new XmlTextReader(dirInfo.FullName + @"\VoxelTerrains" + xmlReader.Value + ".xml");
-                                    //if (!gameManifest.VoxelTerrains.ContainsKey(xmlReader.Value))
-                                    //    gameManifest.VoxelTerrains.Add(xmlReader.Value, (VoxelTerrain)voxelSerializer.Deserialize(voxelReader));
-                                    //voxelReader.Close();
+                                    XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
+                                    XmlTextReader voxelReader = new XmlTextReader(dirInfo.FullName + @"\VoxelTerrains\" + xmlReader.Value + ".xml");
+                                    if (!gameManifest.VoxelTerrains.ContainsKey(xmlReader.Value))
+                                    editorViewerControl.VoxelTerrain = gameManifest.VoxelTerrains[xmlReader.Value];
+                                    voxelReader.Close();
                                 }
                             }
                             loadData = false;
@@ -209,76 +209,76 @@ namespace AweEditor
         {
             Cursor = Cursors.WaitCursor;
 
-            using (MemoryStream mStream = new MemoryStream())
+            DirectoryInfo dInfo = new DirectoryInfo(contentBuilder.OutputDirectory);
+            using (FileStream mStream = new FileStream(Path.Combine(dInfo.Parent.Parent.FullName, "Manifest.xml"), FileMode.Create))
             {
-                using (XmlTextWriter xmlWriter = new XmlTextWriter(mStream, System.Text.Encoding.UTF8))
+                XmlTextWriter xmlWriter = new XmlTextWriter(mStream, System.Text.Encoding.UTF8);
+                xmlWriter.Formatting = Formatting.Indented;
+                xmlWriter.Indentation = 4;
+                xmlWriter.WriteStartDocument();
+                xmlWriter.WriteStartElement("Manifest");
+
+                // Write the Model Information
+                xmlWriter.WriteStartElement("Models");
+                foreach (KeyValuePair<string, Model> modelPair in gameManifest.Models)
                 {
-                    xmlWriter.Formatting = Formatting.Indented;
-                    xmlWriter.Indentation = 4;
-                    xmlWriter.WriteStartDocument();
-                    xmlWriter.WriteStartElement("Manifest");
+                    string[] tokens = modelPair.Key.Split('\\');
+                    int index = (tokens.Length == 2) ? 1 : 0;
+                    xmlWriter.WriteElementString("Name", tokens[index]);
+                }
+                xmlWriter.WriteEndElement();
 
-                    // Write the Model Information
-                    xmlWriter.WriteStartElement("Models");
-                    foreach (KeyValuePair<string, Model> modelPair in gameManifest.Models)
+                // Write the Texture Information
+                xmlWriter.WriteStartElement("Textures");
+                foreach (KeyValuePair<string, Texture2D> texturePair in gameManifest.Textures)
+                {
+                    string[] tokens = texturePair.Key.Split('\\');
+                    int index = (tokens.Length == 2) ? 1 : 0;
+                    xmlWriter.WriteElementString("Name", tokens[index]);
+                }
+                xmlWriter.WriteEndElement();
+
+                // Write the Voxel Terrain Information
+                xmlWriter.WriteStartElement("VoxelTerrains");
+                foreach (KeyValuePair<string, VoxelTerrain> terrainPair in gameManifest.VoxelTerrains)
+                {
+                    string[] tokens = terrainPair.Key.Split('\\');
+                    int index = (tokens.Length == 2) ? 1 : 0;
+                    xmlWriter.WriteElementString("Name", terrainPair.Key);
+                }
+                xmlWriter.WriteEndElement();
+
+                // End the Xml Documents and Flush the Data to the Memory Stream
+                xmlWriter.WriteEndElement();
+                xmlWriter.WriteEndDocument();
+                xmlWriter.Flush();
+
+                // Seek to the beginning of the information in the Memory Stream
+                mStream.Seek(0, SeekOrigin.Begin);
+                mStream.Flush();
+
+                // Zip up files and save to disk
+                using (ZipFile zipFile = new ZipFile())
+                {
+                    if (Directory.Exists(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups")))
+                        zipFile.AddDirectory(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups"));
+                    FileStream voxelStream = new FileStream(Path.Combine(dInfo.Parent.Parent.FullName, "TempVoxelData"), FileMode.Create);
+                    if (gameManifest.VoxelTerrains.Count > 0)
                     {
-                        string[] tokens = modelPair.Key.Split('\\');
-                        int index = (tokens.Length == 2) ? 1 : 0;
-                        xmlWriter.WriteElementString("Name", tokens[index]);
+                        zipFile.AddDirectoryByName("VoxelTerrains");
+                        XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
+                        foreach (KeyValuePair<string, VoxelTerrain> voxelPair in gameManifest.VoxelTerrains)
+                        {
+                            voxelStream.Position = 0;
+                            voxelStream.SetLength(0);
+                            voxelSerializer.Serialize(voxelStream, voxelPair.Value);
+                            voxelStream.Seek(0, SeekOrigin.Begin);
+                            zipFile.AddEntry(@"VoxelTerrains\" + voxelPair.Key + ".xml", voxelStream);
+                        }
                     }
-                    xmlWriter.WriteEndElement();
-
-                    // Write the Texture Information
-                    xmlWriter.WriteStartElement("Textures");
-                    foreach (KeyValuePair<string, Texture2D> texturePair in gameManifest.Textures)
-                    {
-                        string[] tokens = texturePair.Key.Split('\\');
-                        int index = (tokens.Length == 2) ? 1 : 0;
-                        xmlWriter.WriteElementString("Name", tokens[index]);
-                    }
-                    xmlWriter.WriteEndElement();
-
-                    // Write the Voxel Terrain Information
-                    xmlWriter.WriteStartElement("VoxelTerrains");
-                    //foreach (KeyValuePair<string, VoxelTerrain> terrainPair in gameManifest.VoxelTerrains)
-                    //{
-                    //    string[] tokens = terrainPair.Key.Split('\\');
-                    //    int index = (tokens.Length == 2) ? 1 : 0;
-                    //    xmlWriter.WriteElementString("Name", terrainPair.Key);
-                    //}
-                    xmlWriter.WriteEndElement();
-
-                    // End the Xml Documents and Flush the Data to the Memory Stream
-                    xmlWriter.WriteEndElement();
-                    xmlWriter.WriteEndDocument();
-                    xmlWriter.Flush();
-
-                    // Seek to the beginning of the information in the Memory Stream
-                    mStream.Seek(0, SeekOrigin.Begin);
-
-                    // Zip up files and save to disk
-                    using (ZipFile zipFile = new ZipFile())
-                    {
-                        if (Directory.Exists(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups")))
-                            zipFile.AddDirectory(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups"));
-                        //MemoryStream voxelStream = new MemoryStream();
-                        //if (gameManifest.VoxelTerrains.Count > 0)
-                        //{
-                        //    zipFile.AddDirectoryByName("VoxelTerrains");
-                        //    XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
-                        //    foreach (KeyValuePair<string, VoxelTerrain> voxelPair in gameManifest.VoxelTerrains)
-                        //    {
-                        //        voxelStream.Position = 0;
-                        //        voxelStream.SetLength(0);
-                        //        voxelSerializer.Serialize(voxelStream, voxelPair.Value);
-                        //        voxelStream.Seek(0, SeekOrigin.Begin);
-                        //        zipFile.AddEntry(@"VoxelTerrains\" + voxelPair.Key + ".xml", voxelStream);
-                        //    }
-                        //}
-                        zipFile.AddEntry("Manifest.xml", mStream);
-                        zipFile.Save(fileName);
-                        //voxelStream.Close();
-                    }
+                    zipFile.AddEntry("Manifest.xml", mStream);
+                    zipFile.Save(fileName);
+                    voxelStream.Close();
                 }
             }
 
@@ -366,6 +366,7 @@ namespace AweEditor
             }
 
             editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
+            gameManifest.VoxelTerrains.Add(Path.GetFileNameWithoutExtension(fileName), new VoxelTerrain(blocks));
             Cursor = Cursors.Arrow;
         }
 

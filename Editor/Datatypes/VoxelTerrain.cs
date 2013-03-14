@@ -40,6 +40,7 @@ namespace AweEditor
         Emerald = 129,
     }
 
+    [Serializable]
     public struct BlockData
     {
         public int x, y, z;
@@ -50,9 +51,12 @@ namespace AweEditor
     /// <summary>
     /// A class to represent voxel terrain
     /// </summary>
+    [Serializable]
     public class VoxelTerrain
     {
         public List<BlockData> blocks; //store as List for now, optimize later
+
+        public VoxelTerrain() { }
 
         public VoxelTerrain(List<BlockData> blocks)
         {
