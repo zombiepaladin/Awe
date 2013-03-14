@@ -16,10 +16,14 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Windows.Forms;
+using System.Collections;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor.Datatypes;
-using Ionic.Zip;
+using Ionic.Zip
+using System.Text;
+using AweEditor.Utilities;
 #endregion
 
 namespace AweEditor
@@ -299,6 +303,9 @@ namespace AweEditor
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
+                //editorViewerControl.UnpauseForm();
+                ttcControlPanel.SelectTab("tpModelControls");
+                ttcControlPanel.SelectTab("tpTerrainControls");
                 LoadModel(fileDialog.FileName);
             }
         }
@@ -308,7 +315,58 @@ namespace AweEditor
         /// </summary>
         private void ImportVoxelTerrainMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Import the file
+            OpenFileDialog fd = new OpenFileDialog();
+
+            fd.InitialDirectory = ContentPath() + "/Terrains";
+
+            fd.Title = "Import Voxel Terrain";
+
+            fd.Filter = "Schematic and Region Files (*.schematic; *.mcr)|*.schematic;*.mcr|"+
+                        "All File (*.*)|*.*";
+
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                editorViewerControl.UnpauseForm();
+                ttcControlPanel.SelectTab("tpTerrainControls");
+                LoadVoxelTerrain(fd.FileName);
+                RepositionCamera();
+                editorViewerControl.PauseForm();
+            }
+        }
+
+        private void LoadVoxelTerrain(string fileName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            string extension = Path.GetExtension(fileName).ToLower();
+
+            List<BlockData> blocks;
+            switch(extension)
+            {
+                case ".schematic":
+                    SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
+                    blocks = schematicProcessor.generateBlockData();
+                    break;
+
+                case ".mcr":
+                    List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(fileName);
+                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
+                    break;
+
+                //TODO: Handle Anvil region files
+                case ".mca": //Letting it fall through to default for now
+                    //TODO:Delete
+                    VoxelTerrainImporter.LoadTerrain(fileName);
+                    blocks = new List<BlockData>();
+                    break;
+
+                default:
+                    MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
+                    return;
+            }
+
+            editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
+            Cursor = Cursors.Arrow;
         }
 
         /// <summary>
@@ -384,6 +442,8 @@ namespace AweEditor
 
             if (fd.ShowDialog() == DialogResult.OK)
             {
+                editorViewerControl.UnpauseForm();
+                ttcControlPanel.SelectTab("tpTextureControls");
                 LoadTexture(fd.FileName);
             }
 
@@ -495,5 +555,38 @@ namespace AweEditor
         }
 
         #endregion
+
+        private void btnGo_Click(object sender, EventArgs e)
+        {
+            editorViewerControl.UnpauseForm();
+            RepositionCamera();
+            editorViewerControl.PauseForm();
+        }
+
+        private void RepositionCamera()
+        {
+            Cursor = Cursors.WaitCursor;
+
+            Vector3 cameraPosition = new Vector3((float)numCamX.Value, (float)numCamY.Value, (float)numCamZ.Value);
+            
+            float camYaw = (float)numCamYaw.Value;
+            editorViewerControl.CamPosition = cameraPosition;
+            editorViewerControl.CamYaw = MathHelper.ToRadians((float)numCamYaw.Value);
+            editorViewerControl.CamPitch = MathHelper.ToRadians((float)numCamPitch.Value);
+            editorViewerControl.CamRoll = MathHelper.ToRadians((float)numCamRoll.Value);
+
+            editorViewerControl.DrawVoxelTerrain();
+            this.Refresh();
+
+            Cursor = Cursors.Arrow;
+        }
+
+        private void btnToggle_Click(object sender, EventArgs e)
+        {
+            if (editorViewerControl.Paused)
+                editorViewerControl.UnpauseForm();
+            else
+                editorViewerControl.PauseForm();
+        }
     }
 }
