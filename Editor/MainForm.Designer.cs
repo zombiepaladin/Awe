@@ -44,6 +44,7 @@ namespace AweEditor
             this.createTerrianModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.btnRemove = new System.Windows.Forms.Button();
             this.manifestViewer = new System.Windows.Forms.TreeView();
             this.editorViewerControl = new AweEditor.EditorViewerControl();
             this.ttcControlPanel = new AweEditor.Controls.TablessTabControl();
@@ -68,7 +69,7 @@ namespace AweEditor
             this.tpModelControls = new System.Windows.Forms.TabPage();
             this.tpTextureControls = new System.Windows.Forms.TabPage();
             this.treeView1 = new System.Windows.Forms.TreeView();
-            this.btnRemove = new System.Windows.Forms.Button();
+            this.mapTexturesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -183,7 +184,8 @@ namespace AweEditor
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.createTerrianModelToolStripMenuItem});
+            this.createTerrianModelToolStripMenuItem,
+            this.mapTexturesToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -224,6 +226,17 @@ namespace AweEditor
             this.splitContainer1.Size = new System.Drawing.Size(792, 549);
             this.splitContainer1.SplitterDistance = 141;
             this.splitContainer1.TabIndex = 8;
+            // 
+            // btnRemove
+            // 
+            this.btnRemove.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnRemove.Location = new System.Drawing.Point(0, 516);
+            this.btnRemove.Name = "btnRemove";
+            this.btnRemove.Size = new System.Drawing.Size(141, 33);
+            this.btnRemove.TabIndex = 1;
+            this.btnRemove.Text = "Remove Resource";
+            this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
             // manifestViewer
             // 
@@ -521,16 +534,11 @@ namespace AweEditor
             this.treeView1.Size = new System.Drawing.Size(121, 97);
             this.treeView1.TabIndex = 7;
             // 
-            // btnRemove
+            // mapTexturesToolStripMenuItem
             // 
-            this.btnRemove.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.btnRemove.Location = new System.Drawing.Point(0, 516);
-            this.btnRemove.Name = "btnRemove";
-            this.btnRemove.Size = new System.Drawing.Size(141, 33);
-            this.btnRemove.TabIndex = 1;
-            this.btnRemove.Text = "Remove Resource";
-            this.btnRemove.UseVisualStyleBackColor = true;
-            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            this.mapTexturesToolStripMenuItem.Name = "mapTexturesToolStripMenuItem";
+            this.mapTexturesToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.mapTexturesToolStripMenuItem.Text = "Map Textures";
             // 
             // MainForm
             // 
@@ -609,6 +617,7 @@ namespace AweEditor
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.TreeView manifestViewer;
         private System.Windows.Forms.Button btnRemove;
+        private System.Windows.Forms.ToolStripMenuItem mapTexturesToolStripMenuItem;
 
     }
 }
