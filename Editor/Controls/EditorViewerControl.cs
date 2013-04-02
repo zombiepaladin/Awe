@@ -423,7 +423,8 @@ namespace AweEditor
                     tempPosition = Vector3.Divide(new Vector3(block.x, block.y, block.z), scale);
 
                     tempTransform = Matrix.CreateTranslation(tempPosition);
-
+                    instanceTransforms[(instanceTransforms.Length - (i /*- currentDrawIndex*/)) - 1] = transform * world;
+                    blockTypeArray[(blockTypeArray.Length - (i /*- currentDrawIndex*/)) - 1] = blockType;
                     transformInstances[i] = tempTransform * world;
                 }
 
