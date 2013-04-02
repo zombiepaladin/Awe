@@ -18,9 +18,15 @@ obj
 *.suo
 *.user
 *.Debug
+Engine/Debug/*.*
+Engine/Release/*.*
+Editor/Debug/*.*
+Editor/Release/*.*
+Debug/*.*
 
 # mstest test results
 TestResults
 /Debug
 /Engine/Debug
-*.sdf
+/*.opensdf
+/*.sdf

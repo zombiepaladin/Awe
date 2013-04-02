@@ -63,6 +63,9 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>ZipLibrary\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -146,6 +149,10 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\InstancedModelPipeline\InstancedModelPipeline.csproj">
+      <Project>{FF69FD90-8834-4F60-ADA5-36387F112437}</Project>
+      <Name>InstancedModelPipeline</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VoxelTerrianMeshPipeline\VoxelTerrianMeshPipeline.csproj">
       <Project>{3C6F0A66-5FD4-40C5-A115-69663CAF5257}</Project>
       <Name>VoxelTerrianMeshPipeline</Name>

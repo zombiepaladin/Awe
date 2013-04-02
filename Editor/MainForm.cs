@@ -9,15 +9,19 @@
 
 #region Using Statements
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
+using System.Xml;
+using System.Xml.Serialization;
 using System.Windows.Forms;
 using System.Collections;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using AweEditor.Datatypes;
-using System.Collections.Generic;
+using Ionic.Zip;
 using System.Text;
 using AweEditor.Utilities;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
@@ -38,6 +42,7 @@ namespace AweEditor
         ContentBuilder contentBuilder;
         ContentManager contentManager;
         GameManifest gameManifest;
+        string saveLocation;
 
         /// <summary>
         /// Constructs the main form.
@@ -52,6 +57,9 @@ namespace AweEditor
                                                 contentBuilder.OutputDirectory);
             // Automatically start with an empty game manifest
             gameManifest = new GameManifest();
+
+            // Don't start with a default save location
+            saveLocation = null;
             UpdateManifestView();
         }
 
@@ -69,8 +77,19 @@ namespace AweEditor
         /// </summary>
         void OpenMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Load game manifest and associated game resources from file
-            throw new NotImplementedException();
+            OpenFileDialog fileDialog = new OpenFileDialog();
+
+            fileDialog.InitialDirectory = ContentPath();
+
+            fileDialog.Title = "Load Game Data File";
+
+            fileDialog.Filter = "Awe Game Data Files (*.awed)|*.awed";
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                OpenGameAssets(fileDialog.FileName);
+                saveLocation = fileDialog.FileName;
+            }
             //UpdateManifestView();
         }
 
@@ -79,8 +98,12 @@ namespace AweEditor
         /// </summary>
         void SaveMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Save game manifest and resources to a file
-            throw new NotImplementedException();
+            if (saveLocation == null)
+                SaveAsMenuClicked(null, null);
+            else if (!File.Exists(saveLocation))
+                SaveAsMenuClicked(null, null);
+            else
+                SaveGameAssets(saveLocation);
         }
 
         /// <summary>
@@ -88,8 +111,19 @@ namespace AweEditor
         /// </summary>
         void SaveAsMenuClicked(object sender, EventArgs e)
         {
-            // TODO: Save game manifest and resources to a new file
-            throw new NotImplementedException();
+            SaveFileDialog fileDialog = new SaveFileDialog();
+
+            fileDialog.InitialDirectory = ContentPath();
+
+            fileDialog.Title = "Save Game Data File";
+
+            fileDialog.Filter = "Awe Game Data Files (*.awed)|*.awed";
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                SaveGameAssets(fileDialog.FileName);
+                saveLocation = fileDialog.FileName;
+            }
         }
 
         /// <summary>
@@ -103,9 +137,162 @@ namespace AweEditor
         #region Asset Importing Event Handlers & Helpers
 
         /// <summary>
+        /// Handles the opening of the game assets files
+        /// </summary>
+        /// <param name="fileName">The path of the game assets file to open</param>
+        private void OpenGameAssets(string fileName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            #region Unzip assets
+
+            DirectoryInfo dirInfo = new DirectoryInfo(contentBuilder.OutputDirectory);
+            if (!dirInfo.Exists)
+                dirInfo.Create();
+
+            using (ZipFile zipFile = ZipFile.Read(fileName))
+            {
+                zipFile.ExtractAll(dirInfo.FullName);
+            }
+
+            #endregion
+
+            #region Load assets
+
+            using (XmlTextReader xmlReader = new XmlTextReader(Path.Combine(dirInfo.FullName, "Manifest.xml")))
+            {
+                string dataType = "None";
+                bool loadData = false;
+                while (xmlReader.Read())
+                {
+                    switch (xmlReader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            if (xmlReader.Name == "Models" || xmlReader.Name == "Textures" || xmlReader.Name == "VoxelTerrains")
+                                dataType = xmlReader.Name;
+                            if (xmlReader.Name == "Name")
+                                loadData = true;
+                            break;
+
+                        case XmlNodeType.Text:
+                            if (loadData)
+                            {
+                                if (dataType == "Models")
+                                    LoadModel(xmlReader.Value, true);
+                                else if (dataType == "Textures")
+                                    LoadTexture(xmlReader.Value, true);
+                                else if (dataType == "VoxelTerrains")
+                                {
+                                    XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
+                                    XmlTextReader voxelReader = new XmlTextReader(dirInfo.FullName + @"\VoxelTerrains\" + xmlReader.Value + ".xml");
+                                    if (!gameManifest.VoxelTerrains.ContainsKey(xmlReader.Value))
+                                    editorViewerControl.VoxelTerrain = gameManifest.VoxelTerrains[xmlReader.Value];
+                                    voxelReader.Close();
+                                }
+                            }
+                            loadData = false;
+                            break;
+
+                        case XmlNodeType.EndElement:
+                            loadData = false;
+                            break;
+                    }
+                }
+            }
+
+            #endregion
+
+            Cursor = Cursors.Arrow;
+        }
+
+        /// <summary>
+        /// Handles the saving of the game assets file
+        /// </summary>
+        /// <param name="fileName">The path to save the game aseets at</param>
+        private void SaveGameAssets(string fileName)
+        {
+            Cursor = Cursors.WaitCursor;
+
+            DirectoryInfo dInfo = new DirectoryInfo(contentBuilder.OutputDirectory);
+            using (FileStream mStream = new FileStream(Path.Combine(dInfo.Parent.Parent.FullName, "Manifest.xml"), FileMode.Create))
+            {
+                XmlTextWriter xmlWriter = new XmlTextWriter(mStream, System.Text.Encoding.UTF8);
+                xmlWriter.Formatting = Formatting.Indented;
+                xmlWriter.Indentation = 4;
+                xmlWriter.WriteStartDocument();
+                xmlWriter.WriteStartElement("Manifest");
+
+                // Write the Model Information
+                xmlWriter.WriteStartElement("Models");
+                foreach (KeyValuePair<string, Model> modelPair in gameManifest.Models)
+                {
+                    string[] tokens = modelPair.Key.Split('\\');
+                    int index = (tokens.Length == 2) ? 1 : 0;
+                    xmlWriter.WriteElementString("Name", tokens[index]);
+                }
+                xmlWriter.WriteEndElement();
+
+                // Write the Texture Information
+                xmlWriter.WriteStartElement("Textures");
+                foreach (KeyValuePair<string, Texture2D> texturePair in gameManifest.Textures)
+                {
+                    string[] tokens = texturePair.Key.Split('\\');
+                    int index = (tokens.Length == 2) ? 1 : 0;
+                    xmlWriter.WriteElementString("Name", tokens[index]);
+                }
+                xmlWriter.WriteEndElement();
+
+                // Write the Voxel Terrain Information
+                xmlWriter.WriteStartElement("VoxelTerrains");
+                foreach (KeyValuePair<string, VoxelTerrain> terrainPair in gameManifest.VoxelTerrains)
+                {
+                    string[] tokens = terrainPair.Key.Split('\\');
+                    int index = (tokens.Length == 2) ? 1 : 0;
+                    xmlWriter.WriteElementString("Name", terrainPair.Key);
+                }
+                xmlWriter.WriteEndElement();
+
+                // End the Xml Documents and Flush the Data to the Memory Stream
+                xmlWriter.WriteEndElement();
+                xmlWriter.WriteEndDocument();
+                xmlWriter.Flush();
+
+                // Seek to the beginning of the information in the Memory Stream
+                mStream.Seek(0, SeekOrigin.Begin);
+                mStream.Flush();
+
+                // Zip up files and save to disk
+                using (ZipFile zipFile = new ZipFile())
+                {
+                    if (Directory.Exists(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups")))
+                        zipFile.AddDirectory(Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups"));
+                    FileStream voxelStream = new FileStream(Path.Combine(dInfo.Parent.Parent.FullName, "TempVoxelData"), FileMode.Create);
+                    if (gameManifest.VoxelTerrains.Count > 0)
+                    {
+                        zipFile.AddDirectoryByName("VoxelTerrains");
+                        XmlSerializer voxelSerializer = new XmlSerializer(typeof(VoxelTerrain));
+                        foreach (KeyValuePair<string, VoxelTerrain> voxelPair in gameManifest.VoxelTerrains)
+                        {
+                            voxelStream.Position = 0;
+                            voxelStream.SetLength(0);
+                            voxelSerializer.Serialize(voxelStream, voxelPair.Value);
+                            voxelStream.Seek(0, SeekOrigin.Begin);
+                            zipFile.AddEntry(@"VoxelTerrains\" + voxelPair.Key + ".xml", voxelStream);
+                        }
+                    }
+                    zipFile.AddEntry("Manifest.xml", mStream);
+                    zipFile.Save(fileName);
+                    voxelStream.Close();
+                }
+            }
+
+            Cursor = Cursors.Arrow;
+        }
+
+        /// <summary>
         /// Event handler for the Import Model menu option.
         /// </summary>
-        void ImportModelMenuClicked(object sender, EventArgs e)
+        private void ImportModelMenuClicked(object sender, EventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
 
@@ -182,7 +369,6 @@ namespace AweEditor
                     VoxelTerrainImporter.LoadTerrain(fileName);
                     blocks = new List<BlockData>();
                     break;
-
                 default:
                     MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
                     return;
@@ -191,27 +377,31 @@ namespace AweEditor
             VoxelTerrain terrian = new VoxelTerrain(blocks);
             editorViewerControl.VoxelTerrain = terrian;
             gameManifest.VoxelTerrains[fileName] = terrian;
+            gameManifest.VoxelTerrains.Add(Path.GetFileNameWithoutExtension(fileName), new VoxelTerrain(blocks));
             Cursor = Cursors.Arrow;
         }
-
 
         /// <summary>
         /// Loads a new 3D model file into the Game Project and displays
         /// it in the editorViewerControl.
         /// </summary>
-        void LoadModel(string fileName)
+        private void LoadModel(string fileName, bool fromBackup = false)
         {
             Cursor = Cursors.WaitCursor;
 
             // Determine the model's path
             string path = Path.Combine("Models", Path.GetFileNameWithoutExtension(fileName));
 
-            // Tell the ContentBuilder what to build.
-            contentBuilder.Clear();
-            contentBuilder.Add(fileName, path, null, "ModelProcessor");
+            string buildError = null;
+            if (!fromBackup)
+            {
+                // Tell the ContentBuilder what to build.
+                contentBuilder.Clear();
+                contentBuilder.Add(fileName, path, null, "ModelProcessor");
 
-            // Build this new model data.
-            string buildError = contentBuilder.Build();
+                // Build this new model data.
+                buildError = contentBuilder.Build();
+            }
 
             if (string.IsNullOrEmpty(buildError))
             {
@@ -220,10 +410,21 @@ namespace AweEditor
                 Model model = contentManager.Load<Model>(path);
                 
                 // Display the model in our EditorViewerControl
-                editorViewerControl.Model = model;
+                if (!fromBackup)
+                    editorViewerControl.Model = model;
 
                 // Also store the model in our game manifest
-                gameManifest.Models.Add(path, model);
+                if (!gameManifest.Models.ContainsKey(path))
+                    gameManifest.Models.Add(path, model);
+                else
+                {
+                    gameManifest.Models.Remove(path);
+                    gameManifest.Models.Add(path, model);
+                }
+
+                // Backup the Xnb files for this object so that they
+                // can be used later to save the object
+                BackupXnbFiles();
             }
             else
             {
@@ -231,7 +432,8 @@ namespace AweEditor
                 MessageBox.Show(buildError, "Error");
             }
 
-            Cursor = Cursors.Arrow;
+            if (!fromBackup)
+                Cursor = Cursors.Arrow;
         }
 
         /// <summary>
@@ -264,19 +466,23 @@ namespace AweEditor
         /// and displays it in the editorViewerControl
         /// </summary>
         /// <param name="fileName">The texture file to import</param>
-        protected void LoadTexture(string fileName)
+        private void LoadTexture(string fileName, bool fromBackup = false)
         {
             Cursor = Cursors.WaitCursor;
             
             // Determine the texture's path
             string path = Path.Combine("Textures", Path.GetFileNameWithoutExtension(fileName));
 
-            // Tell the ContentBuilder what to build.
-            contentBuilder.Clear();
-            contentBuilder.Add(fileName, path, null, "TextureProcessor");
+            string buildError = null;
+            if (!fromBackup) 
+            {
+                // Tell the ContentBuilder what to build.
+                contentBuilder.Clear();
+                contentBuilder.Add(fileName, path, null, "TextureProcessor");
 
-            // Build this new texture data.
-            string buildError = contentBuilder.Build();
+                // Build this new texture data.
+                buildError = contentBuilder.Build();
+            }
 
             if (string.IsNullOrEmpty(buildError))
             {
@@ -285,10 +491,21 @@ namespace AweEditor
                 Texture2D texture = contentManager.Load<Texture2D>(path);
 
                 // Display the texture in the EditorViewControl
-                editorViewerControl.Texture = texture;
+                if (!fromBackup)
+                    editorViewerControl.Texture = texture;
 
                 // Store the texture in our game manifest
-                gameManifest.Textures.Add(path, texture);
+                if (!gameManifest.Models.ContainsKey(path))
+                    gameManifest.Textures.Add(path, texture);
+                else
+                {
+                    gameManifest.Textures.Remove(path);
+                    gameManifest.Textures.Add(path, texture);
+                }
+
+                // Backup the Xnb files for this object so that they
+                // can be used later to save the object
+                BackupXnbFiles();
             }
             else
             {
@@ -296,8 +513,42 @@ namespace AweEditor
                 MessageBox.Show(buildError, "Error");
             }
             UpdateManifestView();
-            Cursor = Cursors.Arrow;
+            if (!fromBackup)
+                Cursor = Cursors.Arrow;
         }
+
+        private void BackupXnbFiles()
+        {
+            // Create the backup directory for the Xnb files
+            string backupDirectory = Path.Combine(contentBuilder.OutputDirectory, @"..\XnbBackups");
+            DirectoryInfo backupDir = new DirectoryInfo(backupDirectory);
+
+            if (!backupDir.Exists)
+                backupDir.Create();
+
+            // Get information about the content directory
+            DirectoryInfo contentDir = new DirectoryInfo(contentBuilder.OutputDirectory);
+
+            // Copy the Xnb files in the base content directory
+            foreach (FileInfo file in contentDir.GetFiles("*.xnb"))
+            {
+                file.CopyTo(Path.Combine(backupDir.FullName, file.Name),true);
+            }
+            
+            // Copy the Xnb files out of the content folder's subdirectories
+            DirectoryInfo[] subDir = contentDir.GetDirectories();
+            foreach (DirectoryInfo directory in subDir)
+            {
+                DirectoryInfo copyDir = new DirectoryInfo(Path.Combine(backupDir.FullName, directory.Name));
+                if (!copyDir.Exists)
+                    copyDir.Create();
+                foreach (FileInfo file in directory.GetFiles("*.xnb"))
+                {
+                    file.CopyTo(Path.Combine(copyDir.FullName, file.Name), true);
+                }
+            }
+        }
+
 
         void CreateMeshMenuItemClicked(object sender, EventArgs e)
         {
@@ -337,7 +588,6 @@ namespace AweEditor
 
             Cursor = Cursors.Default;
         }
-
         #endregion
 
         #region Helper Methods
