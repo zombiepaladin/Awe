@@ -393,6 +393,10 @@ namespace AweEditor
             //Marks the offset of the block
             Vector3 tempPosition;
             Matrix tempTransform;
+            
+            int maxSize = Math.Min(1048574, voxelTerrain.blocks.Count);
+
+            Array.Resize(ref instanceTransforms, maxSize);
 
             //marks the block itself
             BlockData block;
