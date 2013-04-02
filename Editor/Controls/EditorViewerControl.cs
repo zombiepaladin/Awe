@@ -558,7 +558,25 @@ namespace AweEditor
                 }
             }
         }
+private void drawTexturedInstancedPrimitives(Matrix[] instancesArray, Effect effect, ModelMeshPart meshPart)
+        {
+            if (instancesArray.Length != 0)
+            {
+                instanceVertexBuffer.SetData(instancesArray, 0, instancesArray.Length, SetDataOptions.Discard);
 
+                // Draw all the GRASS instance copies in a single call.
+                foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+
+                    GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
+                                                           meshPart.NumVertices, meshPart.StartIndex,
+                                                           meshPart.PrimitiveCount, Math.Min(1048574, instancesArray.Length)); //TODO: should have warning or something when too big
+
+
+                }
+            }
+        }
 
         /// <summary>
         /// Draw the current model
