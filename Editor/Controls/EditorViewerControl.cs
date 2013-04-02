@@ -18,6 +18,7 @@ using Microsoft.Xna.Framework.Content;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Collections;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 #endregion
 
@@ -158,6 +159,10 @@ namespace AweEditor
 
         Texture2D texture;
 
+        Texture2D grassTexture;
+        Texture2D stoneTexture;
+        Texture2D woodTexture;
+
         Rectangle textureBounds;
 
         #endregion
@@ -226,6 +231,45 @@ namespace AweEditor
                 Application.Idle += invalid;
                 this.Paused = false;
             }
+        }
+
+        private void loadTextures()
+        {
+            // Determine the texture's path
+            string[] textureFiles = { "grass.jpg", "stone.jpg", "wood.png" };
+            Texture2D[] textures = new Texture2D[textureFiles.Length];
+            //string fileName = textureFiles[0];
+            for (int textureNum = 0; textureNum < textureFiles.Length; textureNum++)
+            {
+                string fileName = (Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "../../../../Content/Textures/")) + (textureFiles[textureNum]));
+                string path = Path.Combine("Textures", Path.GetFileNameWithoutExtension(fileName));
+
+                // Tell the ContentBuilder what to build.
+                contentBuilder.Clear();
+                contentBuilder.Add(fileName, path, null, "TextureProcessor");
+
+                // Build this new texture data.
+                string buildError = contentBuilder.Build();
+
+                if (string.IsNullOrEmpty(buildError))
+                {
+                    // If the build succeeded, use the ContentManager to
+                    // load the temporary .xnb file that we just created.
+                    textures[textureNum] = contentManager.Load<Texture2D>(path);
+
+                    // Store the texture in our game manifest
+                    // gameManifest.Textures.Add(path, texture);
+                }
+                else
+                {
+                    // If the build failed, display an error message.
+                    MessageBox.Show(buildError, "Error");
+                }
+            }
+
+            grassTexture = textures[0];
+            stoneTexture = textures[1];
+            woodTexture = textures[2];
         }
 
         public void ClearForm()
@@ -352,7 +396,7 @@ namespace AweEditor
 
             //marks the block itself
             BlockData block;
-
+            byte[] blockTypeArray = new byte[instanceTransforms.Length];
             const float scale = 2;
 
             transformInstances = new Matrix[maxBatchSize];
@@ -364,12 +408,14 @@ namespace AweEditor
             for(int x = 0; x < batchNumber; x++)
             {
                 matrixSize = maxBatchSize;
+            
                 if (x == batchNumber - 1) matrixSize = numberOfBlocks % maxBatchSize;
 
                 for (int i = 0; i < matrixSize; i++)
                 {
+                    
                     block = voxelTerrain.blocks[(x * maxBatchSize) + i];
-
+                    blockTypeArray[(blockTypeArray.Length - i) - 1] = block.type;
                     tempPosition = Vector3.Divide(new Vector3(block.x, block.y, block.z), scale);
 
                     tempTransform = Matrix.CreateTranslation(tempPosition);
@@ -382,7 +428,7 @@ namespace AweEditor
                 DrawModelHardwareInstancing
                     (
                     voxelPlaceHolderModel, instancedModelBones, 
-                    transformInstances, view, projection
+                    transformInstances, view, projection,blockTypeArray
                     );
             }
         }
@@ -392,10 +438,15 @@ namespace AweEditor
         /// Efficiently draws several copies of a piece of geometry using hardware instancing.
         /// </summary>
         void DrawModelHardwareInstancing(Model model, Matrix[] modelBones,
-                                         Matrix[] instances, Matrix view, Matrix projection)
+                                         Matrix[] instances, Matrix view, Matrix projection,byte[] blockTypeArray)
         {
             if (instances.Length == 0)
                 return;
+
+            //create lists for instances with different textures
+            ArrayList grassInstances = new ArrayList();
+            ArrayList stoneInstances = new ArrayList();
+            ArrayList woodInstances = new ArrayList();
 
             // If we have more instances than room in our vertex buffer, grow it to the neccessary size.
             if ((instanceVertexBuffer == null) ||
@@ -432,6 +483,73 @@ namespace AweEditor
                     effect.Parameters["View"].SetValue(view);
                     effect.Parameters["Projection"].SetValue(projection);
 
+                    for (int index = 0; index < instances.Length; index++)
+                    {
+                        //separate different textures blocks
+                        switch (blockTypeArray[index])
+                        {
+                            case 2:
+                            case 31:
+                            case 9:
+                                grassInstances.Add(instances[index]);
+                                break;
+                            case 1:
+                            case 4:
+                            case 35:
+                            case 42:
+                            case 44:
+                            case 98:
+                            case 109:
+                                stoneInstances.Add(instances[index]);
+                                break;
+                            case 5:
+                            case 17:
+                            case 20:
+                            case 53:
+                            case 85:
+                            case 126:
+                                woodInstances.Add(instances[index]);
+                                break;
+                            default:
+                                grassInstances.Add(instances[index]);
+                                break;
+                        }
+                    }
+
+                    //draw GRASS
+                    // Transfer the current instance transform matrices into the instanceVertexBuffer.
+                    Matrix[] grassInstancesArray = new Matrix[grassInstances.Count];
+                    for (int i = 0; i < grassInstancesArray.Length; i++)
+                    {
+                        grassInstancesArray[i] = (Matrix)grassInstances[i];
+                    }
+
+                    effect.Parameters["Texture"].SetValue(grassTexture);
+                    drawTexturedInstancedPrimitives(grassInstancesArray, effect, meshPart);
+
+
+                    //draw STONE
+                    // Transfer the current instance transform matrices into the instanceVertexBuffer.
+                    Matrix[] stoneInstancesArray = new Matrix[stoneInstances.Count];
+                    for (int i = 0; i < stoneInstancesArray.Length; i++)
+                    {
+                        stoneInstancesArray[i] = (Matrix)stoneInstances[i];
+                    }
+
+                    effect.Parameters["Texture"].SetValue(stoneTexture);
+                    drawTexturedInstancedPrimitives(stoneInstancesArray, effect, meshPart);
+
+                    //draw WOOD
+                    // Transfer the current instance transform matrices into the instanceVertexBuffer.
+                    Matrix[] woodInstancesArray = new Matrix[woodInstances.Count];
+                    for (int i = 0; i < woodInstancesArray.Length; i++)
+                    {
+                        woodInstancesArray[i] = (Matrix)woodInstances[i];
+                    }
+
+                    effect.Parameters["Texture"].SetValue(woodTexture);
+                    drawTexturedInstancedPrimitives(woodInstancesArray, effect, meshPart);
+
                     // Draw all the instance copies in a single call.
                     foreach (EffectPass pass in effect.CurrentTechnique.Passes)
                     {
@@ -445,7 +563,25 @@ namespace AweEditor
                 }
             }
         }
+private void drawTexturedInstancedPrimitives(Matrix[] instancesArray, Effect effect, ModelMeshPart meshPart)
+        {
+            if (instancesArray.Length != 0)
+            {
+                instanceVertexBuffer.SetData(instancesArray, 0, instancesArray.Length, SetDataOptions.Discard);
 
+                // Draw all the GRASS instance copies in a single call.
+                foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+
+                    GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
+                                                           meshPart.NumVertices, meshPart.StartIndex,
+                                                           meshPart.PrimitiveCount, Math.Min(1048574, instancesArray.Length)); //TODO: should have warning or something when too big
+
+
+                }
+            }
+        }
 
         /// <summary>
         /// Draw the current model

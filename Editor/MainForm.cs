@@ -471,7 +471,7 @@ namespace AweEditor
             Cursor = Cursors.WaitCursor;
             
             // Determine the texture's path
-            string path = Path.Combine("Textures", Path.GetFileNameWithoutExtension(fileName));
+            string path = Path.Combine("Textures", Path.GetFileName(fileName));
 
             string buildError = null;
             if (!fromBackup) 
