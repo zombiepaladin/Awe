@@ -40,7 +40,12 @@ namespace AweEditor
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createTerrianModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.manifestViewer = new System.Windows.Forms.TreeView();
+            this.editorViewerControl = new AweEditor.EditorViewerControl();
             this.ttcControlPanel = new AweEditor.Controls.TablessTabControl();
             this.tpNoControls = new System.Windows.Forms.TabPage();
             this.tpTerrainControls = new System.Windows.Forms.TabPage();
@@ -62,11 +67,13 @@ namespace AweEditor
             this.label1 = new System.Windows.Forms.Label();
             this.tpModelControls = new System.Windows.Forms.TabPage();
             this.tpTextureControls = new System.Windows.Forms.TabPage();
-            this.editorViewerControl = new AweEditor.EditorViewerControl();
-            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createTerrianModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.treeView1 = new System.Windows.Forms.TreeView();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.ttcControlPanel.SuspendLayout();
             this.tpTerrainControls.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -172,15 +179,77 @@ namespace AweEditor
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitMenuClicked);
             // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.createTerrianModelToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // createTerrianModelToolStripMenuItem
+            // 
+            this.createTerrianModelToolStripMenuItem.Enabled = false;
+            this.createTerrianModelToolStripMenuItem.Name = "createTerrianModelToolStripMenuItem";
+            this.createTerrianModelToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.createTerrianModelToolStripMenuItem.Text = "Create Terrian Model";
+            this.createTerrianModelToolStripMenuItem.Click += new System.EventHandler(this.CreateMeshMenuItemClicked);
+            // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.ttcControlPanel);
-            this.panel1.Controls.Add(this.editorViewerControl);
+            this.panel1.Controls.Add(this.splitContainer1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 24);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(792, 549);
             this.panel1.TabIndex = 6;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.manifestViewer);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.editorViewerControl);
+            this.splitContainer1.Panel2.Controls.Add(this.ttcControlPanel);
+            this.splitContainer1.Panel2.Controls.Add(this.treeView1);
+            this.splitContainer1.Size = new System.Drawing.Size(792, 549);
+            this.splitContainer1.SplitterDistance = 141;
+            this.splitContainer1.TabIndex = 8;
+            // 
+            // manifestViewer
+            // 
+            this.manifestViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.manifestViewer.Location = new System.Drawing.Point(0, 0);
+            this.manifestViewer.Name = "manifestViewer";
+            this.manifestViewer.Size = new System.Drawing.Size(141, 549);
+            this.manifestViewer.TabIndex = 0;
+            this.manifestViewer.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.manifestViewer_BeforeSelect);
+            // 
+            // editorViewerControl
+            // 
+            this.editorViewerControl.CamPitch = 0F;
+            this.editorViewerControl.CamPosition = new Microsoft.Xna.Framework.Vector3(0F, 0F, 0F);
+            this.editorViewerControl.CamRoll = 0F;
+            this.editorViewerControl.CamYaw = 0F;
+            this.editorViewerControl.Dock = System.Windows.Forms.DockStyle.Top;
+            this.editorViewerControl.Location = new System.Drawing.Point(0, 0);
+            this.editorViewerControl.Margin = new System.Windows.Forms.Padding(2);
+            this.editorViewerControl.Model = null;
+            this.editorViewerControl.Name = "editorViewerControl";
+            this.editorViewerControl.Paused = false;
+            this.editorViewerControl.Size = new System.Drawing.Size(647, 455);
+            this.editorViewerControl.TabIndex = 5;
+            this.editorViewerControl.TerrianModel = null;
+            this.editorViewerControl.Text = "editorViewerControl";
+            this.editorViewerControl.Texture = null;
+            this.editorViewerControl.VoxelTerrain = null;
             // 
             // ttcControlPanel
             // 
@@ -192,7 +261,7 @@ namespace AweEditor
             this.ttcControlPanel.Location = new System.Drawing.Point(0, 460);
             this.ttcControlPanel.Name = "ttcControlPanel";
             this.ttcControlPanel.SelectedIndex = 0;
-            this.ttcControlPanel.Size = new System.Drawing.Size(792, 89);
+            this.ttcControlPanel.Size = new System.Drawing.Size(647, 89);
             this.ttcControlPanel.TabIndex = 6;
             // 
             // tpNoControls
@@ -201,7 +270,7 @@ namespace AweEditor
             this.tpNoControls.Location = new System.Drawing.Point(4, 22);
             this.tpNoControls.Name = "tpNoControls";
             this.tpNoControls.Padding = new System.Windows.Forms.Padding(3);
-            this.tpNoControls.Size = new System.Drawing.Size(784, 63);
+            this.tpNoControls.Size = new System.Drawing.Size(639, 63);
             this.tpNoControls.TabIndex = 0;
             this.tpNoControls.Text = "No Controls";
             // 
@@ -215,7 +284,7 @@ namespace AweEditor
             this.tpTerrainControls.Location = new System.Drawing.Point(4, 22);
             this.tpTerrainControls.Name = "tpTerrainControls";
             this.tpTerrainControls.Padding = new System.Windows.Forms.Padding(3);
-            this.tpTerrainControls.Size = new System.Drawing.Size(784, 63);
+            this.tpTerrainControls.Size = new System.Drawing.Size(639, 63);
             this.tpTerrainControls.TabIndex = 1;
             this.tpTerrainControls.Text = "Terrain Controls";
             // 
@@ -430,7 +499,7 @@ namespace AweEditor
             this.tpModelControls.BackColor = System.Drawing.SystemColors.Control;
             this.tpModelControls.Location = new System.Drawing.Point(4, 22);
             this.tpModelControls.Name = "tpModelControls";
-            this.tpModelControls.Size = new System.Drawing.Size(784, 63);
+            this.tpModelControls.Size = new System.Drawing.Size(639, 63);
             this.tpModelControls.TabIndex = 2;
             this.tpModelControls.Text = "Model Controls";
             // 
@@ -439,44 +508,16 @@ namespace AweEditor
             this.tpTextureControls.BackColor = System.Drawing.SystemColors.Control;
             this.tpTextureControls.Location = new System.Drawing.Point(4, 22);
             this.tpTextureControls.Name = "tpTextureControls";
-            this.tpTextureControls.Size = new System.Drawing.Size(784, 63);
+            this.tpTextureControls.Size = new System.Drawing.Size(639, 63);
             this.tpTextureControls.TabIndex = 3;
             this.tpTextureControls.Text = "Texture Controls";
             // 
-            // editorViewerControl
+            // treeView1
             // 
-            this.editorViewerControl.CamPitch = 0F;
-            this.editorViewerControl.CamPosition = new Microsoft.Xna.Framework.Vector3(0F, 0F, 0F);
-            this.editorViewerControl.CamRoll = 0F;
-            this.editorViewerControl.CamYaw = 0F;
-            this.editorViewerControl.Dock = System.Windows.Forms.DockStyle.Top;
-            this.editorViewerControl.Location = new System.Drawing.Point(0, 0);
-            this.editorViewerControl.Margin = new System.Windows.Forms.Padding(2);
-            this.editorViewerControl.Model = null;
-            this.editorViewerControl.Name = "editorViewerControl";
-            this.editorViewerControl.Paused = false;
-            this.editorViewerControl.Size = new System.Drawing.Size(792, 455);
-            this.editorViewerControl.TabIndex = 5;
-            this.editorViewerControl.TerrianModel = null;
-            this.editorViewerControl.Text = "editorViewerControl";
-            this.editorViewerControl.Texture = null;
-            this.editorViewerControl.VoxelTerrain = null;
-            // 
-            // toolsToolStripMenuItem
-            // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.createTerrianModelToolStripMenuItem});
-            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
-            this.toolsToolStripMenuItem.Text = "Tools";
-            // 
-            // createTerrianModelToolStripMenuItem
-            // 
-            this.createTerrianModelToolStripMenuItem.Enabled = false;
-            this.createTerrianModelToolStripMenuItem.Name = "createTerrianModelToolStripMenuItem";
-            this.createTerrianModelToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.createTerrianModelToolStripMenuItem.Text = "Create Terrian Model";
-            this.createTerrianModelToolStripMenuItem.Click += new System.EventHandler(this.CreateMeshMenuItemClicked);
+            this.treeView1.Location = new System.Drawing.Point(-54, 18);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(121, 97);
+            this.treeView1.TabIndex = 7;
             // 
             // MainForm
             // 
@@ -491,6 +532,10 @@ namespace AweEditor
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             this.ttcControlPanel.ResumeLayout(false);
             this.tpTerrainControls.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
@@ -547,6 +592,9 @@ namespace AweEditor
         private System.Windows.Forms.Button btnToggle;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createTerrianModelToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TreeView manifestViewer;
 
     }
 }

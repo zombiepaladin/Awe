@@ -50,9 +50,9 @@ namespace AweEditor
 
             contentManager = new ContentManager(editorViewerControl.Services,
                                                 contentBuilder.OutputDirectory);
-
             // Automatically start with an empty game manifest
             gameManifest = new GameManifest();
+            UpdateManifestView();
         }
 
         /// <summary>
@@ -61,6 +61,7 @@ namespace AweEditor
         void NewMenuClicked(object sender, EventArgs e)
         {
             gameManifest = new GameManifest();
+            UpdateManifestView();
         }
 
         /// <summary>
@@ -70,6 +71,7 @@ namespace AweEditor
         {
             // TODO: Load game manifest and associated game resources from file
             throw new NotImplementedException();
+            //UpdateManifestView();
         }
 
         /// <summary>
@@ -122,6 +124,7 @@ namespace AweEditor
                 ttcControlPanel.SelectTab("tpModelControls");
                 ttcControlPanel.SelectTab("tpTerrainControls");
                 LoadModel(fileDialog.FileName);
+                UpdateManifestView();
             }
         }
 
@@ -148,9 +151,9 @@ namespace AweEditor
                 LoadVoxelTerrain(fd.FileName);
                 RepositionCamera();
                 editorViewerControl.PauseForm();
+                createTerrianModelToolStripMenuItem.Enabled = true;
+                UpdateManifestView();
             }
-
-            createTerrianModelToolStripMenuItem.Enabled = true;
         }
 
         private void LoadVoxelTerrain(string fileName)
@@ -249,6 +252,7 @@ namespace AweEditor
                 editorViewerControl.UnpauseForm();
                 ttcControlPanel.SelectTab("tpTextureControls");
                 LoadTexture(fd.FileName);
+                UpdateManifestView();
             }
 
         }
@@ -296,6 +300,7 @@ namespace AweEditor
         void CreateMeshMenuItemClicked(object sender, EventArgs e)
         {
             CreateTerrianModel(editorViewerControl.VoxelTerrain, "Default");
+            UpdateManifestView();
         }
 
         void CreateTerrianModel(VoxelTerrain terrian, string meshName)
@@ -316,7 +321,6 @@ namespace AweEditor
             if(string.IsNullOrEmpty(buildError))
             {
                 Model terrianModel = contentManager.Load<Model>(meshName);
-
 
                 editorViewerControl.UnpauseForm();
                 editorViewerControl.TerrianModel = terrianModel;
@@ -346,6 +350,36 @@ namespace AweEditor
             string relativePath = Path.Combine(assemblyLocation, "../../../../Content");
             string contentPath = Path.GetFullPath(relativePath);
             return contentPath;
+        }
+
+        private const string MANIFEST_KEY = "manifest";
+        private const string VOXELTERRIAN_KEY = "voxelTerrian";
+        private const string MODEL_KEY = "model";
+        private const string TERRIAN_KEY = "terrian";
+        private const string TEXTURE_KEY = "texture";
+
+        private void UpdateManifestView()
+        {
+            manifestViewer.Nodes.Clear();
+
+            TreeNode root = manifestViewer.Nodes.Add(MANIFEST_KEY, "Manifest");
+            if (gameManifest.VoxelTerrains.Count > 0)
+                AddNewNode(root, VOXELTERRIAN_KEY, "Voxel Terrians", gameManifest.VoxelTerrains.Keys);
+            if (gameManifest.Models.Count > 0)
+                AddNewNode(root, MODEL_KEY, "Models", gameManifest.Models.Keys);
+            if (gameManifest.TerrianModels.Count > 0)
+                AddNewNode(root, TERRIAN_KEY, "Terrians", gameManifest.TerrianModels.Keys);
+            if (gameManifest.Textures.Count > 0)
+                AddNewNode(root, TEXTURE_KEY, "Textures", gameManifest.Textures.Keys);
+        }
+
+        private void AddNewNode(TreeNode parent, string key, string name, IEnumerable<string> childNodes)
+        {
+            TreeNode modelNode = parent.Nodes.Add(key, name);
+            foreach (string item in childNodes)
+            {
+                modelNode.Nodes.Add(item, Path.GetFileNameWithoutExtension(item));
+            }
         }
 
         #endregion
@@ -381,6 +415,38 @@ namespace AweEditor
                 editorViewerControl.UnpauseForm();
             else
                 editorViewerControl.PauseForm();
+        }
+
+        private void manifestViewer_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node == null)
+                return;
+
+            string key = e.Node.Name;
+            if (gameManifest.Models.ContainsKey(key))
+                editorViewerControl.Model = gameManifest.Models[key];
+            else if (gameManifest.TerrianModels.ContainsKey(key))
+                editorViewerControl.TerrianModel = gameManifest.TerrianModels[key];
+            else if (gameManifest.Textures.ContainsKey(key))
+                editorViewerControl.Texture = gameManifest.Textures[key];
+            else if (gameManifest.VoxelTerrains.ContainsKey(key))
+                editorViewerControl.VoxelTerrain = gameManifest.VoxelTerrains[key];
+        }
+
+        private void manifestViewer_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        {
+            if (e.Node == null)
+                return;
+
+            string key = e.Node.Name;
+            if (gameManifest.Models.ContainsKey(key))
+                editorViewerControl.Model = gameManifest.Models[key];
+            else if (gameManifest.TerrianModels.ContainsKey(key))
+                editorViewerControl.TerrianModel = gameManifest.TerrianModels[key];
+            else if (gameManifest.Textures.ContainsKey(key))
+                editorViewerControl.Texture = gameManifest.Textures[key];
+            else if (gameManifest.VoxelTerrains.ContainsKey(key))
+                editorViewerControl.VoxelTerrain = gameManifest.VoxelTerrains[key];
         }
     }
 }
