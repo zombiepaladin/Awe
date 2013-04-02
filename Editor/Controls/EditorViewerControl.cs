@@ -46,7 +46,7 @@ namespace AweEditor
 
         long currentDrawIndex = 1000;
 
-        EditorState editorState = EditorState.None;
+        public EditorState EditorState {get; private set;}
 
         // Timer controls the rotation speed.
         Stopwatch timer;
@@ -70,7 +70,7 @@ namespace AweEditor
             set
             {
                 voxelTerrain = value;
-                editorState = EditorState.VoxelTerrain;
+                EditorState = EditorState.VoxelTerrain;
             }
         }
         VoxelTerrain voxelTerrain;
@@ -122,7 +122,7 @@ namespace AweEditor
                     MeasureModel(model);
                 }
 
-                editorState = EditorState.Model;
+                EditorState = EditorState.Model;
             }
         }
 
@@ -152,7 +152,7 @@ namespace AweEditor
                     MeasureTexture();
                 }
 
-                editorState = EditorState.Texture;
+                EditorState = EditorState.Texture;
             }
         }
 
@@ -175,7 +175,7 @@ namespace AweEditor
                 terrianModel = value;
                 if (terrianModel != null)
                     MeasureModel(terrianModel);
-                editorState = EditorState.TerrianModel;
+                EditorState = EditorState.TerrianModel;
             }
         }
 
@@ -228,6 +228,11 @@ namespace AweEditor
             }
         }
 
+        public void ClearForm()
+        {
+            EditorState = AweEditor.EditorState.None;
+        }
+
         private void loadModels()
         {
             #region Load Placeholder Block Model
@@ -272,7 +277,7 @@ namespace AweEditor
             PrepGraphicsDevice();
 
             // Render according to current editor state
-            switch (editorState)
+            switch (EditorState)
             {
                 case EditorState.VoxelTerrain:
                     DrawVoxelTerrain();

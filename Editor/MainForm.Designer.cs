@@ -68,6 +68,7 @@ namespace AweEditor
             this.tpModelControls = new System.Windows.Forms.TabPage();
             this.tpTextureControls = new System.Windows.Forms.TabPage();
             this.treeView1 = new System.Windows.Forms.TreeView();
+            this.btnRemove = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -212,6 +213,7 @@ namespace AweEditor
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.btnRemove);
             this.splitContainer1.Panel1.Controls.Add(this.manifestViewer);
             // 
             // splitContainer1.Panel2
@@ -225,10 +227,10 @@ namespace AweEditor
             // 
             // manifestViewer
             // 
-            this.manifestViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.manifestViewer.Dock = System.Windows.Forms.DockStyle.Top;
             this.manifestViewer.Location = new System.Drawing.Point(0, 0);
             this.manifestViewer.Name = "manifestViewer";
-            this.manifestViewer.Size = new System.Drawing.Size(141, 549);
+            this.manifestViewer.Size = new System.Drawing.Size(141, 510);
             this.manifestViewer.TabIndex = 0;
             this.manifestViewer.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.manifestViewer_BeforeSelect);
             // 
@@ -519,6 +521,17 @@ namespace AweEditor
             this.treeView1.Size = new System.Drawing.Size(121, 97);
             this.treeView1.TabIndex = 7;
             // 
+            // btnRemove
+            // 
+            this.btnRemove.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnRemove.Location = new System.Drawing.Point(0, 516);
+            this.btnRemove.Name = "btnRemove";
+            this.btnRemove.Size = new System.Drawing.Size(141, 33);
+            this.btnRemove.TabIndex = 1;
+            this.btnRemove.Text = "Remove Resource";
+            this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -595,6 +608,7 @@ namespace AweEditor
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.TreeView manifestViewer;
+        private System.Windows.Forms.Button btnRemove;
 
     }
 }
