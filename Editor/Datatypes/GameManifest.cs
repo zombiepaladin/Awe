@@ -37,5 +37,25 @@ namespace AweEditor.Datatypes
         /// keyed by the asset name
         /// </summary>
         public Dictionary<string, Model> TerrianModels = new Dictionary<string, Model>();
+
+        public void ClearAll()
+        {
+            VoxelTerrains.Clear();
+            Models.Clear();
+            Textures.Clear();
+            TerrianModels.Clear();
+        }
+
+        public void RemoveKey(string key)
+        {
+            if (VoxelTerrains.ContainsKey(key))
+                VoxelTerrains.Remove(key);
+            else if (Models.ContainsKey(key))
+                Models.Remove(key);
+            else if (Textures.ContainsKey(key))
+                Textures.Remove(key);
+            else if (TerrianModels.ContainsKey(key))
+                TerrianModels.Remove(key);
+        }
     }
 }

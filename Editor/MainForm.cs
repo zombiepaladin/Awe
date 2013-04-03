@@ -55,12 +55,12 @@ namespace AweEditor
 
             contentManager = new ContentManager(editorViewerControl.Services,
                                                 contentBuilder.OutputDirectory);
-
             // Automatically start with an empty game manifest
             gameManifest = new GameManifest();
 
             // Don't start with a default save location
             saveLocation = null;
+            UpdateManifestView();
         }
 
         /// <summary>
@@ -69,6 +69,7 @@ namespace AweEditor
         void NewMenuClicked(object sender, EventArgs e)
         {
             gameManifest = new GameManifest();
+            UpdateManifestView();
         }
 
         /// <summary>
@@ -89,6 +90,7 @@ namespace AweEditor
                 OpenGameAssets(fileDialog.FileName);
                 saveLocation = fileDialog.FileName;
             }
+            //UpdateManifestView();
         }
 
         /// <summary>
@@ -309,6 +311,8 @@ namespace AweEditor
                 ttcControlPanel.SelectTab("tpModelControls");
                 ttcControlPanel.SelectTab("tpTerrainControls");
                 LoadModel(fileDialog.FileName);
+                UpdateManifestView();
+                toggleMeshButton();
             }
         }
 
@@ -333,10 +337,12 @@ namespace AweEditor
                 LoadVoxelTerrain(fd.FileName);
                 RepositionCamera();
                 editorViewerControl.PauseForm();
+                createTerrianModelToolStripMenuItem.Enabled = true;
+                UpdateManifestView();
+                toggleMeshButton();
             }
-
-            createTerrianModelToolStripMenuItem.Enabled = true;
         }
+
 
         private void LoadVoxelTerrain(string fileName)
         {
@@ -368,8 +374,9 @@ namespace AweEditor
                     return;
             }
 
-            editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
-            gameManifest.VoxelTerrains.Add(Path.GetFileNameWithoutExtension(fileName), new VoxelTerrain(blocks));
+            VoxelTerrain terrian = new VoxelTerrain(blocks);
+            editorViewerControl.VoxelTerrain = terrian;
+            gameManifest.VoxelTerrains[fileName] = terrian;
             Cursor = Cursors.Arrow;
         }
 
@@ -463,7 +470,7 @@ namespace AweEditor
             Cursor = Cursors.WaitCursor;
             
             // Determine the texture's path
-            string path = Path.Combine("Textures", Path.GetFileNameWithoutExtension(fileName));
+            string path = Path.Combine("Textures", Path.GetFileName(fileName));
 
             string buildError = null;
             if (!fromBackup) 
@@ -504,7 +511,7 @@ namespace AweEditor
                 // If the build failed, display an error message.
                 MessageBox.Show(buildError, "Error");
             }
-
+            UpdateManifestView();
             if (!fromBackup)
                 Cursor = Cursors.Arrow;
         }
@@ -541,10 +548,14 @@ namespace AweEditor
             }
         }
 
-
         void CreateMeshMenuItemClicked(object sender, EventArgs e)
         {
-            CreateTerrianModel(editorViewerControl.VoxelTerrain, "Default");
+            InputDialog dialog = new InputDialog("Enter a name for this terran model", "Terrian Model");
+            if (dialog.ShowDialog() != DialogResult.OK)
+                return;
+            CreateTerrianModel(editorViewerControl.VoxelTerrain, dialog.Input);
+            UpdateManifestView();
+            toggleMeshButton();
         }
 
         void CreateTerrianModel(VoxelTerrain terrian, string meshName)
@@ -566,11 +577,10 @@ namespace AweEditor
             {
                 Model terrianModel = contentManager.Load<Model>(meshName);
 
-
                 editorViewerControl.UnpauseForm();
                 editorViewerControl.TerrianModel = terrianModel;
 
-                gameManifest.TerrianModels.Add(meshName, terrianModel);
+                gameManifest.TerrianModels[meshName] = terrianModel;
             }
             else
             {
@@ -594,6 +604,36 @@ namespace AweEditor
             string relativePath = Path.Combine(assemblyLocation, "../../../../Content");
             string contentPath = Path.GetFullPath(relativePath);
             return contentPath;
+        }
+
+        private const string MANIFEST_KEY = "manifest";
+        private const string VOXELTERRIAN_KEY = "voxelTerrian";
+        private const string MODEL_KEY = "model";
+        private const string TERRIAN_KEY = "terrian";
+        private const string TEXTURE_KEY = "texture";
+
+        private void UpdateManifestView()
+        {
+            manifestViewer.Nodes.Clear();
+
+            TreeNode root = manifestViewer.Nodes.Add(MANIFEST_KEY, "Manifest");
+            if (gameManifest.VoxelTerrains.Count > 0)
+                AddNewNode(root, VOXELTERRIAN_KEY, "Voxel Terrians", gameManifest.VoxelTerrains.Keys);
+            if (gameManifest.Models.Count > 0)
+                AddNewNode(root, MODEL_KEY, "Models", gameManifest.Models.Keys);
+            if (gameManifest.TerrianModels.Count > 0)
+                AddNewNode(root, TERRIAN_KEY, "Terrians", gameManifest.TerrianModels.Keys);
+            if (gameManifest.Textures.Count > 0)
+                AddNewNode(root, TEXTURE_KEY, "Textures", gameManifest.Textures.Keys);
+        }
+
+        private void AddNewNode(TreeNode parent, string key, string name, IEnumerable<string> childNodes)
+        {
+            TreeNode modelNode = parent.Nodes.Add(key, name);
+            foreach (string item in childNodes)
+            {
+                modelNode.Nodes.Add(item, Path.GetFileNameWithoutExtension(item));
+            }
         }
 
         #endregion
@@ -629,6 +669,79 @@ namespace AweEditor
                 editorViewerControl.UnpauseForm();
             else
                 editorViewerControl.PauseForm();
+        }
+
+        private void manifestViewer_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        {
+            if (e.Node == null)
+                return;
+
+            string key = e.Node.Name;
+            if (gameManifest.Models.ContainsKey(key))
+                editorViewerControl.Model = gameManifest.Models[key];
+            else if (gameManifest.TerrianModels.ContainsKey(key))
+                editorViewerControl.TerrianModel = gameManifest.TerrianModels[key];
+            else if (gameManifest.Textures.ContainsKey(key))
+                editorViewerControl.Texture = gameManifest.Textures[key];
+            else if (gameManifest.VoxelTerrains.ContainsKey(key))
+                editorViewerControl.VoxelTerrain = gameManifest.VoxelTerrains[key];
+
+            toggleMeshButton();
+        }
+
+        private void toggleMeshButton()
+        {
+            createTerrianModelToolStripMenuItem.Enabled = editorViewerControl.EditorState == EditorState.VoxelTerrain;
+        }
+
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
+            if (manifestViewer.SelectedNode == null)
+                MessageBox.Show("No resource selected");
+            else if (manifestViewer.SelectedNode.Name == MANIFEST_KEY)
+            {
+                if (MessageBox.Show("Remove all resources?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    gameManifest.ClearAll();
+                }
+            }
+            else if (manifestViewer.SelectedNode.Name == MODEL_KEY)
+            {
+                if (MessageBox.Show("Remove model resources?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    gameManifest.Models.Clear();
+                }
+            }
+            else if (manifestViewer.SelectedNode.Name == TERRIAN_KEY)
+            {
+                if (MessageBox.Show("Remove terrian resources?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    gameManifest.TerrianModels.Clear();
+                }
+            }
+            else if (manifestViewer.SelectedNode.Name == VOXELTERRIAN_KEY)
+            {
+                if (MessageBox.Show("Remove voxel terrian resources?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    gameManifest.VoxelTerrains.Clear();
+                }
+            }
+            else if (manifestViewer.SelectedNode.Name == TEXTURE_KEY)
+            {
+                if (MessageBox.Show("Remove texture resources?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    gameManifest.Textures.Clear();
+                }
+            }
+            else
+            {
+                if (MessageBox.Show("Remove selected resource?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    gameManifest.RemoveKey(manifestViewer.SelectedNode.Name);
+                }
+            }
+            editorViewerControl.ClearForm();
+            UpdateManifestView();
         }
     }
 }
