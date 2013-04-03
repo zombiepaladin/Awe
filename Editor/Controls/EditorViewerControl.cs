@@ -47,7 +47,7 @@ namespace AweEditor
 
         long currentDrawIndex = 1000;
 
-        EditorState editorState = EditorState.None;
+        public EditorState EditorState {get; private set;}
 
         // Timer controls the rotation speed.
         Stopwatch timer;
@@ -71,7 +71,7 @@ namespace AweEditor
             set
             {
                 voxelTerrain = value;
-                editorState = EditorState.VoxelTerrain;
+                EditorState = EditorState.VoxelTerrain;
             }
         }
         VoxelTerrain voxelTerrain;
@@ -123,7 +123,7 @@ namespace AweEditor
                     MeasureModel(model);
                 }
 
-                editorState = EditorState.Model;
+                EditorState = EditorState.Model;
             }
         }
 
@@ -153,7 +153,7 @@ namespace AweEditor
                     MeasureTexture();
                 }
 
-                editorState = EditorState.Texture;
+                EditorState = EditorState.Texture;
             }
         }
 
@@ -180,7 +180,7 @@ namespace AweEditor
                 terrianModel = value;
                 if (terrianModel != null)
                     MeasureModel(terrianModel);
-                editorState = EditorState.TerrianModel;
+                EditorState = EditorState.TerrianModel;
             }
         }
 
@@ -272,6 +272,11 @@ namespace AweEditor
             woodTexture = textures[2];
         }
 
+        public void ClearForm()
+        {
+            EditorState = AweEditor.EditorState.None;
+        }
+
         private void loadModels()
         {
             #region Load Placeholder Block Model
@@ -316,7 +321,7 @@ namespace AweEditor
             PrepGraphicsDevice();
 
             // Render according to current editor state
-            switch (editorState)
+            switch (EditorState)
             {
                 case EditorState.VoxelTerrain:
                     DrawVoxelTerrain();
@@ -393,12 +398,12 @@ namespace AweEditor
 
             Array.Resize(ref instanceTransforms, maxSize);
 
+            transformInstances = new Matrix[maxBatchSize];
+
             //marks the block itself
             BlockData block;
-            byte[] blockTypeArray = new byte[instanceTransforms.Length];
+            byte[] blockTypeArray = new byte[transformInstances.Length];
             const float scale = 2;
-
-            transformInstances = new Matrix[maxBatchSize];
 
             int batchNumber = (numberOfBlocks / maxBatchSize);
             if ((numberOfBlocks % maxBatchSize) > 0) batchNumber++;
@@ -418,8 +423,8 @@ namespace AweEditor
                     tempPosition = Vector3.Divide(new Vector3(block.x, block.y, block.z), scale);
 
                     tempTransform = Matrix.CreateTranslation(tempPosition);
-                    instanceTransforms[(instanceTransforms.Length - (i /*- currentDrawIndex*/)) - 1] = transform * world;
-                    blockTypeArray[(blockTypeArray.Length - (i /*- currentDrawIndex*/)) - 1] = blockType;
+                    instanceTransforms[(instanceTransforms.Length - (i /*- currentDrawIndex*/)) - 1] = tempTransform * world;
+                    blockTypeArray[(blockTypeArray.Length - (i /*- currentDrawIndex*/)) - 1] = block.type;
                     transformInstances[i] = tempTransform * world;
                 }
 
@@ -563,7 +568,8 @@ namespace AweEditor
                 }
             }
         }
-private void drawTexturedInstancedPrimitives(Matrix[] instancesArray, Effect effect, ModelMeshPart meshPart)
+        
+        private void drawTexturedInstancedPrimitives(Matrix[] instancesArray, Effect effect, ModelMeshPart meshPart)
         {
             if (instancesArray.Length != 0)
             {
@@ -577,8 +583,6 @@ private void drawTexturedInstancedPrimitives(Matrix[] instancesArray, Effect eff
                     GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0,
                                                            meshPart.NumVertices, meshPart.StartIndex,
                                                            meshPart.PrimitiveCount, Math.Min(1048574, instancesArray.Length)); //TODO: should have warning or something when too big
-
-
                 }
             }
         }
