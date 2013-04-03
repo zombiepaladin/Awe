@@ -398,12 +398,12 @@ namespace AweEditor
 
             Array.Resize(ref instanceTransforms, maxSize);
 
+            transformInstances = new Matrix[maxBatchSize];
+
             //marks the block itself
             BlockData block;
-            byte[] blockTypeArray = new byte[instanceTransforms.Length];
+            byte[] blockTypeArray = new byte[transformInstances.Length];
             const float scale = 2;
-
-            transformInstances = new Matrix[maxBatchSize];
 
             int batchNumber = (numberOfBlocks / maxBatchSize);
             if ((numberOfBlocks % maxBatchSize) > 0) batchNumber++;
