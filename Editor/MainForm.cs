@@ -377,7 +377,6 @@ namespace AweEditor
             VoxelTerrain terrian = new VoxelTerrain(blocks);
             editorViewerControl.VoxelTerrain = terrian;
             gameManifest.VoxelTerrains[fileName] = terrian;
-            gameManifest.VoxelTerrains.Add(Path.GetFileNameWithoutExtension(fileName), new VoxelTerrain(blocks));
             Cursor = Cursors.Arrow;
         }
 
@@ -471,7 +470,7 @@ namespace AweEditor
             Cursor = Cursors.WaitCursor;
             
             // Determine the texture's path
-            string path = Path.Combine("Textures", Path.GetFileNameWithoutExtension(fileName));
+            string path = Path.Combine("Textures", Path.GetFileName(fileName));
 
             string buildError = null;
             if (!fromBackup) 
@@ -549,10 +548,12 @@ namespace AweEditor
             }
         }
 
-
         void CreateMeshMenuItemClicked(object sender, EventArgs e)
         {
-            CreateTerrianModel(editorViewerControl.VoxelTerrain, "Default");
+            InputDialog dialog = new InputDialog("Enter a name for this terran model", "Terrian Model");
+            if (dialog.ShowDialog() != DialogResult.OK)
+                return;
+            CreateTerrianModel(editorViewerControl.VoxelTerrain, dialog.Input);
             UpdateManifestView();
             toggleMeshButton();
         }
