@@ -42,6 +42,7 @@
     </ClCompile>
     <ClCompile Include="D3D9App.cpp" />
     <ClCompile Include="D3D11App.cpp" />
+    <ClCompile Include="physics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h">
