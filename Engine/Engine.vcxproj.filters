@@ -75,5 +75,6 @@
     <ClInclude Include="..\DXUT11\Optional\SDKmisc.h">
       <Filter>DXUT</Filter>
     </ClInclude>
+    <ClInclude Include="physics.h" />
   </ItemGroup>
 </Project>
