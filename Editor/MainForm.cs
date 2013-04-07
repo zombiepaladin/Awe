@@ -89,8 +89,9 @@ namespace AweEditor
             {
                 OpenGameAssets(fileDialog.FileName);
                 saveLocation = fileDialog.FileName;
+                UpdateManifestView();
             }
-            //UpdateManifestView();
+            
         }
 
         /// <summary>
@@ -334,7 +335,7 @@ namespace AweEditor
             {
                 editorViewerControl.UnpauseForm();
                 ttcControlPanel.SelectTab("tpTerrainControls");
-                LoadVoxelTerrain(fd.FileName);
+                LoadVoxelTerrain(Path.Combine("VoxelTerrian", fd.FileName));
                 RepositionCamera();
                 editorViewerControl.PauseForm();
                 createTerrianModelToolStripMenuItem.Enabled = true;
@@ -362,10 +363,7 @@ namespace AweEditor
                     List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(fileName);
                     blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
                     break;
-
-                //TODO: Handle Anvil region files
-                case ".mca": //Letting it fall through to default for now
-                    //TODO:Delete
+                case ".mca":
                     VoxelTerrainImporter.LoadTerrain(fileName);
                     blocks = new List<BlockData>();
                     break;
@@ -413,13 +411,7 @@ namespace AweEditor
                     editorViewerControl.Model = model;
 
                 // Also store the model in our game manifest
-                if (!gameManifest.Models.ContainsKey(path))
-                    gameManifest.Models.Add(path, model);
-                else
-                {
-                    gameManifest.Models.Remove(path);
-                    gameManifest.Models.Add(path, model);
-                }
+                gameManifest.Models[path] = model;
 
                 // Backup the Xnb files for this object so that they
                 // can be used later to save the object
@@ -494,13 +486,7 @@ namespace AweEditor
                     editorViewerControl.Texture = texture;
 
                 // Store the texture in our game manifest
-                if (!gameManifest.Models.ContainsKey(path))
-                    gameManifest.Textures.Add(path, texture);
-                else
-                {
-                    gameManifest.Textures.Remove(path);
-                    gameManifest.Textures.Add(path, texture);
-                }
+                gameManifest.Textures[path] = texture;
 
                 // Backup the Xnb files for this object so that they
                 // can be used later to save the object
@@ -553,7 +539,7 @@ namespace AweEditor
             InputDialog dialog = new InputDialog("Enter a name for this terran model", "Terrian Model");
             if (dialog.ShowDialog() != DialogResult.OK)
                 return;
-            CreateTerrianModel(editorViewerControl.VoxelTerrain, dialog.Input);
+            CreateTerrianModel(editorViewerControl.VoxelTerrain, Path.Combine("Terrian", dialog.Input));
             UpdateManifestView();
             toggleMeshButton();
         }
