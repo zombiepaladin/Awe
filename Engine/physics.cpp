@@ -23,8 +23,7 @@ using namespace physx;
 #pragma comment(lib, "PhysX3CHECKED_x86.lib")
 #pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
 #pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
-#pragma comment(lib, "PxTask.lib")
-
+#pragma comment(lib, "PxLoader.lib")
 
 static PxPhysics *physics = NULL;
 PxFoundation *foundation = NULL;
