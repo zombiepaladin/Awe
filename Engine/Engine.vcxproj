@@ -105,7 +105,6 @@
     <ClInclude Include="..\DXUT11\Optional\DXUTsettingsdlg.h" />
     <ClInclude Include="..\DXUT11\Optional\SDKmesh.h" />
     <ClInclude Include="..\DXUT11\Optional\SDKmisc.h" />
-    <ClInclude Include="physics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

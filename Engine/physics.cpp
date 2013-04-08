@@ -1,4 +1,4 @@
-#include "physics.h"
+
 #include <PxPhysicsAPI.h>
 #include <PxPhysics.h>
 #include <extensions\PxExtensionsAPI.h>
@@ -9,6 +9,7 @@
 #include <extensions\PxShapeExt.h>
 #include <extensions\PxSimpleFactory.h>
 #include <foundation\PxFoundation.h>
+#include <foundation\PxPreprocessor.h>
 
 #include <iostream>
 #include <vector>
@@ -23,7 +24,6 @@ using namespace physx;
 #pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
 #pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
 #pragma comment(lib, "PxTask.lib")
-
 
 
 static PxPhysics *physics = NULL;
@@ -61,9 +61,10 @@ void initPhysX() {
 
 	if(!sceneDesc.filterShader)
 		sceneDesc.filterShader  = gDefaultFilterShader;
-
+	
 	dxScene = physics->createScene(sceneDesc);
 
+	//get objects from sceene graph and create the physics bodys.
 	PxMaterial* mMaterial = physics->createMaterial(0.5,0.5,0.5);
 
 	PxReal d = 0.0f;
