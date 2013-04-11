@@ -1,29 +1,26 @@
 
 #include <PxPhysicsAPI.h>
-#include <PxPhysics.h>
 #include <extensions\PxExtensionsAPI.h>
 #include <extensions\PxDefaultErrorCallback.h>
 #include <extensions\PxDefaultAllocator.h>
 #include <extensions\PxDefaultSimulationFilterShader.h>
 #include <extensions\PxDefaultCpuDispatcher.h>
 #include <extensions\PxShapeExt.h>
+#include <foundation\PxMat33.h>
 #include <extensions\PxSimpleFactory.h>
-#include <foundation\PxFoundation.h>
-#include <foundation\PxPreprocessor.h>
-
 #include <iostream>
 #include <vector>
 
 using namespace std;
 using namespace physx;
 
+#pragma comment(lib, "PhysX3_x86.lib")
+#pragma comment(lib, "PxTask.lib")
+#pragma comment(lib, "PhysX3Extensions.lib")
+#pragma comment(lib, "PhysX3Common_x86.lib")
+#pragma comment(lib, "PhysX3Cooking_x86.lib")
 
 
-
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
-#pragma comment(lib, "PxLoader.lib")
 
 static PxPhysics *physics = NULL;
 PxFoundation *foundation = NULL;
