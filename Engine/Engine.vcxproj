@@ -87,8 +87,10 @@
     <ClCompile Include="..\DXUT11\Optional\DXUTsettingsdlg.cpp" />
     <ClCompile Include="..\DXUT11\Optional\SDKmesh.cpp" />
     <ClCompile Include="..\DXUT11\Optional\SDKmisc.cpp" />
-    <ClCompile Include="D3D9App.cpp" />
-    <ClCompile Include="D3D11App.cpp" />
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="ColorUtil.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h" />
@@ -101,6 +103,26 @@
     <ClInclude Include="..\DXUT11\Optional\DXUTsettingsdlg.h" />
     <ClInclude Include="..\DXUT11\Optional\SDKmesh.h" />
     <ClInclude Include="..\DXUT11\Optional\SDKmisc.h" />
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Buffer.h" />
+    <ClInclude Include="ColorUtil.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderDefines.h" />
+    <ClInclude Include="ShaderStructures.h" />
+    <ClInclude Include="Texture2D.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BasicLoop.hlsl" />
+    <None Include="ComputeShaderTile.hlsl" />
+    <None Include="Forward.hlsl" />
+    <None Include="FramebufferFlat.hlsl" />
+    <None Include="FullScreenTriangle.hlsl" />
+    <None Include="GBuffer.hlsl" />
+    <None Include="GPUQuad.hlsl" />
+    <None Include="GPUQuadDL.hlsl" />
+    <None Include="PerFrameConstants.hlsl" />
+    <None Include="Rendering.hlsl" />
+    <None Include="SkyboxToneMap.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

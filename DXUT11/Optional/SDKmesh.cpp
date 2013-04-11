@@ -7,15 +7,19 @@
 // meets the specific needs of the application.
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
+//
+// Modified by Intel Corporation in 2010.
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
 #include "SDKMesh.h"
 #include "SDKMisc.h"
+#include <algorithm>       // INTEL
 
 //--------------------------------------------------------------------------------------
 void CDXUTSDKMesh::LoadMaterials( ID3D11Device* pd3dDevice, SDKMESH_MATERIAL* pMaterials, UINT numMaterials,
                                   SDKMESH_CALLBACKS11* pLoaderCallbacks )
 {
+    // TODO: D3D11
     char strPath[MAX_PATH];
 
     if( pLoaderCallbacks && pLoaderCallbacks->pCreateTextureFromFile )
@@ -193,7 +197,6 @@ HRESULT CDXUTSDKMesh::CreateVertexBuffer( ID3D11Device* pd3dDevice, SDKMESH_VERT
         D3D11_SUBRESOURCE_DATA InitData;
         InitData.pSysMem = pVertices;
         hr = pd3dDevice->CreateBuffer( &bufferDesc, &InitData, &pHeader->pVB11 );
-        DXUT_SetDebugName( pHeader->pVB11, "CDXUTSDKMesh" );
     }
 
     return hr;
@@ -224,7 +227,6 @@ HRESULT CDXUTSDKMesh::CreateIndexBuffer( ID3D11Device* pd3dDevice, SDKMESH_INDEX
         D3D11_SUBRESOURCE_DATA InitData;
         InitData.pSysMem = pIndices;
         hr = pd3dDevice->CreateBuffer( &bufferDesc, &InitData, &pHeader->pIB11 );
-        DXUT_SetDebugName( pHeader->pIB11, "CDXUTSDKMesh" );
     }
 
     return hr;
@@ -387,8 +389,6 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
                                         SDKMESH_CALLBACKS9* pLoaderCallbacks9 )
 {
     HRESULT hr = E_FAIL;
-    D3DXVECTOR3 lower; 
-    D3DXVECTOR3 upper; 
     
     m_pDev9 = pDev9;
 	m_pDev11 = pDev11;
@@ -498,12 +498,16 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
     SDKMESH_SUBSET* pSubset = NULL;
     D3D11_PRIMITIVE_TOPOLOGY PrimType;
 
-    // update bounding volume 
+    // Setup bounds array
+    m_pSubsetBounds.resize(m_pMeshHeader->NumTotalSubsets);
+
+    // Update bounding volumes
     SDKMESH_MESH* currentMesh = &m_pMeshArray[0];
     int tris = 0;
     for (UINT meshi=0; meshi < m_pMeshHeader->NumMeshes; ++meshi) {
-        lower.x = FLT_MAX; lower.y = FLT_MAX; lower.z = FLT_MAX;
-        upper.x = -FLT_MAX; upper.y = -FLT_MAX; upper.z = -FLT_MAX;
+        // INTEL: Track both mesh and subset bounds
+        D3DXVECTOR3 lowerMesh(FLT_MAX, FLT_MAX, FLT_MAX);
+        D3DXVECTOR3 upperMesh(-FLT_MAX, -FLT_MAX, -FLT_MAX);
         currentMesh = GetMesh( meshi );
         INT indsize;
         if (m_pIndexBufferArray[currentMesh->IndexBuffer].IndexType == IT_16BIT ) {
@@ -514,6 +518,10 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
 
         for( UINT subset = 0; subset < currentMesh->NumSubsets; subset++ )
         {
+            // INTEL: Track subset bounds
+            D3DXVECTOR3 lowerSubset(FLT_MAX, FLT_MAX, FLT_MAX);
+            D3DXVECTOR3 upperSubset(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
             pSubset = GetSubset( meshi, subset ); //&m_pSubsetArray[ currentMesh->pSubsets[subset] ];
 
             PrimType = GetPrimitiveType11( ( SDKMESH_PRIMITIVE_TYPE )pSubset->PrimitiveType );
@@ -535,7 +543,7 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
             UINT stride = (UINT)m_pVertexBufferArray[currentMesh->VertexBuffers[0]].StrideBytes;
             assert (stride % 4 == 0);
             stride /=4;
-            for (UINT vertind = IndexStart; vertind < IndexStart + IndexCount; ++vertind) {
+            for (UINT vertind = IndexStart; vertind < IndexStart + IndexCount; ++vertind) { //TODO: test 16 bit and 32 bit
                 UINT current_ind=0;
                 if (indsize == 2) {
                     UINT ind_div2 = vertind / 2;
@@ -550,37 +558,39 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
                     current_ind = ind[vertind];
                 }
                 tris++;
-                D3DXVECTOR3 *pt = (D3DXVECTOR3*)&(verts[stride * current_ind]);
-                if (pt->x < lower.x) {
-                    lower.x = pt->x;
-                }
-                if (pt->y < lower.y) {
-                    lower.y = pt->y;
-                }
-                if (pt->z < lower.z) {
-                    lower.z = pt->z;
-                }
-                if (pt->x > upper.x) {
-                    upper.x = pt->x;
-                }
-                if (pt->y > upper.y) {
-                    upper.y = pt->y;
-                }
-                if (pt->z > upper.z) {
-                    upper.z = pt->z;
-                }
+                const D3DXVECTOR3 *pt = (D3DXVECTOR3*)&(verts[stride * current_ind]);
+                // INTEL: Propogate bounds
+                D3DXVec3Minimize(&lowerSubset, &lowerSubset, pt);
+                D3DXVec3Maximize(&upperSubset, &upperSubset, pt);
                 //BYTE** m_ppVertices;
                 //BYTE** m_ppIndices;
             }
             //pd3dDeviceContext->DrawIndexed( IndexCount, IndexStart, VertexStart );
+
+            // INTEL: Store subset bounds
+            SDKMESH_BOUNDS* subsetBounds = GetSubsetBounds(meshi, subset);
+            subsetBounds->AABBMin = lowerSubset;
+            subsetBounds->AABBMax = upperSubset;
+
+            // INTEL: This isn't the tighest bounding sphere but it will work for now
+            D3DXVECTOR3 half = upperSubset - lowerSubset;
+            half *= 0.5f;
+            subsetBounds->sphereCenter = lowerSubset + half;
+            subsetBounds->sphereRadius = D3DXVec3Length(&half);
+
+            // INTEL: Initialize this in case they never do a frustum check
+            subsetBounds->inFrustum = true;
+
+            // INTEL: Propogate to mesh bounds
+            D3DXVec3Minimize(&lowerMesh, &lowerMesh, &lowerSubset);
+            D3DXVec3Maximize(&upperMesh, &upperMesh, &upperSubset);
         }
 
-        D3DXVECTOR3 half = upper - lower;
-        half *=0.5f;
-
-        currentMesh->BoundingBoxCenter = lower + half;
+        // INTEL: Store mesh bounds
+        D3DXVECTOR3 half = upperMesh - lowerMesh;
+        half *= 0.5f;
+        currentMesh->BoundingBoxCenter = lowerMesh + half;
         currentMesh->BoundingBoxExtents = half;
-
     }
     // Update 
         
@@ -596,6 +606,117 @@ Error:
 
     return hr;
 }
+
+
+//--------------------------------------------------------------------------------------
+// INTEL: Clear all frustum flags to the given value
+//--------------------------------------------------------------------------------------
+void CDXUTSDKMesh::SetInFrustumFlags(bool flag)
+{
+    for (unsigned int i = 0; i < m_pMeshHeader->NumTotalSubsets; ++i) {
+        m_pSubsetBounds[i].inFrustum = flag;
+    }
+}
+
+
+//--------------------------------------------------------------------------------------
+// INTEL: Perfom frustum culling and set flags accordingly
+//--------------------------------------------------------------------------------------
+void CDXUTSDKMesh::ComputeInFrustumFlags(const D3DXMATRIXA16 &worldViewProj,
+                                         bool cullNear)
+{
+    // Extract frustum planes in object space (differences of columns)    
+    D3DXPLANE frustumPlanes[6];
+    for (unsigned int p = 0; p < 2; ++p) {
+        D3DXPLANE &neg = frustumPlanes[2 * p];
+        neg.a = worldViewProj._14 - worldViewProj.m[0][p];
+        neg.b = worldViewProj._24 - worldViewProj.m[1][p];
+        neg.c = worldViewProj._34 - worldViewProj.m[2][p];
+        neg.d = worldViewProj._44 - worldViewProj.m[3][p];
+
+        D3DXPLANE &pos = frustumPlanes[2 * p + 1];
+        pos.a = worldViewProj._14 + worldViewProj.m[0][p];
+        pos.b = worldViewProj._24 + worldViewProj.m[1][p];
+        pos.c = worldViewProj._34 + worldViewProj.m[2][p];
+        pos.d = worldViewProj._44 + worldViewProj.m[3][p];
+    }
+
+    {
+        // Far
+        D3DXPLANE &f = frustumPlanes[4];
+        f.a = worldViewProj._14 - worldViewProj._13;
+        f.b = worldViewProj._24 - worldViewProj._23;
+        f.c = worldViewProj._34 - worldViewProj._33;
+        f.d = worldViewProj._44 - worldViewProj._43;
+
+        // Near is special in D3D due to [0, 1] Z clip range
+        D3DXPLANE &n = frustumPlanes[5];
+        n.a = worldViewProj._13;
+        n.b = worldViewProj._23;
+        n.c = worldViewProj._33;
+        n.d = worldViewProj._43;
+    }
+
+    // Normalize
+    for (unsigned int p = 0; p < 6; ++p) {
+        D3DXPlaneNormalize(&frustumPlanes[p], &frustumPlanes[p]);
+    }
+
+    // If they didn't ask for culling against near, skip it
+    unsigned int cullPlanes = cullNear ? 6 : 5;
+    
+    for (unsigned int i = 0; i < m_pMeshHeader->NumTotalSubsets; ++i) {
+        const D3DXVECTOR3& center = m_pSubsetBounds[i].sphereCenter;
+        float radius = m_pSubsetBounds[i].sphereRadius;
+
+        bool inFrustum = true;
+        for (unsigned int p = 0; p < cullPlanes; ++p) {
+            float d = D3DXPlaneDotCoord(&frustumPlanes[p], &center);
+            if (d + radius < 0.0f) {
+                // Outside frustum!
+                inFrustum = false;
+                break;
+            }
+        }
+
+        // AABB test doesn't make enough difference to justify the cost
+        // and complexity in our scenes. Commented out for now.
+        /*
+        if (inFrustum) {
+            // It's in the sphere, so check AABB
+            const D3DXVECTOR3& min = m_pSubsetBounds[i].AABBMin;
+            const D3DXVECTOR3& max = m_pSubsetBounds[i].AABBMax;
+            D3DXVECTOR3 corners[8];
+            for (unsigned int c = 0; c < 8; ++c) {
+                corners[c].x = (c & 1 ? min.x : max.x);
+                corners[c].y = (c & 2 ? min.y : max.y);
+                corners[c].z = (c & 4 ? min.z : max.z);
+            }
+
+            for (unsigned int p = 0; p < cullPlanes && inFrustum; ++p) {
+                bool oneInside = false;
+                for (unsigned int c = 0; c < 8; ++c) {
+                    float d = D3DXPlaneDotCoord(&frustumPlanes[p], &corners[c]);
+                    if (d > 0.0f) {
+                        // At least one inside means we can't reject based on this plane
+                        oneInside = true;
+                        break;
+                    }
+                }
+
+                if (!oneInside) {
+                    // All were outside this frustum plane
+                    inFrustum = false;
+                    break;
+                }
+            }
+        }
+        */
+
+        m_pSubsetBounds[i].inFrustum = inFrustum;
+    }
+}
+
 
 //--------------------------------------------------------------------------------------
 // transform bind pose frame using a recursive traversal
@@ -734,50 +855,59 @@ void CDXUTSDKMesh::RenderMesh( UINT iMesh,
 
     SDKMESH_MESH* pMesh = &m_pMeshArray[iMesh];
 
-    UINT Strides[MAX_D3D11_VERTEX_STREAMS];
-    UINT Offsets[MAX_D3D11_VERTEX_STREAMS];
-    ID3D11Buffer* pVB[MAX_D3D11_VERTEX_STREAMS];
-
-    if( pMesh->NumVertexBuffers > MAX_D3D11_VERTEX_STREAMS )
-        return;
-
-    for( UINT64 i = 0; i < pMesh->NumVertexBuffers; i++ )
-    {
-        pVB[i] = m_pVertexBufferArray[ pMesh->VertexBuffers[i] ].pVB11;
-        Strides[i] = ( UINT )m_pVertexBufferArray[ pMesh->VertexBuffers[i] ].StrideBytes;
-        Offsets[i] = 0;
-    }
-
-    SDKMESH_INDEX_BUFFER_HEADER* pIndexBufferArray;
-    if( bAdjacent )
-        pIndexBufferArray = m_pAdjacencyIndexBufferArray;
-    else
-        pIndexBufferArray = m_pIndexBufferArray;
-
-    ID3D11Buffer* pIB = pIndexBufferArray[ pMesh->IndexBuffer ].pIB11;
-    DXGI_FORMAT ibFormat = DXGI_FORMAT_R16_UINT;
-    switch( pIndexBufferArray[ pMesh->IndexBuffer ].IndexType )
-    {
-    case IT_16BIT:
-        ibFormat = DXGI_FORMAT_R16_UINT;
-        break;
-    case IT_32BIT:
-        ibFormat = DXGI_FORMAT_R32_UINT;
-        break;
-    };
-
-    pd3dDeviceContext->IASetVertexBuffers( 0, pMesh->NumVertexBuffers, pVB, Strides, Offsets );
-    pd3dDeviceContext->IASetIndexBuffer( pIB, ibFormat, 0 );
-
-    SDKMESH_SUBSET* pSubset = NULL;
-    SDKMESH_MATERIAL* pMat = NULL;
-    D3D11_PRIMITIVE_TOPOLOGY PrimType;
+    bool firstRenderedSubset = true;
 
     for( UINT subset = 0; subset < pMesh->NumSubsets; subset++ )
     {
-        pSubset = &m_pSubsetArray[ pMesh->pSubsets[subset] ];
+        UINT subsetArrayIndex = pMesh->pSubsets[subset];
+        SDKMESH_SUBSET* pSubset = &m_pSubsetArray[ subsetArrayIndex ];
 
-        PrimType = GetPrimitiveType11( ( SDKMESH_PRIMITIVE_TYPE )pSubset->PrimitiveType );
+        // INTEL: Skip this subset if it was market out of the frustum
+        if (!m_pSubsetBounds[subsetArrayIndex].inFrustum) {
+            continue;
+        }
+
+        // Setup mesh rendering (if this is the first rendered subset in this mesh)
+        if (firstRenderedSubset) {
+            firstRenderedSubset = false;
+
+            UINT Strides[MAX_D3D11_VERTEX_STREAMS];
+            UINT Offsets[MAX_D3D11_VERTEX_STREAMS];
+            ID3D11Buffer* pVB[MAX_D3D11_VERTEX_STREAMS];
+
+            if( pMesh->NumVertexBuffers > MAX_D3D11_VERTEX_STREAMS )
+                return;
+
+            for( UINT64 i = 0; i < pMesh->NumVertexBuffers; i++ )
+            {
+                pVB[i] = m_pVertexBufferArray[ pMesh->VertexBuffers[i] ].pVB11;
+                Strides[i] = ( UINT )m_pVertexBufferArray[ pMesh->VertexBuffers[i] ].StrideBytes;
+                Offsets[i] = 0;
+            }
+
+            SDKMESH_INDEX_BUFFER_HEADER* pIndexBufferArray;
+            if( bAdjacent )
+                pIndexBufferArray = m_pAdjacencyIndexBufferArray;
+            else
+                pIndexBufferArray = m_pIndexBufferArray;
+
+            ID3D11Buffer* pIB = pIndexBufferArray[ pMesh->IndexBuffer ].pIB11;
+            DXGI_FORMAT ibFormat = DXGI_FORMAT_R16_UINT;
+            switch( pIndexBufferArray[ pMesh->IndexBuffer ].IndexType )
+            {
+            case IT_16BIT:
+                ibFormat = DXGI_FORMAT_R16_UINT;
+                break;
+            case IT_32BIT:
+                ibFormat = DXGI_FORMAT_R32_UINT;
+                break;
+            };
+
+            pd3dDeviceContext->IASetVertexBuffers( 0, pMesh->NumVertexBuffers, pVB, Strides, Offsets );
+            pd3dDeviceContext->IASetIndexBuffer( pIB, ibFormat, 0 );
+        }
+
+        D3D11_PRIMITIVE_TOPOLOGY PrimType = GetPrimitiveType11( ( SDKMESH_PRIMITIVE_TYPE )pSubset->PrimitiveType );
         if( bAdjacent )
         {
             switch( PrimType )
@@ -799,7 +929,7 @@ void CDXUTSDKMesh::RenderMesh( UINT iMesh,
 
         pd3dDeviceContext->IASetPrimitiveTopology( PrimType );
 
-        pMat = &m_pMaterialArray[ pSubset->MaterialID ];
+        SDKMESH_MATERIAL* pMat = &m_pMaterialArray[ pSubset->MaterialID ];
         if( iDiffuseSlot != INVALID_SAMPLER_SLOT && !IsErrorResource( pMat->pDiffuseRV11 ) )
             pd3dDeviceContext->PSSetShaderResources( iDiffuseSlot, 1, &pMat->pDiffuseRV11 );
         if( iNormalSlot != INVALID_SAMPLER_SLOT && !IsErrorResource( pMat->pNormalRV11 ) )
@@ -1477,6 +1607,12 @@ UINT CDXUTSDKMesh::GetNumSubsets( UINT iMesh )
 SDKMESH_SUBSET* CDXUTSDKMesh::GetSubset( UINT iMesh, UINT iSubset )
 {
     return &m_pSubsetArray[ m_pMeshArray[ iMesh ].pSubsets[iSubset] ];
+}
+
+//--------------------------------------------------------------------------------------
+SDKMESH_BOUNDS* CDXUTSDKMesh::GetSubsetBounds( UINT iMesh, UINT iSubset )
+{
+    return &m_pSubsetBounds[ m_pMeshArray[ iMesh ].pSubsets[iSubset] ];
 }
 
 //--------------------------------------------------------------------------------------
