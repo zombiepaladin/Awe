@@ -44,7 +44,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>$(SolutionDir)\PhysX\Lib\win32;$(DXSDK_DIR)Lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>false</LinkIncremental>
     <SourcePath>$(SourcePath)</SourcePath>
     <ReferencePath>$(SolutionDir)\PhysX\Include;$(SolutionDir)\PhysX\Samples;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
