@@ -46,6 +46,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="physics.cpp" />
     <ClCompile Include="Texture2D.cpp" />
   </ItemGroup>
   <ItemGroup>
