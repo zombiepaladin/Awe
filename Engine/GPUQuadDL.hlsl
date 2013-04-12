@@ -89,7 +89,7 @@ float4 GPUQuadDLResolve(FullScreenTriangleVSOut input, uint sampleIndex)
 
         // Prevent divide by zero
         const float epsilon = 0.000001f;
-		float3 ambientLight = float3(0.01f,0.01f,0.01f);
+		float3 ambientLight = float3(0.01f,0.01125f,0.01275f);
         lit = surface.albedo.xyz * (accumulated.xyz + surface.specularAmount * accumulated.xyz * (accumulated.w / (diffuseLum + epsilon)));
 		if(lit.x <ambientLight.x && lit.y <ambientLight.y && lit.z<ambientLight.z)
 		{
