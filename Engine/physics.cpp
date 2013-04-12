@@ -14,13 +14,6 @@
 using namespace std;
 using namespace physx;
 
-#pragma comment(lib, "PhysX3_x86.lib")
-#pragma comment(lib, "PxTask.lib")
-#pragma comment(lib, "PhysX3Extensions.lib")
-#pragma comment(lib, "PhysX3Common_x86.lib")
-#pragma comment(lib, "PhysX3Cooking_x86.lib")
-
-
 
 static PxPhysics *physics = NULL;
 PxFoundation *foundation = NULL;
@@ -73,10 +66,10 @@ void initPhysX() {
 	PxTransform transform(PxVec3(0.0f, 10.0f, 0.0f), PxQuat::createIdentity());
 	PxVec3 dimensions(0.5,0.5,0.5);
 	PxBoxGeometry geometry(dimensions);
-    
+	
 	PxRigidDynamic *actor = PxCreateDynamic(*physics, transform, geometry, *mMaterial, density);
-    actor->setAngularDamping(0.75);
-    actor->setLinearVelocity(PxVec3(0,0,0)); 
+	actor->setAngularDamping(0.75);
+	actor->setLinearVelocity(PxVec3(0,0,0)); 
 	dxScene->addActor(*actor);
 
 	box = actor;
@@ -109,7 +102,7 @@ void DrawBox(PxShape* pShape) {
 	PxBoxGeometry bg;
 	pShape->getBoxGeometry(bg);
 	PxMat33 m = PxMat33(pT.q);
-    float mat[16];
+	float mat[16];
 	//might have to fix the whole app due to quadturians
 	getColumnMajor(m,pT.q.getBasisVector0(),mat);
 	//d3d render here
@@ -117,24 +110,24 @@ void DrawBox(PxShape* pShape) {
 void DrawShape(PxShape* shape) 
 { 
 	PxGeometryType::Enum type = shape->getGeometryType();
-    switch(type) 
-    {          
+	switch(type) 
+	{          
 		case PxGeometryType::eBOX:
 			DrawBox(shape);
 		break;
-    } 
+	} 
 } 
 
 void DrawActor(PxRigidActor* actor) 
 {  
 	PxU32 nShapes = actor->getNbShapes(); 
-    PxShape** shapes=new PxShape*[nShapes];
+	PxShape** shapes=new PxShape*[nShapes];
 	
 	actor->getShapes(shapes, nShapes);     
-    while (nShapes--) 
-    { 
-        DrawShape(shapes[nShapes]); 
-    } 
+	while (nShapes--) 
+	{ 
+		DrawShape(shapes[nShapes]); 
+	} 
 	delete [] shapes;
 }
 void RenderActors(){
