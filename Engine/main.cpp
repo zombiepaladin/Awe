@@ -35,6 +35,7 @@ enum SCENE_SELECTION {
 	CUBE_WORLD,
     POWER_PLANT_SCENE,
     SPONZA_SCENE,
+	MULTI_SCENE,
 };
 
 enum {
@@ -70,6 +71,7 @@ App* gApp = 0;
 CFirstPersonCamera gViewerCamera;
 
 CDXUTSDKMesh gMeshOpaque;
+CDXUTSDKMesh gMeshOpaque2;
 CDXUTSDKMesh gMeshAlpha;
 D3DXMATRIXA16 gWorldMatrix;
 ID3D11ShaderResourceView* gSkyboxSRV = 0;
@@ -215,6 +217,7 @@ void InitUI()
 		gSceneSelectCombo->AddItem(L"Cube World (AWE)", ULongToPtr(CUBE_WORLD));
         gSceneSelectCombo->AddItem(L"Power Plant", ULongToPtr(POWER_PLANT_SCENE));
         gSceneSelectCombo->AddItem(L"Sponza", ULongToPtr(SPONZA_SCENE));
+		gSceneSelectCombo->AddItem(L"Multi Object Scene", ULongToPtr(MULTI_SCENE));
 #pragma endregion
 
 #pragma region Add Options Checkboxes and sliders
@@ -332,7 +335,7 @@ void InitScene(ID3D11Device* d3dDevice)
 
         case POWER_PLANT_SCENE: {
             gMeshOpaque.Create(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
-            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
             sceneScaling = 1.0f;
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -345,6 +348,14 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
+		case MULTI_SCENE:{
+			gMeshOpaque.Create(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
+			gMeshOpaque2.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+            sceneScaling = 1.0f;
+            cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
+            cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		}break;
     };
 #pragma endregion
 
@@ -372,6 +383,7 @@ void InitScene(ID3D11Device* d3dDevice)
 void DestroyScene()
 {
     gMeshOpaque.Destroy();
+	gMeshOpaque2.Destroy();
     gMeshAlpha.Destroy();
     SAFE_RELEASE(gSkyboxSRV);
 }
@@ -590,6 +602,10 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     if (!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded()) {
         InitScene(d3dDevice);
     }
+	else if(gMeshOpaque2.IsLoaded()&&!gMeshAlpha.IsLoaded())
+	{
+		InitScene(d3dDevice);
+	}
 
     ID3D11RenderTargetView* pRTV = DXUTGetD3D11RenderTargetView();
     
@@ -601,9 +617,9 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     viewport.TopLeftX = 0.0f;
     viewport.TopLeftY = 0.0f;
 
-    gApp->Render(d3dDeviceContext, pRTV, gMeshOpaque, gMeshAlpha, gSkyboxSRV,
+		 gApp->Render(d3dDeviceContext, pRTV, gMeshOpaque,gMeshOpaque2, gMeshAlpha, gSkyboxSRV,
         gWorldMatrix, &gViewerCamera, &viewport, &gUIConstants);
-
+	
     if (gDisplayUI) {
         d3dDeviceContext->RSSetViewports(1, &viewport);
 
