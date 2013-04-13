@@ -12,6 +12,9 @@
 // assume any responsibility for any errors which may appear in this software nor any
 // responsibility to update it.
 
+//Modified by: Matthew Hart, Pavel Janovsky
+//#MSH = modified or commented by Matthew Hart
+
 #include "App.h"
 #include "ColorUtil.h"
 #include "ShaderDefines.h"
@@ -62,7 +65,10 @@ App::App(ID3D11Device *d3dDevice, unsigned int activeLights, unsigned int msaaSa
         {0, 0}
     };
 
-    // Create shaders
+#pragma region CreateEverything
+
+    // Create shaders, Careful moving the shaders. Moving them causes memory exceptions during runtime.
+#pragma region Create Shaders
     mGeometryVS = new VertexShader(d3dDevice, L"Rendering.hlsl", "GeometryVS", defines);
 
     mGBufferPS = new PixelShader(d3dDevice, L"GBuffer.hlsl", "GBufferPS", defines);
@@ -93,8 +99,11 @@ App::App(ID3D11Device *d3dDevice, unsigned int activeLights, unsigned int msaaSa
 
     mGPUQuadDLResolvePS = new PixelShader(d3dDevice, L"GPUQuadDL.hlsl", "GPUQuadDLResolvePS", defines);
     mGPUQuadDLResolvePerSamplePS = new PixelShader(d3dDevice, L"GPUQuadDL.hlsl", "GPUQuadDLResolvePerSamplePS", defines);
+#pragma endregion
+
 
     // Create input layout
+#pragma region Create input layout
     {
         // We need the vertex shader bytecode for this... rather than try to wire that all through the
         // shader interface, just recompile the vertex shader.
@@ -120,6 +129,7 @@ App::App(ID3D11Device *d3dDevice, unsigned int activeLights, unsigned int msaaSa
 
         bytecode->Release();
     }
+#pragma endregion
 
     // Create standard rasterizer state
     {
@@ -130,6 +140,7 @@ App::App(ID3D11Device *d3dDevice, unsigned int activeLights, unsigned int msaaSa
         d3dDevice->CreateRasterizerState(&desc, &mDoubleSidedRasterizerState);
     }
     
+
     {
         CD3D11_DEPTH_STENCIL_DESC desc(D3D11_DEFAULT);
         // NOTE: Complementary Z => GREATER test
@@ -204,11 +215,13 @@ App::App(ID3D11Device *d3dDevice, unsigned int activeLights, unsigned int msaaSa
 
     InitializeLightParameters(d3dDevice);
     SetActiveLights(d3dDevice, activeLights);
+#pragma endregion
 }
 
 
 App::~App() 
 {
+#pragma region Delete everything
     mSkyboxMesh.Destroy();
     SAFE_RELEASE(mDepthBufferReadOnlyDSV);
     delete mLightBuffer;
@@ -243,6 +256,7 @@ App::~App()
     delete mGBufferAlphaTestPS;
     delete mGBufferPS;
     delete mGeometryVS;
+#pragma endregion
 }
 
 
@@ -285,7 +299,7 @@ void App::OnD3D11ResizedSwapChain(ID3D11Device* d3dDevice,
 
     // NOTE: The next set of buffers are not all needed at the same time... a given technique really only needs one of them.
     // We allocate them all up front for quick swapping between techniques and to keep the code as simple as possible.
-
+#pragma region Buffers
     // lit buffers
     mLitBufferPS = shared_ptr<Texture2D>(new Texture2D(
         d3dDevice, mGBufferWidth, mGBufferHeight, DXGI_FORMAT_R16G16B16A16_FLOAT,
@@ -332,8 +346,10 @@ void App::OnD3D11ResizedSwapChain(ID3D11Device* d3dDevice,
     }
     // Depth buffer is the last SRV that we use for reading
     mGBufferSRV.back() = mDepthBuffer->GetShaderResource();
+#pragma endregion
 }
 
+//#MSH Controls the light parameters, their "randomness" and their motion
 void App::InitializeLightParameters(ID3D11Device* d3dDevice)
 {
     mPointLightParameters.resize(MAX_LIGHTS);
@@ -383,7 +399,7 @@ void App::SetActiveLights(ID3D11Device* d3dDevice, unsigned int activeLights)
     Move(0.0f);
 }
 
-
+//#MSH Moves The lights
 void App::Move(float elapsedTime)
 {
     mTotalTime += elapsedTime;
@@ -400,6 +416,7 @@ void App::Move(float elapsedTime)
 }
 
 
+//#MSH Render
 void App::Render(ID3D11DeviceContext* d3dDeviceContext, 
                  ID3D11RenderTargetView* backBuffer,
                  CDXUTSDKMesh& mesh_opaque,
@@ -410,6 +427,7 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
                  const D3D11_VIEWPORT* viewport,
                  const UIConstants* ui)
 {
+#pragma region Local Variables
     D3DXMATRIXA16 cameraProj = *viewerCamera->GetProjMatrix();
     D3DXMATRIXA16 cameraView = *viewerCamera->GetViewMatrix();
     
@@ -419,8 +437,10 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
     // Compute composite matrices
     D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
     D3DXMATRIXA16 cameraWorldViewProj = worldMatrix * cameraViewProj;
+#pragma endregion
 
-    // Fill in frame constants
+	// Fill in frame constants
+#pragma region Frame constants
     {
         D3D11_MAPPED_SUBRESOURCE mappedResource;
         d3dDeviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -442,6 +462,7 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
         
         d3dDeviceContext->Unmap(mPerFrameConstants, 0);
     }
+#pragma endregion
 
     // Geometry phase
     if (mesh_opaque.IsLoaded()) {
@@ -455,16 +476,23 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
     ID3D11ShaderResourceView *lightBufferSRV = SetupLights(d3dDeviceContext, cameraView);
 
     // Forward rendering takes a different path here
-    if (ui->lightCullTechnique == CULL_FORWARD_NONE) {
+	//#MSH Else statement is the deffered methods, the other two should be removable for the final product
+    if (ui->lightCullTechnique == CULL_FORWARD_NONE) 
+	{
         RenderForward(d3dDeviceContext, mesh_opaque, mesh_alpha, lightBufferSRV, viewerCamera, viewport, ui, false);
-    } else if (ui->lightCullTechnique == CULL_FORWARD_PREZ_NONE) {
+    }
+	else if (ui->lightCullTechnique == CULL_FORWARD_PREZ_NONE) 
+	{
         RenderForward(d3dDeviceContext, mesh_opaque, mesh_alpha, lightBufferSRV, viewerCamera, viewport, ui, true);
-    } else {
+    } 
+	else
+	{
         RenderGBuffer(d3dDeviceContext, mesh_opaque, mesh_alpha, viewerCamera, viewport, ui);
         ComputeLighting(d3dDeviceContext, lightBufferSRV, viewport, ui);
-    }
+	}
 
     // Render skybox and tonemap
+	//#MSH skybox is rendered last because its a requirement for the deferred rendering
     RenderSkyboxAndToneMap(d3dDeviceContext, backBuffer, skybox,
         mDepthBuffer->GetShaderResource(), viewport, ui);
 }
@@ -487,83 +515,6 @@ ID3D11ShaderResourceView * App::SetupLights(ID3D11DeviceContext* d3dDeviceContex
     }
     
     return mLightBuffer->GetShaderResource();
-}
-
-
-ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceContext,
-                                              CDXUTSDKMesh& mesh_opaque,
-                                              CDXUTSDKMesh& mesh_alpha,
-                                              ID3D11ShaderResourceView *lightBufferSRV,
-                                              const CFirstPersonCamera* viewerCamera,
-                                              const D3D11_VIEWPORT* viewport,
-                                              const UIConstants* ui,
-                                              bool doPreZ)
-{
-    // Clear lit and depth buffer
-    const float zeros[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    d3dDeviceContext->ClearRenderTargetView(mLitBufferPS->GetRenderTarget(), zeros);
-    // NOTE: Complementary Z buffer: clear to 0 (far)!
-    d3dDeviceContext->ClearDepthStencilView(mDepthBuffer->GetDepthStencil(), D3D11_CLEAR_DEPTH, 0.0f, 0);
-
-    d3dDeviceContext->IASetInputLayout(mMeshVertexLayout);
-
-    d3dDeviceContext->VSSetConstantBuffers(0, 1, &mPerFrameConstants);
-    d3dDeviceContext->VSSetShader(mGeometryVS->GetShader(), 0, 0);
-    
-    d3dDeviceContext->GSSetShader(0, 0, 0);
-
-    d3dDeviceContext->RSSetViewports(1, viewport);
-
-    d3dDeviceContext->PSSetConstantBuffers(0, 1, &mPerFrameConstants);
-    d3dDeviceContext->PSSetShaderResources(5, 1, &lightBufferSRV);
-    d3dDeviceContext->PSSetSamplers(0, 1, &mDiffuseSampler);
-    // Diffuse texture set per-material by DXUT mesh routines
-
-    d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
-    
-    // Pre-Z pass if requested
-    if (doPreZ) {
-        d3dDeviceContext->OMSetRenderTargets(0, 0, mDepthBuffer->GetDepthStencil());
-            
-        // Render opaque geometry
-        if (mesh_opaque.IsLoaded()) {
-            d3dDeviceContext->RSSetState(mRasterizerState);
-            d3dDeviceContext->PSSetShader(0, 0, 0);
-            mesh_opaque.Render(d3dDeviceContext, 0);
-        }
-
-        // Render alpha tested geometry
-        if (mesh_alpha.IsLoaded()) {
-            d3dDeviceContext->RSSetState(mDoubleSidedRasterizerState);
-            // NOTE: Use simplified alpha test shader that only clips
-            d3dDeviceContext->PSSetShader(mForwardAlphaTestOnlyPS->GetShader(), 0, 0);
-            mesh_alpha.Render(d3dDeviceContext, 0);
-        }
-    }
-
-    // Set up render targets
-    ID3D11RenderTargetView *renderTargets[1] = {mLitBufferPS->GetRenderTarget()};
-    d3dDeviceContext->OMSetRenderTargets(1, renderTargets, mDepthBuffer->GetDepthStencil());
-    d3dDeviceContext->OMSetBlendState(mGeometryBlendState, 0, 0xFFFFFFFF);
-    
-    // Render opaque geometry
-    if (mesh_opaque.IsLoaded()) {
-        d3dDeviceContext->RSSetState(mRasterizerState);
-        d3dDeviceContext->PSSetShader(mForwardPS->GetShader(), 0, 0);
-        mesh_opaque.Render(d3dDeviceContext, 0);
-    }
-
-    // Render alpha tested geometry
-    if (mesh_alpha.IsLoaded()) {
-        d3dDeviceContext->RSSetState(mDoubleSidedRasterizerState);
-        d3dDeviceContext->PSSetShader(mForwardAlphaTestPS->GetShader(), 0, 0);
-        mesh_alpha.Render(d3dDeviceContext, 0);
-    }
-
-    // Cleanup (aka make the runtime happy)
-    d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
-
-    return mLitBufferPS->GetShaderResource();
 }
 
 
@@ -860,3 +811,84 @@ void App::RenderSkyboxAndToneMap(ID3D11DeviceContext* d3dDeviceContext,
     ID3D11ShaderResourceView* nullViews[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     d3dDeviceContext->PSSetShaderResources(0, 10, nullViews);
 }
+
+//#MSH This region holds the functions that are useful for demo purposes but may be unneccesary for the game.
+//Testing required before removing anything
+#pragma region Demo Functions
+ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceContext,
+                                              CDXUTSDKMesh& mesh_opaque,
+                                              CDXUTSDKMesh& mesh_alpha,
+                                              ID3D11ShaderResourceView *lightBufferSRV,
+                                              const CFirstPersonCamera* viewerCamera,
+                                              const D3D11_VIEWPORT* viewport,
+                                              const UIConstants* ui,
+                                              bool doPreZ)
+{
+    // Clear lit and depth buffer
+    const float zeros[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    d3dDeviceContext->ClearRenderTargetView(mLitBufferPS->GetRenderTarget(), zeros);
+    // NOTE: Complementary Z buffer: clear to 0 (far)!
+    d3dDeviceContext->ClearDepthStencilView(mDepthBuffer->GetDepthStencil(), D3D11_CLEAR_DEPTH, 0.0f, 0);
+
+    d3dDeviceContext->IASetInputLayout(mMeshVertexLayout);
+
+    d3dDeviceContext->VSSetConstantBuffers(0, 1, &mPerFrameConstants);
+    d3dDeviceContext->VSSetShader(mGeometryVS->GetShader(), 0, 0);
+    
+    d3dDeviceContext->GSSetShader(0, 0, 0);
+
+    d3dDeviceContext->RSSetViewports(1, viewport);
+
+    d3dDeviceContext->PSSetConstantBuffers(0, 1, &mPerFrameConstants);
+    d3dDeviceContext->PSSetShaderResources(5, 1, &lightBufferSRV);
+    d3dDeviceContext->PSSetSamplers(0, 1, &mDiffuseSampler);
+    // Diffuse texture set per-material by DXUT mesh routines
+
+    d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
+    
+    // Pre-Z pass if requested
+    if (doPreZ) {
+        d3dDeviceContext->OMSetRenderTargets(0, 0, mDepthBuffer->GetDepthStencil());
+            
+        // Render opaque geometry
+        if (mesh_opaque.IsLoaded()) {
+            d3dDeviceContext->RSSetState(mRasterizerState);
+            d3dDeviceContext->PSSetShader(0, 0, 0);
+            mesh_opaque.Render(d3dDeviceContext, 0);
+        }
+
+        // Render alpha tested geometry
+        if (mesh_alpha.IsLoaded()) {
+            d3dDeviceContext->RSSetState(mDoubleSidedRasterizerState);
+            // NOTE: Use simplified alpha test shader that only clips
+            d3dDeviceContext->PSSetShader(mForwardAlphaTestOnlyPS->GetShader(), 0, 0);
+            mesh_alpha.Render(d3dDeviceContext, 0);
+        }
+    }
+
+    // Set up render targets
+    ID3D11RenderTargetView *renderTargets[1] = {mLitBufferPS->GetRenderTarget()};
+    d3dDeviceContext->OMSetRenderTargets(1, renderTargets, mDepthBuffer->GetDepthStencil());
+    d3dDeviceContext->OMSetBlendState(mGeometryBlendState, 0, 0xFFFFFFFF);
+    
+    // Render opaque geometry
+    if (mesh_opaque.IsLoaded()) {
+        d3dDeviceContext->RSSetState(mRasterizerState);
+        d3dDeviceContext->PSSetShader(mForwardPS->GetShader(), 0, 0);
+        mesh_opaque.Render(d3dDeviceContext, 0);
+    }
+
+    // Render alpha tested geometry
+    if (mesh_alpha.IsLoaded()) {
+        d3dDeviceContext->RSSetState(mDoubleSidedRasterizerState);
+        d3dDeviceContext->PSSetShader(mForwardAlphaTestPS->GetShader(), 0, 0);
+        mesh_alpha.Render(d3dDeviceContext, 0);
+    }
+
+    // Cleanup (aka make the runtime happy)
+    d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
+
+    return mLitBufferPS->GetShaderResource();
+}
+
+#pragma endregion

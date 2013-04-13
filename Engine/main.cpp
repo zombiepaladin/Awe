@@ -12,6 +12,9 @@
 // assume any responsibility for any errors which may appear in this software nor any
 // responsibility to update it.
 
+//Modified by Matthew Hart, Pavel Janovsky
+//#MSH = modified or commented by Matthew Hart
+
 #include "DXUT.h"
 #include "DXUTcamera.h"
 #include "DXUTgui.h"
@@ -72,6 +75,7 @@ D3DXMATRIXA16 gWorldMatrix;
 ID3D11ShaderResourceView* gSkyboxSRV = 0;
 
 // DXUT GUI stuff
+#pragma region DXUT GUI stuff
 CDXUTDialogResourceManager gDialogResourceManager;
 CD3DSettingsDlg gD3DSettingsDlg;
 CDXUTDialog gHUD[HUD_NUM];
@@ -81,6 +85,7 @@ CDXUTComboBox* gSceneSelectCombo = 0;
 CDXUTComboBox* gCullTechniqueCombo = 0;
 CDXUTSlider* gLightsSlider = 0;
 CDXUTTextHelper* gTextHelper = 0;
+#pragma endregion
 
 float gAspectRatio;
 bool gDisplayUI = true;
@@ -89,7 +94,8 @@ bool gZeroNextFrameTime = true;
 // Any UI state passed directly to rendering shaders
 UIConstants gUIConstants;
 
-
+#pragma region Function Prototypes
+#pragma region Callback Declarations
 bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* deviceSettings, void* userContext);
 void CALLBACK OnFrameMove(double time, float elapsedTime, void* userContext);
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* noFurtherProcessing,
@@ -104,6 +110,7 @@ void CALLBACK OnD3D11ReleasingSwapChain(void* userContext);
 void CALLBACK OnD3D11DestroyDevice(void* userContext);
 void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d3dDeviceContext, double time,
                                  float elapsedTime, void* userContext);
+#pragma endregion
 
 void LoadSkybox(LPCWSTR fileName);
 
@@ -114,7 +121,7 @@ void DestroyScene();
 
 void InitUI();
 void UpdateUIState();
-
+#pragma endregion
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, INT nCmdShow)
 {
@@ -123,6 +130,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+#pragma region Callback prototypes
     DXUTSetCallbackDeviceChanging(ModifyDeviceSettings);
     DXUTSetCallbackMsgProc(MsgProc);
     DXUTSetCallbackKeyboard(OnKeyboard);
@@ -133,16 +141,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     DXUTSetCallbackD3D11FrameRender(OnD3D11FrameRender);
     DXUTSetCallbackD3D11SwapChainReleasing(OnD3D11ReleasingSwapChain);
     DXUTSetCallbackD3D11DeviceDestroyed(OnD3D11DestroyDevice);
-    
+#pragma endregion
+
     DXUTSetIsInGammaCorrectMode(true);
 
     DXUTInit(true, true, 0);
     InitUI();
 
+#pragma region Adjust Display and Handling Settings
     DXUTSetCursorSettings(true, true);
     DXUTSetHotkeyHandling(true, true, false);
     DXUTCreateWindow(L"Deferred Shading");
     DXUTCreateDevice(D3D_FEATURE_LEVEL_11_0, true, 1280, 720);
+#pragma endregion
+
     DXUTMainLoop();
 
     return DXUTGetExitCode();
@@ -154,12 +166,15 @@ void InitUI()
     // Setup default UI state
     // NOTE: All of these are made directly available in the shader constant buffer
     // This is convenient for development purposes.
+
+#pragma region set UIConstants
     gUIConstants.lightingOnly = 0;
     gUIConstants.faceNormals = 0;
     gUIConstants.visualizeLightCount = 0;
     gUIConstants.visualizePerSampleShading = 0;
     gUIConstants.lightCullTechnique = CULL_COMPUTE_SHADER_TILE;
-    
+#pragma endregion
+
     gD3DSettingsDlg.Init(&gDialogResourceManager);
 
     for (int i = 0; i < HUD_NUM; ++i) {
@@ -169,6 +184,7 @@ void InitUI()
 
     int width = 200;
 
+#pragma region Generate Hud
     // Generic HUD
     {
         CDXUTDialog* HUD = &gHUD[HUD_GENERIC];
@@ -184,19 +200,24 @@ void InitUI()
         HUD->AddButton(UI_CHANGEDEVICE, L"Change device (F2)", 0, y, width, 23, VK_F2);
         y += 26;
 
+#pragma region Add MSAA select Combo Box Items
         HUD->AddComboBox(UI_MSAA, 0, y, width, 23, 0, false, &gMSAACombo);
         y += 26;
         gMSAACombo->AddItem(L"No MSAA", ULongToPtr(1));
         gMSAACombo->AddItem(L"2x MSAA", ULongToPtr(2));
         gMSAACombo->AddItem(L"4x MSAA", ULongToPtr(4));
         gMSAACombo->AddItem(L"8x MSAA", ULongToPtr(8));
+#pragma endregion
 
+#pragma region Add Scene/mesh select Combo Box items
         HUD->AddComboBox(UI_SELECTEDSCENE, 0, y, width, 23, 0, false, &gSceneSelectCombo);
         y += 26;
 		gSceneSelectCombo->AddItem(L"Cube World (AWE)", ULongToPtr(CUBE_WORLD));
         gSceneSelectCombo->AddItem(L"Power Plant", ULongToPtr(POWER_PLANT_SCENE));
         gSceneSelectCombo->AddItem(L"Sponza", ULongToPtr(SPONZA_SCENE));
+#pragma endregion
 
+#pragma region Add Options Checkboxes and sliders
         HUD->AddCheckBox(UI_ANIMATELIGHT, L"Animate Lights", 0, y, width, 23, false, VK_SPACE, false, &gAnimateLightCheck);
         y += 26;
 
@@ -216,7 +237,9 @@ void InitUI()
         y += 26;
         HUD->AddSlider(UI_LIGHTS, 0, y, width, 23, 0, MAX_LIGHTS_POWER, MAX_LIGHTS_POWER, false, &gLightsSlider);
         y += 26;
+#pragma endregion
 
+#pragma region Add Lighting method select Combo box items
         HUD->AddComboBox(UI_CULLTECHNIQUE, 0, y, width, 23, 0, false, &gCullTechniqueCombo);
         y += 26;
         gCullTechniqueCombo->AddItem(L"No Cull Forward", ULongToPtr(CULL_FORWARD_NONE));
@@ -226,6 +249,7 @@ void InitUI()
         gCullTechniqueCombo->AddItem(L"Quad Deferred Light", ULongToPtr(CULL_QUAD_DEFERRED_LIGHTING));
         gCullTechniqueCombo->AddItem(L"Compute Shader Tile", ULongToPtr(CULL_COMPUTE_SHADER_TILE));
         gCullTechniqueCombo->SetSelectedByData(ULongToPtr(gUIConstants.lightCullTechnique));
+#pragma endregion
 
         HUD->SetSize(width, y);
     }
@@ -240,7 +264,8 @@ void InitUI()
         // Initially hidden
         HUD->SetVisible(false);
     }
-    
+#pragma endregion
+
     UpdateUIState();
 }
 
@@ -253,6 +278,7 @@ void UpdateUIState()
 
 void InitApp(ID3D11Device* d3dDevice)
 {
+	//#MSH if an app exists, destroy it
     DestroyApp();
     
     // Get current UI settings
@@ -293,6 +319,7 @@ void InitScene(ID3D11Device* d3dDevice)
     D3DXVECTOR3 sceneTranslation(0.0f, 0.0f, 0.0f);
     bool zAxisUp = false;
 
+#pragma region Pick Scene
     SCENE_SELECTION scene = static_cast<SCENE_SELECTION>(PtrToUlong(gSceneSelectCombo->GetSelectedData()));
     switch (scene) {
 		case CUBE_WORLD: {
@@ -319,7 +346,8 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
     };
-    
+#pragma endregion
+
     D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
     if (zAxisUp) {
         D3DXMATRIXA16 m;
@@ -348,7 +376,7 @@ void DestroyScene()
     SAFE_RELEASE(gSkyboxSRV);
 }
 
-
+#pragma region Callbacks
 bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* deviceSettings, void* userContext)
 {
     // For the first device created if its a REF device, optionally display a warning dialog box
@@ -610,3 +638,4 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
         gTextHelper->End();
     }
 }
+#pragma endregion
