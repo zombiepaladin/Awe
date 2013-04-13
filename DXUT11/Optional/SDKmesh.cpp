@@ -622,6 +622,7 @@ void CDXUTSDKMesh::SetInFrustumFlags(bool flag)
 //--------------------------------------------------------------------------------------
 // INTEL: Perfom frustum culling and set flags accordingly
 //--------------------------------------------------------------------------------------
+//#MSH function used
 void CDXUTSDKMesh::ComputeInFrustumFlags(const D3DXMATRIXA16 &worldViewProj,
                                          bool cullNear)
 {
@@ -843,6 +844,7 @@ void CDXUTSDKMesh::TransformFrameAbsolute( UINT iFrame, double fTime )
 
 #define MAX_D3D11_VERTEX_STREAMS D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT
 //--------------------------------------------------------------------------------------
+//#MSH Function used
 void CDXUTSDKMesh::RenderMesh( UINT iMesh,
                                bool bAdjacent,
                                ID3D11DeviceContext* pd3dDeviceContext,
@@ -951,6 +953,7 @@ void CDXUTSDKMesh::RenderMesh( UINT iMesh,
 }
 
 //--------------------------------------------------------------------------------------
+//#MSH Function used
 void CDXUTSDKMesh::RenderFrame( UINT iFrame,
                                 bool bAdjacent,
                                 ID3D11DeviceContext* pd3dDeviceContext,
@@ -1351,6 +1354,7 @@ void CDXUTSDKMesh::TransformMesh( D3DXMATRIX* pWorld, double fTime )
 
 
 //--------------------------------------------------------------------------------------
+//#MSH Function used
 void CDXUTSDKMesh::Render( ID3D11DeviceContext* pd3dDeviceContext,
                            UINT iDiffuseSlot,
                            UINT iNormalSlot,
@@ -1766,6 +1770,7 @@ bool CDXUTSDKMesh::CheckLoadDone()
 }
 
 //--------------------------------------------------------------------------------------
+//#MSH Function used
 bool CDXUTSDKMesh::IsLoaded()
 {
     if( m_pStaticMeshData && !m_bLoading )

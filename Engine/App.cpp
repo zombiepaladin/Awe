@@ -529,6 +529,8 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
     // NOTE: We actually only need to clear the depth buffer here since we replace unwritten (i.e. far plane) samples
     // with the skybox. We use the depth buffer to reconstruct position and only in-frustum positions are shaded.
     // NOTE: Complementary Z buffer: clear to 0 (far)!
+
+#pragma region Set d3dDeviceContext 
     d3dDeviceContext->ClearDepthStencilView(mDepthBuffer->GetDepthStencil(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0.0f, 0);
 
     d3dDeviceContext->IASetInputLayout(mMeshVertexLayout);
@@ -548,7 +550,8 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
     d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
     d3dDeviceContext->OMSetRenderTargets(static_cast<UINT>(mGBufferRTV.size()), &mGBufferRTV.front(), mDepthBuffer->GetDepthStencil());
     d3dDeviceContext->OMSetBlendState(mGeometryBlendState, 0, 0xFFFFFFFF);
-    
+#pragma endregion
+
     // Render opaque geometry
     if (mesh_opaque.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
@@ -575,8 +578,9 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
 {
     // TODO: Clean up the branchiness here a bit... refactor into small functions
          
-    switch (ui->lightCullTechnique) {
-
+    switch (ui->lightCullTechnique) 
+	{
+#pragma region  CULL_COMPUTE_SHADER_TILE
     case CULL_COMPUTE_SHADER_TILE:
     {
         // No need to clear, we write all pixels
@@ -596,7 +600,9 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->Dispatch(dispatchWidth, dispatchHeight, 1);
     }
     break;
+#pragma endregion
 
+#pragma region CULL_QUAD & CULL_QUAD_DEFERRED_LIGHTING
     case CULL_QUAD:
     case CULL_QUAD_DEFERRED_LIGHTING: {
         bool deferredLighting = (ui->lightCullTechnique == CULL_QUAD_DEFERRED_LIGHTING);
@@ -607,6 +613,7 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->ClearRenderTargetView(accumulateBuffer->GetRenderTarget(), zeros);
         
         if (mMSAASamples > 1) {
+		#pragma region Set d3dDeviceContexts when using MSAA
             // Full screen triangle setup
             d3dDeviceContext->IASetInputLayout(0);
             d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -627,9 +634,11 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
             d3dDeviceContext->OMSetDepthStencilState(mWriteStencilState, 1);
             d3dDeviceContext->OMSetRenderTargets(0, 0, mDepthBufferReadOnlyDSV);
             d3dDeviceContext->Draw(3, 0);
+		#pragma endregion
         }
 
         // Point primitives expanded into quads in the geometry shader
+		#pragma region Set more d3dDeviceContexts
         d3dDeviceContext->IASetInputLayout(0);
         d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
         d3dDeviceContext->IASetVertexBuffers(0, 0, 0, 0, 0);
@@ -646,6 +655,7 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->PSSetConstantBuffers(0, 1, &mPerFrameConstants);
         d3dDeviceContext->PSSetShaderResources(0, static_cast<UINT>(mGBufferSRV.size()), &mGBufferSRV.front());
         d3dDeviceContext->PSSetShaderResources(5, 1, &lightBufferSRV);
+
 
         // Additively blend into lit buffer        
         ID3D11RenderTargetView * renderTargets[1] = {accumulateBuffer->GetRenderTarget()};
@@ -666,9 +676,11 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
             d3dDeviceContext->OMSetDepthStencilState(mEqualStencilState, 1);
             d3dDeviceContext->Draw(mActiveLights, 0);
         }
+		#pragma endregion
 
         if (deferredLighting) {
             // Final screen-space pass to combine diffuse and specular
+			#pragma region Set Deferred lighting d3dDeviceContext options
             d3dDeviceContext->IASetInputLayout(0);
             d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             d3dDeviceContext->IASetVertexBuffers(0, 0, 0, 0, 0);
@@ -687,6 +699,7 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
             d3dDeviceContext->PSSetShader(mGPUQuadDLResolvePS->GetShader(), 0, 0);
             d3dDeviceContext->OMSetDepthStencilState(mEqualStencilState, 0);
             d3dDeviceContext->Draw(3, 0);
+			#pragma endregion
 
             if (mMSAASamples > 1) {
                 // Do sample frequency resolve
@@ -697,7 +710,9 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         }
     }
     break;
-    
+#pragma endregion
+
+#pragma region CULL_DEFERRED_NONE
     case CULL_DEFERRED_NONE:
     {
         // Clear
@@ -705,6 +720,7 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->ClearRenderTargetView(mLitBufferPS->GetRenderTarget(), zeros);
         
         // Full screen triangle setup
+		#pragma region Triangle setup in d3dDeviceContext
         d3dDeviceContext->IASetInputLayout(0);
         d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         d3dDeviceContext->IASetVertexBuffers(0, 0, 0, 0, 0);
@@ -718,13 +734,16 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->PSSetConstantBuffers(0, 1, &mPerFrameConstants);
         d3dDeviceContext->PSSetShaderResources(0, static_cast<UINT>(mGBufferSRV.size()), &mGBufferSRV.front());
         d3dDeviceContext->PSSetShaderResources(5, 1, &lightBufferSRV);
+#pragma endregion
 
         if (mMSAASamples > 1) {
             // Set stencil mask for samples that require per-sample shading
+			#pragma region Set stencil mask in d3dDeviceContext
             d3dDeviceContext->PSSetShader(mRequiresPerSampleShadingPS->GetShader(), 0, 0);
             d3dDeviceContext->OMSetDepthStencilState(mWriteStencilState, 1);
             d3dDeviceContext->OMSetRenderTargets(0, 0, mDepthBufferReadOnlyDSV);
             d3dDeviceContext->Draw(3, 0);
+			#pragma endregion
         }
                 
         // Additively blend into back buffer
@@ -745,10 +764,12 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
         }
     }
     break;
+#pragma endregion
 
     };  // switch
 
     // Cleanup (aka make the runtime happy)
+#pragma region Cleanup
     d3dDeviceContext->VSSetShader(0, 0, 0);
     d3dDeviceContext->GSSetShader(0, 0, 0);
     d3dDeviceContext->PSSetShader(0, 0, 0);
@@ -759,6 +780,7 @@ void App::ComputeLighting(ID3D11DeviceContext* d3dDeviceContext,
     d3dDeviceContext->CSSetShaderResources(0, 8, nullSRV);
     ID3D11UnorderedAccessView *nullUAV[1] = {0};
     d3dDeviceContext->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
+#pragma endregion
 }
 
 
@@ -773,6 +795,7 @@ void App::RenderSkyboxAndToneMap(ID3D11DeviceContext* d3dDeviceContext,
     skyboxViewport.MinDepth = 1.0f;
     skyboxViewport.MaxDepth = 1.0f;
 
+#pragma region Set d3dDeviceContexts
     d3dDeviceContext->IASetInputLayout(mMeshVertexLayout);
 
     d3dDeviceContext->VSSetConstantBuffers(0, 1, &mPerFrameConstants);
@@ -787,6 +810,7 @@ void App::RenderSkyboxAndToneMap(ID3D11DeviceContext* d3dDeviceContext,
 
     d3dDeviceContext->PSSetShaderResources(5, 1, &skybox);
     d3dDeviceContext->PSSetShaderResources(6, 1, &depthSRV);
+#pragma endregion
 
     // Bind the appropriate lit buffer depending on the technique
     ID3D11ShaderResourceView* litViews[2] = {0, 0};
@@ -807,9 +831,11 @@ void App::RenderSkyboxAndToneMap(ID3D11DeviceContext* d3dDeviceContext,
     mSkyboxMesh.Render(d3dDeviceContext);
 
     // Cleanup (aka make the runtime happy)
+#pragma region Cleanup
     d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
     ID3D11ShaderResourceView* nullViews[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     d3dDeviceContext->PSSetShaderResources(0, 10, nullViews);
+#pragma endregion
 }
 
 //#MSH This region holds the functions that are useful for demo purposes but may be unneccesary for the game.

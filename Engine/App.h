@@ -135,7 +135,7 @@ private:
                          ID3D11ShaderResourceView *lightBufferSRV,
                          const D3D11_VIEWPORT* viewport,
                          const UIConstants* ui);
-    
+#pragma region Field Declarations
     unsigned int mMSAASamples;
     float mTotalTime;
 
@@ -215,4 +215,5 @@ private:
     std::vector<D3DXVECTOR3> mPointLightPositionWorld;
     
     StructuredBuffer<PointLight>* mLightBuffer;
+#pragma endregion
 };
