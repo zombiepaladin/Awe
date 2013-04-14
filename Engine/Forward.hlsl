@@ -23,19 +23,24 @@ float4 ForwardPS(GeometryVSOut input) : SV_Target
     // How many total lights?
     uint totalLights, dummy;
     gLight.GetDimensions(totalLights, dummy);
-
+	SurfaceData surface = ComputeSurfaceDataFromGeometry(input);
     float3 lit = float3(0.0f, 0.0f, 0.0f);
 
     [branch] if (mUI.visualizeLightCount) {
         lit = (float(totalLights) * rcp(255.0f)).xxx;
     } else {
-        SurfaceData surface = ComputeSurfaceDataFromGeometry(input);
+        
         for (uint lightIndex = 0; lightIndex < totalLights; ++lightIndex) {
             PointLight light = gLight[lightIndex];
             AccumulateBRDF(surface, light, lit);
         }
     }
 
+	float3 ambientLight = float3(0.01f,0.01125f,0.01275f);
+	if(lit.x <ambientLight.x && lit.y <ambientLight.y && lit.z<ambientLight.z)
+	{
+		lit.xyz= surface.albedo.xyz* ambientLight;
+	}
     return float4(lit, 1.0f);
 }
 
