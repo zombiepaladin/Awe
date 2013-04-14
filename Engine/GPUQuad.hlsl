@@ -156,6 +156,14 @@ float4 GPUQuad(GPUQuadGSOut input, uint sampleIndex)
             PointLight light = gLight[input.lightIndex.x];
             AccumulateBRDF(surface, light, lit);
         }    
+
+		float3 ambientLight = float3(0.01f,0.01125f,0.01275f);
+		if(lit.x <ambientLight.x && lit.y <ambientLight.y && lit.z<ambientLight.z)
+		{
+			uint2 coords = uint2(input.positionViewport.xy);
+			SurfaceData surface2 = ComputeSurfaceDataFromGBufferSample(coords, sampleIndex);
+			lit.xyz=surface2.albedo.xyz * ambientLight;
+		}
     }
 
     return float4(lit, 1.0f);

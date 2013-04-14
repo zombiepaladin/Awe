@@ -132,7 +132,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-#pragma region Callback prototypes
+#pragma region Callback Calls
     DXUTSetCallbackDeviceChanging(ModifyDeviceSettings);
     DXUTSetCallbackMsgProc(MsgProc);
     DXUTSetCallbackKeyboard(OnKeyboard);
@@ -174,7 +174,7 @@ void InitUI()
     gUIConstants.faceNormals = 0;
     gUIConstants.visualizeLightCount = 0;
     gUIConstants.visualizePerSampleShading = 0;
-    gUIConstants.lightCullTechnique = CULL_COMPUTE_SHADER_TILE;
+    gUIConstants.lightCullTechnique = CULL_QUAD_DEFERRED_LIGHTING;
 #pragma endregion
 
     gD3DSettingsDlg.Init(&gDialogResourceManager);
