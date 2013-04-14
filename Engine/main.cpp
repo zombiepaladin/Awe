@@ -349,7 +349,7 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
 		case MULTI_SCENE:{
-			gMeshOpaque.Create(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
+			gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");;
 			gMeshOpaque2.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
             sceneScaling = 1.0f;
@@ -599,13 +599,9 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     }
 
     // Lazily load scene
-    if (!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded()) {
+    if (!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded() &&!gMeshOpaque2.IsLoaded()) {
         InitScene(d3dDevice);
     }
-	else if(gMeshOpaque2.IsLoaded()&&!gMeshAlpha.IsLoaded())
-	{
-		InitScene(d3dDevice);
-	}
 
     ID3D11RenderTargetView* pRTV = DXUTGetD3D11RenderTargetView();
     
