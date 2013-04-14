@@ -352,7 +352,7 @@ void InitScene(ID3D11Device* d3dDevice)
 			gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");;
 			gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
-            sceneScaling = 1.0f;
+            sceneScaling = .05f;
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
