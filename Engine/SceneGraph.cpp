@@ -1,7 +1,3 @@
-#include <list>
+#include "SceneGraph.h"
 
-class SceneGraph
-{
-public:
-private:
-}
+using namespace std;

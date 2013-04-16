@@ -588,16 +588,17 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
 
 	// Fill in frame constants
 #pragma region Frame constants
-    {D3DXMatrixTranslation(&worldMatrix,10,0,0);
+    {D3DXMatrixTranslation(&worldMatrix,0,10,0);
         d3dDeviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
 		constants->mCameraWorldViewProj = scaleMatrix * worldMatrix * cameraViewProj;
 		constants->mCameraWorldView = scaleMatrix * worldMatrix * cameraView;
 		if (mesh_opaque2.IsLoaded()) {
-		mesh_opaque2.ComputeInFrustumFlags(cameraWorldViewProj,0);
+		//mesh_opaque2.ComputeInFrustumFlags(cameraWorldViewProj,0);
 		}
 		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
 	}
+	
 #pragma endregion
 
 	if (mesh_opaque2.IsLoaded()) {

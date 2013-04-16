@@ -24,6 +24,7 @@
 #include "App.h"
 #include "ShaderDefines.h"
 #include <sstream>
+#include "SceneGraph.h"
 
 
 // Constants

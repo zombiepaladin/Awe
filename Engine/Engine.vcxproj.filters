@@ -48,6 +48,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="SceneGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h">
@@ -89,6 +90,7 @@
     <ClInclude Include="ShaderDefines.h">
       <Filter>Resource Files\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="SceneGraph.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BasicLoop.hlsl">

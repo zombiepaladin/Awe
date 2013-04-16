@@ -22,6 +22,7 @@
 #include "Buffer.h"
 #include <vector>
 #include <memory>
+#include "SceneGraph.h"
 
 enum LightCullTechnique {
     CULL_FORWARD_NONE = 0,
