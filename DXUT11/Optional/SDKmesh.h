@@ -8,10 +8,14 @@
 //   meets the specific needs of the application.
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
+//
+// Modified by Intel Corporation in 2010.
 //--------------------------------------------------------------------------------------
 #pragma once
 #ifndef _SDKMESH_
 #define _SDKMESH_
+
+#include <vector>           // INTEL
 
 //--------------------------------------------------------------------------------------
 // Hard Defines for the various structures
@@ -255,6 +259,16 @@ struct SDKANIMATION_FRAME_DATA
     };
 };
 
+// INTEL
+struct SDKMESH_BOUNDS
+{
+    D3DXVECTOR3 AABBMin;
+    D3DXVECTOR3 AABBMax;
+    D3DXVECTOR3 sphereCenter;
+    float sphereRadius;
+    bool inFrustum;
+};
+
 #ifndef _CONVERTER_APP_
 
 //--------------------------------------------------------------------------------------
@@ -327,6 +341,9 @@ protected:
     SDKMESH_SUBSET* m_pSubsetArray;
     SDKMESH_FRAME* m_pFrameArray;
     SDKMESH_MATERIAL* m_pMaterialArray;
+
+    // INTEL: Subset bounds - parallel to subset array
+    std::vector<SDKMESH_BOUNDS> m_pSubsetBounds;
 
     // Adjacency information (not part of the m_pStaticMeshData, so it must be created and destroyed separately )
     SDKMESH_INDEX_BUFFER_HEADER* m_pAdjacencyIndexBufferArray;
@@ -431,6 +448,11 @@ public:
     void                            TransformBindPose( D3DXMATRIX* pWorld );
     void                            TransformMesh( D3DXMATRIX* pWorld, double fTime );
 
+    // INTEL: Manage frustum checks on mesh subsets. Results are used for future rendering
+    // to cull subsets that are outside of the frustum.
+    void SetInFrustumFlags(bool flag);
+    void ComputeInFrustumFlags(const D3DXMATRIXA16 &worldViewProj,
+                               bool cullNear = true);
 
     //Direct3D 11 Rendering
     virtual void                    Render( ID3D11DeviceContext* pd3dDeviceContext,
@@ -485,6 +507,7 @@ public:
     SDKMESH_MESH* GetMesh( UINT iMesh );
     UINT                            GetNumSubsets( UINT iMesh );
     SDKMESH_SUBSET* GetSubset( UINT iMesh, UINT iSubset );
+    SDKMESH_BOUNDS* GetSubsetBounds( UINT iMesh, UINT iSubset );        // INTEL
     UINT                            GetVertexStride( UINT iMesh, UINT iVB );
     UINT                            GetNumFrames();
     SDKMESH_FRAME*                  GetFrame( UINT iFrame );
