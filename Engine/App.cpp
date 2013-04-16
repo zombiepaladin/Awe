@@ -433,7 +433,7 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
     
     D3DXMATRIXA16 cameraViewInv;
     D3DXMatrixInverse(&cameraViewInv, 0, &cameraView);
-        
+	
     // Compute composite matrices
     D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
     D3DXMATRIXA16 cameraWorldViewProj = worldMatrix * cameraViewProj;
@@ -553,6 +553,30 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
     d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
     d3dDeviceContext->OMSetRenderTargets(static_cast<UINT>(mGBufferRTV.size()), &mGBufferRTV.front(), mDepthBuffer->GetDepthStencil());
     d3dDeviceContext->OMSetBlendState(mGeometryBlendState, 0, 0xFFFFFFFF);
+	
+	D3DXMATRIXA16 cameraProj = *viewerCamera->GetProjMatrix();
+    D3DXMATRIXA16 cameraView = *viewerCamera->GetViewMatrix();
+	D3DXMATRIXA16 worldMatrix;
+	D3DXMATRIXA16 scaleMatrix;
+	D3DXMatrixScaling(&scaleMatrix,0.05f,0.05f,0.05f);
+	D3DXMatrixTranslation(&worldMatrix,0,0,0);
+	// Compute composite matrices
+    D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
+    D3DXMATRIXA16 cameraWorldViewProj =scaleMatrix * worldMatrix * cameraViewProj;
+	
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+#pragma endregion
+
+	// Fill in frame constants
+#pragma region Frame constants
+    {        
+        d3dDeviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
+		constants->mCameraWorldViewProj = scaleMatrix * worldMatrix * cameraViewProj;
+		constants->mCameraWorldView = scaleMatrix * worldMatrix * cameraView;
+		mesh_opaque.ComputeInFrustumFlags(cameraWorldViewProj,0);
+		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
+	}
 #pragma endregion
 
     // Render opaque geometry
@@ -561,6 +585,20 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
         mesh_opaque.Render(d3dDeviceContext, 0);
     }
+
+	// Fill in frame constants
+#pragma region Frame constants
+    {D3DXMatrixTranslation(&worldMatrix,10,0,0);
+        d3dDeviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
+		constants->mCameraWorldViewProj = scaleMatrix * worldMatrix * cameraViewProj;
+		constants->mCameraWorldView = scaleMatrix * worldMatrix * cameraView;
+		if (mesh_opaque2.IsLoaded()) {
+		mesh_opaque2.ComputeInFrustumFlags(cameraWorldViewProj,0);
+		}
+		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
+	}
+#pragma endregion
 
 	if (mesh_opaque2.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
