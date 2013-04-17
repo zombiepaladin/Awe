@@ -466,8 +466,9 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
     // Geometry phase
     if(sceneGraph.IsLoaded())
 	{
-		sceneGraph.ComputeInFrustumFlags(cameraWorldViewProj);
+		sceneGraph.ComputeInFrustumFlags(cameraViewProj);
 	}
+#pragma region Old Code
 	/*if (mesh_opaque.IsLoaded()) {
         mesh_opaque.ComputeInFrustumFlags(cameraWorldViewProj);
     }
@@ -477,6 +478,7 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
 	if(mesh_opaque2.IsLoaded()){
 		mesh_opaque2.ComputeInFrustumFlags(cameraWorldViewProj);
 	}*/
+#pragma endregion
 
     // Setup lights
     ID3D11ShaderResourceView *lightBufferSRV = SetupLights(d3dDeviceContext, cameraView);
@@ -558,13 +560,23 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
 	
 	D3DXMATRIXA16 cameraProj = *viewerCamera->GetProjMatrix();
     D3DXMATRIXA16 cameraView = *viewerCamera->GetViewMatrix();
-	D3DXMATRIXA16 worldMatrix;
+#pragma region Old Code
+	/*D3DXMATRIXA16 worldMatrix;
 	D3DXMATRIXA16 scaleMatrix;
 	D3DXMatrixScaling(&scaleMatrix,0.05f,0.05f,0.05f);
 	D3DXMatrixTranslation(&worldMatrix,0,0,0);
-	// Compute composite matrices
-    D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
-    D3DXMATRIXA16 cameraWorldViewProj =scaleMatrix * worldMatrix * cameraViewProj;
+	
+    //D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
+	*/
+#pragma endregion
+	if(sceneGraph.IsLoaded())
+	{
+		d3dDeviceContext->RSSetState(mRasterizerState);
+        d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
+		sceneGraph.Render(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
+	}
+#pragma region Old Code
+   /* D3DXMATRIXA16 cameraWorldViewProj =scaleMatrix * worldMatrix * cameraViewProj;
 	
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 #pragma endregion
@@ -581,19 +593,14 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
 		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
 	}
 #pragma endregion
-	if(sceneGraph.IsLoaded())
-	{
-		d3dDeviceContext->RSSetState(mRasterizerState);
-        d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
-		sceneGraph.Render(d3dDeviceContext);
-	}
+
     // Render opaque geometry
     /*
 	if (mesh_opaque.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
         mesh_opaque.Render(d3dDeviceContext, 0);
-    }*/
+    }
 
 	// Fill in frame constants
 #pragma region Frame constants
@@ -608,7 +615,6 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
 		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
 	}*/
 	
-#pragma endregion
 	/*
 	if (mesh_opaque2.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
@@ -624,7 +630,10 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
         mesh_alpha.Render(d3dDeviceContext, 0);
     }
 	*/
+
     // Cleanup (aka make the runtime happy)
+#pragma endregion
+
     d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
 }
 
@@ -928,7 +937,8 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
     // Diffuse texture set per-material by DXUT mesh routines
 
     d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
-    
+    D3DXMATRIXA16 cameraProj = *viewerCamera->GetProjMatrix();
+    D3DXMATRIXA16 cameraView = *viewerCamera->GetViewMatrix();
     // Pre-Z pass if requested
     if (doPreZ) {
         d3dDeviceContext->OMSetRenderTargets(0, 0, mDepthBuffer->GetDepthStencil());
@@ -938,8 +948,9 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
 		{
 			d3dDeviceContext->RSSetState(mRasterizerState);
             d3dDeviceContext->PSSetShader(0, 0, 0);
-			sceneGraph.Render(d3dDeviceContext);
+			sceneGraph.Render(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
 		}
+#pragma region Old Code
 		/*
         if (mesh_opaque.IsLoaded()) {
             d3dDeviceContext->RSSetState(mRasterizerState);
@@ -958,6 +969,7 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
             d3dDeviceContext->PSSetShader(mForwardAlphaTestOnlyPS->GetShader(), 0, 0);
             mesh_alpha.Render(d3dDeviceContext, 0);
         }*/
+#pragma endregion
     }
 
     // Set up render targets
@@ -970,8 +982,9 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
 	{
 		d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mForwardPS->GetShader(), 0, 0);
-		sceneGraph.Render(d3dDeviceContext);
+		sceneGraph.Render(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
 	}
+#pragma region Old Code
 	/*
     if (mesh_opaque.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
@@ -990,6 +1003,7 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
         d3dDeviceContext->PSSetShader(mForwardAlphaTestPS->GetShader(), 0, 0);
         mesh_alpha.Render(d3dDeviceContext, 0);
     }*/
+#pragma endregion
 
     // Cleanup (aka make the runtime happy)
     d3dDeviceContext->OMSetRenderTargets(0, 0, 0);

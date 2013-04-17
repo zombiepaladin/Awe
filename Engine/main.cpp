@@ -317,7 +317,6 @@ void LoadSkybox(ID3D11Device* d3dDevice, LPCWSTR fileName)
 void InitScene(ID3D11Device* d3dDevice)
 {
     DestroyScene();
-
     D3DXVECTOR3 cameraEye(0.0f, 0.0f, 0.0f);
     D3DXVECTOR3 cameraAt(0.0f, 0.0f, 0.0f);
     float sceneScaling = 1.0f;
@@ -328,55 +327,113 @@ void InitScene(ID3D11Device* d3dDevice)
     SCENE_SELECTION scene = static_cast<SCENE_SELECTION>(PtrToUlong(gSceneSelectCombo->GetSelectedData()));
     switch (scene) {
 		case CUBE_WORLD: {
+            sceneScaling = 1.0f;
+
+			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
+			if (zAxisUp) {
+				D3DXMATRIXA16 m;
+				D3DXMatrixRotationX(&m, -D3DX_PI / 2.0f);
+				gWorldMatrix *= m;
+			}
+			{
+				D3DXMATRIXA16 t;
+				D3DXMatrixTranslation(&t, sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+				gWorldMatrix *= t;
+			}
+
+			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
+
 			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
             //gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
-            sceneScaling = 1.0f;
+
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
 
         case POWER_PLANT_SCENE: {
+            sceneScaling = 1.0f;
+
+			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
+			if (zAxisUp) {
+				D3DXMATRIXA16 m;
+				D3DXMatrixRotationX(&m, -D3DX_PI / 2.0f);
+				gWorldMatrix *= m;
+			}
+			{
+				D3DXMATRIXA16 t;
+				D3DXMatrixTranslation(&t, sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+				gWorldMatrix *= t;
+			}
+			
+			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
+
 			sceneGraph.Add(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
-            sceneScaling = 1.0f;
+
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
 
         case SPONZA_SCENE: {
-            sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
+
+            sceneScaling = 0.05f;
+
+			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
+			if (zAxisUp) {
+				D3DXMATRIXA16 m;
+				D3DXMatrixRotationX(&m, -D3DX_PI / 2.0f);
+				gWorldMatrix *= m;
+			}
+			{
+				D3DXMATRIXA16 t;
+				D3DXMatrixTranslation(&t, sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+				gWorldMatrix *= t;
+			}
+			
+			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
+			
+
+			sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
-            sceneScaling = 0.05f;
+
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
 		case MULTI_SCENE:{
+            sceneScaling = .05f;
+			
+			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
+			if (zAxisUp) {
+				D3DXMATRIXA16 m;
+				D3DXMatrixRotationX(&m, -D3DX_PI / 2.0f);
+				gWorldMatrix *= m;
+			}
+			{
+				D3DXMATRIXA16 t;
+				D3DXMatrixTranslation(&t, sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+				gWorldMatrix *= t;
+			}
+			
+			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
+
 			sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
-			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
+			D3DXMATRIXA16 translate;
+			D3DXMatrixTranslation(&translate,0,10,0);
+			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			//gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
-            sceneScaling = .05f;
+
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
     };
 #pragma endregion
 
-    D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
-    if (zAxisUp) {
-        D3DXMATRIXA16 m;
-        D3DXMatrixRotationX(&m, -D3DX_PI / 2.0f);
-        gWorldMatrix *= m;
-    }
-    {
-        D3DXMATRIXA16 t;
-        D3DXMatrixTranslation(&t, sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
-        gWorldMatrix *= t;
-    }
+   
 
     gViewerCamera.SetViewParams(&cameraEye, &cameraAt);
     gViewerCamera.SetScalers(0.01f, 10.0f);
