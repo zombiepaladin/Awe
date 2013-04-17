@@ -31,7 +31,10 @@ SceneGraph::~SceneGraph()
 
 bool SceneGraph::IsLoaded()
 {
-	
+	if(meshList.empty())
+	{
+		return false;
+	}
 	vector<CDXUTSDKMesh*>::iterator i;
 	for(i=meshList.begin();i!=meshList.end();i++)
 	{
