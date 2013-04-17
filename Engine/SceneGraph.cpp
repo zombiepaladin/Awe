@@ -121,26 +121,32 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 
 void SceneGraph::EmptyList(vector<CDXUTSDKMesh*> list)
 {
-	list.erase(list.begin());
-	//unnecessary?
-	/*
-	vector<CDXUTSDKMesh*>::iterator i;
-	for(i=list.begin(); i!=list.end();i++)
+	if(!list.empty())
 	{
-		SAFE_DELETE(*i);
-	}*/
+		list.erase(list.begin());
+		//unnecessary?
+		/*
+		vector<CDXUTSDKMesh*>::iterator i;
+		for(i=list.begin(); i!=list.end();i++)
+		{
+			SAFE_DELETE(*i);
+		}*/
+	}
 }
 
 void SceneGraph::EmptyList(vector<D3DXMATRIXA16*> list)
 {
-	list.erase(list.begin());
-	//unnecessary?
-	/*
-	vector<D3DXMATRIXA16*>::iterator i;
-	for(i=list.begin(); i!=list.end();i++)
+	if(!list.empty())
 	{
-		SAFE_DELETE(*i);
-	}*/
+		list.erase(list.begin());
+		//unnecessary?
+		/*
+		vector<D3DXMATRIXA16*>::iterator i;
+		for(i=list.begin(); i!=list.end();i++)
+		{
+			SAFE_DELETE(*i);
+		}*/
+	}
 }
 
 void SceneGraph::Destroy()

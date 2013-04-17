@@ -24,6 +24,8 @@
 #include <memory>
 #include "SceneGraph.h"
 
+class SceneGraph;
+
 enum LightCullTechnique {
     CULL_FORWARD_NONE = 0,
     CULL_FORWARD_PREZ_NONE,
