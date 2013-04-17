@@ -16,6 +16,7 @@ class SceneGraph
 public:
 	SceneGraph();
 	~SceneGraph();
+	void Destroy();
 	void Render(ID3D11DeviceContext* deviceContext);
 	bool IsLoaded();
 	void ComputeInFrustumFlags(const D3DXMATRIXA16 &worldViewProj);

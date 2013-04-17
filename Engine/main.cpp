@@ -71,9 +71,10 @@ App* gApp = 0;
 
 CFirstPersonCamera gViewerCamera;
 
-CDXUTSDKMesh gMeshOpaque;
+SceneGraph sceneGraph;
+/*CDXUTSDKMesh gMeshOpaque;
 CDXUTSDKMesh gMeshOpaque2;
-CDXUTSDKMesh gMeshAlpha;
+CDXUTSDKMesh gMeshAlpha;*/
 D3DXMATRIXA16 gWorldMatrix;
 ID3D11ShaderResourceView* gSkyboxSRV = 0;
 
@@ -327,7 +328,8 @@ void InitScene(ID3D11Device* d3dDevice)
     SCENE_SELECTION scene = static_cast<SCENE_SELECTION>(PtrToUlong(gSceneSelectCombo->GetSelectedData()));
     switch (scene) {
 		case CUBE_WORLD: {
-            gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+            //gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
             sceneScaling = 1.0f;
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
@@ -335,7 +337,8 @@ void InitScene(ID3D11Device* d3dDevice)
         } break;
 
         case POWER_PLANT_SCENE: {
-            gMeshOpaque.Create(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
+			sceneGraph.Add(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
+			//gMeshOpaque.Create(d3dDevice, L"..\\media\\powerplant\\powerplant.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
             sceneScaling = 1.0f;
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
@@ -343,15 +346,18 @@ void InitScene(ID3D11Device* d3dDevice)
         } break;
 
         case SPONZA_SCENE: {
-            gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
+            sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
+			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
             sceneScaling = 0.05f;
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
 		case MULTI_SCENE:{
-			gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");;
-			gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
+			sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
+			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
+			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
+			//gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
             sceneScaling = .05f;
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
@@ -383,9 +389,10 @@ void InitScene(ID3D11Device* d3dDevice)
 
 void DestroyScene()
 {
-    gMeshOpaque.Destroy();
+	sceneGraph.Destroy();
+	/*gMeshOpaque.Destroy();
 	gMeshOpaque2.Destroy();
-    gMeshAlpha.Destroy();
+    gMeshAlpha.Destroy();*/
     SAFE_RELEASE(gSkyboxSRV);
 }
 
@@ -600,7 +607,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     }
 
     // Lazily load scene
-    if (!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded() &&!gMeshOpaque2.IsLoaded()) {
+    if (!sceneGraph.IsLoaded()/*!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded() &&!gMeshOpaque2.IsLoaded()*/) {
         InitScene(d3dDevice);
     }
 
@@ -614,7 +621,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     viewport.TopLeftX = 0.0f;
     viewport.TopLeftY = 0.0f;
 
-		 gApp->Render(d3dDeviceContext, pRTV, gMeshOpaque,gMeshOpaque2, gMeshAlpha, gSkyboxSRV,
+		 gApp->Render(d3dDeviceContext, pRTV, sceneGraph, gSkyboxSRV,
         gWorldMatrix, &gViewerCamera, &viewport, &gUIConstants);
 	
     if (gDisplayUI) {

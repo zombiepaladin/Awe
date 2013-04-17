@@ -84,8 +84,7 @@ public:
 
     void Render(ID3D11DeviceContext* d3dDeviceContext,
                 ID3D11RenderTargetView* backBuffer,
-                CDXUTSDKMesh& mesh_opaque,CDXUTSDKMesh& mesh_opaque2,
-                CDXUTSDKMesh& mesh_alpha,
+                SceneGraph& sceneGraph,
                 ID3D11ShaderResourceView* skybox,
                 const D3DXMATRIXA16& worldMatrix,
                 const CFirstPersonCamera* viewerCamera,
@@ -108,8 +107,7 @@ private:
 
     // Forward rendering of geometry into
     ID3D11ShaderResourceView * RenderForward(ID3D11DeviceContext* d3dDeviceContext,
-                                             CDXUTSDKMesh& mesh_opaque,CDXUTSDKMesh& mesh_opaque2,
-                                             CDXUTSDKMesh& mesh_alpha,
+                                             SceneGraph& sceneGraph,
                                              ID3D11ShaderResourceView *lightBufferSRV,
                                              const CFirstPersonCamera* viewerCamera,
                                              const D3D11_VIEWPORT* viewport,
@@ -118,8 +116,7 @@ private:
     
     // Draws geometry into G-buffer
     void RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
-                       CDXUTSDKMesh& mesh_opaque,CDXUTSDKMesh& mesh_opaque2,
-                       CDXUTSDKMesh& mesh_alpha,
+                       SceneGraph& sceneGraph,
                        const CFirstPersonCamera* viewerCamera,
                        const D3D11_VIEWPORT* viewport,
                        const UIConstants* ui);    

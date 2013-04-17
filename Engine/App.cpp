@@ -419,8 +419,7 @@ void App::Move(float elapsedTime)
 //#MSH Render
 void App::Render(ID3D11DeviceContext* d3dDeviceContext, 
                  ID3D11RenderTargetView* backBuffer,
-                 CDXUTSDKMesh& mesh_opaque,CDXUTSDKMesh& mesh_opaque2,
-                 CDXUTSDKMesh& mesh_alpha,
+                 SceneGraph& sceneGraph,
                  ID3D11ShaderResourceView* skybox,
                  const D3DXMATRIXA16& worldMatrix,
                  const CFirstPersonCamera* viewerCamera,
@@ -465,7 +464,11 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
 #pragma endregion
 
     // Geometry phase
-    if (mesh_opaque.IsLoaded()) {
+    if(sceneGraph.IsLoaded())
+	{
+		sceneGraph.ComputeInFrustumFlags(cameraWorldViewProj);
+	}
+	/*if (mesh_opaque.IsLoaded()) {
         mesh_opaque.ComputeInFrustumFlags(cameraWorldViewProj);
     }
     if (mesh_alpha.IsLoaded()) {
@@ -473,7 +476,7 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
     }
 	if(mesh_opaque2.IsLoaded()){
 		mesh_opaque2.ComputeInFrustumFlags(cameraWorldViewProj);
-	}
+	}*/
 
     // Setup lights
     ID3D11ShaderResourceView *lightBufferSRV = SetupLights(d3dDeviceContext, cameraView);
@@ -482,15 +485,15 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
 	//#MSH Else statement is the deffered methods, the other two should be removable for the final product
     if (ui->lightCullTechnique == CULL_FORWARD_NONE) 
 	{
-        RenderForward(d3dDeviceContext, mesh_opaque, mesh_opaque2, mesh_alpha, lightBufferSRV, viewerCamera, viewport, ui, false);
+        RenderForward(d3dDeviceContext, sceneGraph, lightBufferSRV, viewerCamera, viewport, ui, false);
     }
 	else if (ui->lightCullTechnique == CULL_FORWARD_PREZ_NONE) 
 	{
-        RenderForward(d3dDeviceContext, mesh_opaque, mesh_opaque2, mesh_alpha, lightBufferSRV, viewerCamera, viewport, ui, true);
+        RenderForward(d3dDeviceContext, sceneGraph, lightBufferSRV, viewerCamera, viewport, ui, true);
     } 
 	else
 	{
-        RenderGBuffer(d3dDeviceContext, mesh_opaque,mesh_opaque2, mesh_alpha, viewerCamera, viewport, ui);
+        RenderGBuffer(d3dDeviceContext,sceneGraph, viewerCamera, viewport, ui);
         ComputeLighting(d3dDeviceContext, lightBufferSRV, viewport, ui);
 	}
 
@@ -522,8 +525,7 @@ ID3D11ShaderResourceView * App::SetupLights(ID3D11DeviceContext* d3dDeviceContex
 
 
 void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
-                        CDXUTSDKMesh& mesh_opaque,CDXUTSDKMesh& mesh_opaque2,
-                        CDXUTSDKMesh& mesh_alpha,
+                        SceneGraph& sceneGraph,
                         const CFirstPersonCamera* viewerCamera,
                         const D3D11_VIEWPORT* viewport,
                         const UIConstants* ui)
@@ -574,33 +576,40 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
 		PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
 		constants->mCameraWorldViewProj = scaleMatrix * worldMatrix * cameraViewProj;
 		constants->mCameraWorldView = scaleMatrix * worldMatrix * cameraView;
-		mesh_opaque.ComputeInFrustumFlags(cameraWorldViewProj,0);
+		sceneGraph.ComputeInFrustumFlags(cameraWorldViewProj);
+		//mesh_opaque.ComputeInFrustumFlags(cameraWorldViewProj,0);
 		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
 	}
 #pragma endregion
-
+	if(sceneGraph.IsLoaded())
+	{
+		d3dDeviceContext->RSSetState(mRasterizerState);
+        d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
+		sceneGraph.Render(d3dDeviceContext);
+	}
     // Render opaque geometry
-    if (mesh_opaque.IsLoaded()) {
+    /*
+	if (mesh_opaque.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
         mesh_opaque.Render(d3dDeviceContext, 0);
-    }
+    }*/
 
 	// Fill in frame constants
 #pragma region Frame constants
-    {D3DXMatrixTranslation(&worldMatrix,0,10,0);
+  /*  {D3DXMatrixTranslation(&worldMatrix,0,10,0);
         d3dDeviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
 		constants->mCameraWorldViewProj = scaleMatrix * worldMatrix * cameraViewProj;
 		constants->mCameraWorldView = scaleMatrix * worldMatrix * cameraView;
-		if (mesh_opaque2.IsLoaded()) {
+	//	if (mesh_opaque2.IsLoaded()) {
 		//mesh_opaque2.ComputeInFrustumFlags(cameraWorldViewProj,0);
-		}
+	//	}
 		d3dDeviceContext->Unmap(mPerFrameConstants, 0);
-	}
+	}*/
 	
 #pragma endregion
-
+	/*
 	if (mesh_opaque2.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
@@ -614,7 +623,7 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->PSSetShader(mGBufferAlphaTestPS->GetShader(), 0, 0);
         mesh_alpha.Render(d3dDeviceContext, 0);
     }
-
+	*/
     // Cleanup (aka make the runtime happy)
     d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
 }
@@ -891,8 +900,7 @@ void App::RenderSkyboxAndToneMap(ID3D11DeviceContext* d3dDeviceContext,
 //Testing required before removing anything
 #pragma region Demo Functions
 ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceContext,
-                                              CDXUTSDKMesh& mesh_opaque,CDXUTSDKMesh& mesh_opaque2,
-                                              CDXUTSDKMesh& mesh_alpha,
+                                              SceneGraph& sceneGraph,
                                               ID3D11ShaderResourceView *lightBufferSRV,
                                               const CFirstPersonCamera* viewerCamera,
                                               const D3D11_VIEWPORT* viewport,
@@ -926,6 +934,13 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
         d3dDeviceContext->OMSetRenderTargets(0, 0, mDepthBuffer->GetDepthStencil());
             
         // Render opaque geometry
+		if(sceneGraph.IsLoaded())
+		{
+			d3dDeviceContext->RSSetState(mRasterizerState);
+            d3dDeviceContext->PSSetShader(0, 0, 0);
+			sceneGraph.Render(d3dDeviceContext);
+		}
+		/*
         if (mesh_opaque.IsLoaded()) {
             d3dDeviceContext->RSSetState(mRasterizerState);
             d3dDeviceContext->PSSetShader(0, 0, 0);
@@ -942,7 +957,7 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
             // NOTE: Use simplified alpha test shader that only clips
             d3dDeviceContext->PSSetShader(mForwardAlphaTestOnlyPS->GetShader(), 0, 0);
             mesh_alpha.Render(d3dDeviceContext, 0);
-        }
+        }*/
     }
 
     // Set up render targets
@@ -951,6 +966,13 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
     d3dDeviceContext->OMSetBlendState(mGeometryBlendState, 0, 0xFFFFFFFF);
     
     // Render opaque geometry
+	if(sceneGraph.IsLoaded())
+	{
+		d3dDeviceContext->RSSetState(mRasterizerState);
+        d3dDeviceContext->PSSetShader(mForwardPS->GetShader(), 0, 0);
+		sceneGraph.Render(d3dDeviceContext);
+	}
+	/*
     if (mesh_opaque.IsLoaded()) {
         d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mForwardPS->GetShader(), 0, 0);
@@ -967,7 +989,7 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
         d3dDeviceContext->RSSetState(mDoubleSidedRasterizerState);
         d3dDeviceContext->PSSetShader(mForwardAlphaTestPS->GetShader(), 0, 0);
         mesh_alpha.Render(d3dDeviceContext, 0);
-    }
+    }*/
 
     // Cleanup (aka make the runtime happy)
     d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
