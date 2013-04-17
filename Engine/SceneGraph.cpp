@@ -35,10 +35,10 @@ bool SceneGraph::IsLoaded()
 	{
 		return false;
 	}
-	vector<CDXUTSDKMesh*>::iterator i;
-	for(i=meshList.begin();i!=meshList.end();i++)
+
+	for(int i=0;i<meshList.size();i++)
 	{
-		if(!(*i)->IsLoaded())
+		if(!meshList[i]->IsLoaded())
 		{
 			return false;
 		}
@@ -69,9 +69,10 @@ void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName)
 
 void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& position)
 {
-	CDXUTSDKMesh newMesh;
-	newMesh.Create(device, szFileName);
-	meshList.push_back(&newMesh);
+	CDXUTSDKMesh* newMesh = new CDXUTSDKMesh();
+	newMesh->Create(device, szFileName);
+	meshList.push_back(newMesh);
+	unsigned int x = meshList.size();
 	positionList.push_back(&position);
 	//maybe return size to use as an ID
 }
@@ -122,11 +123,18 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 
 }
 
-void SceneGraph::EmptyList(vector<CDXUTSDKMesh*> list)
+void SceneGraph::EmptyList(vector<CDXUTSDKMesh*>& list)
 {
 	if(!list.empty())
 	{
-		list.erase(list.begin());
+		for(unsigned int i=0; i<list.size(); i++)
+		{
+			SAFE_DELETE(list[i]);
+		}
+
+		unsigned int y = list.size();
+		list.clear();
+		unsigned int x = list.size();
 		//unnecessary?
 		/*
 		vector<CDXUTSDKMesh*>::iterator i;
@@ -135,13 +143,19 @@ void SceneGraph::EmptyList(vector<CDXUTSDKMesh*> list)
 			SAFE_DELETE(*i);
 		}*/
 	}
+	
 }
 
-void SceneGraph::EmptyList(vector<D3DXMATRIXA16*> list)
+void SceneGraph::EmptyList(vector<D3DXMATRIXA16*>& list)
 {
-	if(!list.empty())
+	if(list.empty())
 	{
-		list.erase(list.begin());
+		for(unsigned int i=0; i<list.size(); i++)
+		{
+			SAFE_DELETE(list[i]);
+		}
+
+		list.clear();
 		//unnecessary?
 		/*
 		vector<D3DXMATRIXA16*>::iterator i;
