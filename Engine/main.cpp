@@ -450,7 +450,12 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
 			D3DXMATRIXA16 translate;
-
+			D3DXMatrixTranslation(&translate,0,0,0);
+			
+			D3DXMATRIXA16 s;
+			D3DXMatrixScaling(&s,100,.01,100);
+			s=s*translate;
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
 			for(float x =0; x<15;x+=5)
 			{
 				for(float y=0; y<15; y+=5)
@@ -462,7 +467,7 @@ void InitScene(ID3D11Device* d3dDevice)
 					}
 				}
 			}
-			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 			cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
@@ -700,7 +705,8 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     }
 
     // Lazily load scene
-    if (!sceneGraph.IsLoaded()/*!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded() &&!gMeshOpaque2.IsLoaded()*/) {
+	/*!gMeshOpaque.IsLoaded() && !gMeshAlpha.IsLoaded() &&!gMeshOpaque2.IsLoaded()*/
+    if (!sceneGraph.IsLoaded()) {
         InitScene(d3dDevice);
     }
 

@@ -499,6 +499,19 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
         ComputeLighting(d3dDeviceContext, lightBufferSRV, viewport, ui);
 	}
 
+	{
+        D3D11_MAPPED_SUBRESOURCE mappedResource;
+        d3dDeviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+        PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
+
+        constants->mCameraWorldViewProj = cameraWorldViewProj;
+        constants->mCameraWorldView = worldMatrix * cameraView;
+        constants->mCameraViewProj = cameraViewProj;
+        constants->mCameraProj = cameraProj;
+
+        d3dDeviceContext->Unmap(mPerFrameConstants, 0);
+    }
+
     // Render skybox and tonemap
 	//#MSH skybox is rendered last because its a requirement for the deferred rendering
     RenderSkyboxAndToneMap(d3dDeviceContext, backBuffer, skybox,
@@ -558,6 +571,8 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
     d3dDeviceContext->OMSetRenderTargets(static_cast<UINT>(mGBufferRTV.size()), &mGBufferRTV.front(), mDepthBuffer->GetDepthStencil());
     d3dDeviceContext->OMSetBlendState(mGeometryBlendState, 0, 0xFFFFFFFF);
 	
+#pragma endregion
+
 	D3DXMATRIXA16 cameraProj = *viewerCamera->GetProjMatrix();
     D3DXMATRIXA16 cameraView = *viewerCamera->GetViewMatrix();
 #pragma region Old Code

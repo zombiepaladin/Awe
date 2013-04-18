@@ -48,16 +48,6 @@ bool SceneGraph::IsLoaded()
 
 void SceneGraph::StartScene(D3DXMATRIXA16& worldMatrix, float sceneScaling)
 {
-	if(!meshList.empty())
-	{
-		EmptyList(meshList);
-	}
-
-	if(!positionList.empty())
-	{
-		EmptyList(positionList);
-	}
-
 	_worldMatrix = worldMatrix;
 	_sceneScaling=sceneScaling;
 }
@@ -77,6 +67,7 @@ void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& po
 	meshList.push_back(newMesh);
 	unsigned int x = meshList.size();
 	positionList.push_back(newPosition);
+//	SAFE_DELETE(newMesh);
 	//maybe return size to use as an ID
 }
 
@@ -114,59 +105,16 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
+	PerFrameConstants *constants;
 	for(int i=0;i<meshList.size();i++)
 	{
 		deviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		PerFrameConstants* constants = static_cast<PerFrameConstants *>(mappedResource.pData);
+		constants = static_cast<PerFrameConstants *>(mappedResource.pData);
 		constants->mCameraWorldViewProj=(*positionList[i])*cameraViewProj;
 		constants->mCameraWorldView=(*positionList[i])*cameraView;
 		deviceContext->Unmap(mPerFrameConstants, 0);
 		meshList[i]->ComputeInFrustumFlags((*positionList[i])*cameraViewProj,0);
 		meshList[i]->Render(deviceContext,0);
-	}
-
-}
-
-void SceneGraph::EmptyList(vector<CDXUTSDKMesh*>& list)
-{
-	if(!list.empty())
-	{
-		for(unsigned int i=0; i<list.size(); i++)
-		{
-			SAFE_DELETE(list[i]);
-		}
-
-		unsigned int y = list.size();
-		list.clear();
-		unsigned int x = list.size();
-		//unnecessary?
-		/*
-		vector<CDXUTSDKMesh*>::iterator i;
-		for(i=list.begin(); i!=list.end();i++)
-		{
-			SAFE_DELETE(*i);
-		}*/
-	}
-	
-}
-
-void SceneGraph::EmptyList(vector<D3DXMATRIXA16*>& list)
-{
-	if(!list.empty())
-	{
-		for(unsigned int i=0; i<list.size(); i++)
-		{
-			SAFE_DELETE(list[i]);
-		}
-
-		list.clear();
-		//unnecessary?
-		/*
-		vector<D3DXMATRIXA16*>::iterator i;
-		for(i=list.begin(); i!=list.end();i++)
-		{
-			SAFE_DELETE(*i);
-		}*/
 	}
 }
 
@@ -182,10 +130,10 @@ void SceneGraph::Destroy()
 	}
 	if(!positionList.empty())
 	{
-		for(unsigned int i=0; i<meshList.size(); i++)
+		for(unsigned int i=0; i<positionList.size(); i++)
 		{
 			SAFE_DELETE(positionList[i]);
 		}
-		meshList.clear();
+		positionList.clear();
 	}
 }

@@ -29,7 +29,5 @@ private:
 	vector<CDXUTSDKMesh*> meshList;
 	vector<D3DXMATRIXA16*> positionList;
 	float _sceneScaling;
-	void EmptyList(vector<CDXUTSDKMesh*>& list);
-	void EmptyList(vector<D3DXMATRIXA16*>& list);
 	D3DXMATRIXA16 _worldMatrix;
 };
