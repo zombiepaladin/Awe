@@ -64,13 +64,15 @@ void SceneGraph::StartScene(D3DXMATRIXA16& worldMatrix, float sceneScaling)
 
 void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName)
 {
-	Add(device,szFileName,_worldMatrix);
+	D3DXMATRIXA16 t;
+	D3DXMatrixTranslation(&t,0,0,0);
+	Add(device,szFileName,t);
 }
 
 void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& position)
 {
 	CDXUTSDKMesh* newMesh = new CDXUTSDKMesh();
-	D3DXMATRIXA16* newPosition = new D3DXMATRIXA16(position);
+	D3DXMATRIXA16* newPosition = new D3DXMATRIXA16((_worldMatrix*position));
 	newMesh->Create(device, szFileName);
 	meshList.push_back(newMesh);
 	unsigned int x = meshList.size();

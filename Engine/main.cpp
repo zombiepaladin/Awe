@@ -421,7 +421,7 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			D3DXMATRIXA16 translate;
-			D3DXMatrixTranslation(&translate,0,10,0);
+			D3DXMatrixTranslation(&translate,0,10,25);
 			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			//gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
