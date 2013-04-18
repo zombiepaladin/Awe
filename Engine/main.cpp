@@ -37,6 +37,7 @@ enum SCENE_SELECTION {
     POWER_PLANT_SCENE,
     SPONZA_SCENE,
 	MULTI_SCENE,
+	CUBES,
 };
 
 enum {
@@ -220,6 +221,7 @@ void InitUI()
         gSceneSelectCombo->AddItem(L"Power Plant", ULongToPtr(POWER_PLANT_SCENE));
         gSceneSelectCombo->AddItem(L"Sponza", ULongToPtr(SPONZA_SCENE));
 		gSceneSelectCombo->AddItem(L"Multi Object Scene", ULongToPtr(MULTI_SCENE));
+		gSceneSelectCombo->AddItem(L"CUBES", ULongToPtr(CUBES));
 #pragma endregion
 
 #pragma region Add Options Checkboxes and sliders
@@ -421,13 +423,47 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			D3DXMATRIXA16 translate;
-			D3DXMatrixTranslation(&translate,0,10,25);
+			D3DXMatrixTranslation(&translate,0,10,0);
 			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			//gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
 
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
+            cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		}break;
+		case CUBES:
+		{
+			sceneScaling = 1.0f;
+
+			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
+			if (zAxisUp) {
+				D3DXMATRIXA16 m;
+				D3DXMatrixRotationX(&m, -D3DX_PI / 2.0f);
+				gWorldMatrix *= m;
+			}
+			{
+				D3DXMATRIXA16 t;
+				D3DXMatrixTranslation(&t, sceneTranslation.x, sceneTranslation.y, sceneTranslation.z);
+				gWorldMatrix *= t;
+			}
+
+			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
+			D3DXMATRIXA16 translate;
+
+			for(float x =0; x<15;x+=5)
+			{
+				for(float y=0; y<15; y+=5)
+				{
+					for(float z=0; z<15; z+=5)
+					{
+						D3DXMatrixTranslation(&translate,x,y,z);
+						sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",translate);
+					}
+				}
+			}
+			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+			cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
     };

@@ -121,6 +121,7 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 		constants->mCameraWorldViewProj=(*positionList[i])*cameraViewProj;
 		constants->mCameraWorldView=(*positionList[i])*cameraView;
 		deviceContext->Unmap(mPerFrameConstants, 0);
+		meshList[i]->ComputeInFrustumFlags((*positionList[i])*cameraViewProj,0);
 		meshList[i]->Render(deviceContext,0);
 	}
 
@@ -171,6 +172,20 @@ void SceneGraph::EmptyList(vector<D3DXMATRIXA16*>& list)
 
 void SceneGraph::Destroy()
 {
-	EmptyList(meshList);
-	EmptyList(positionList);
+	if(!meshList.empty())
+	{
+		for(unsigned int i=0; i<meshList.size(); i++)
+		{
+			SAFE_DELETE(meshList[i]);
+		}
+		meshList.clear();
+	}
+	if(!positionList.empty())
+	{
+		for(unsigned int i=0; i<meshList.size(); i++)
+		{
+			SAFE_DELETE(positionList[i]);
+		}
+		meshList.clear();
+	}
 }

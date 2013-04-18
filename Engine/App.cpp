@@ -462,14 +462,14 @@ void App::Render(ID3D11DeviceContext* d3dDeviceContext,
         d3dDeviceContext->Unmap(mPerFrameConstants, 0);
     }
 #pragma endregion
-
+#pragma region Old Code
+	/*
     // Geometry phase
     if(sceneGraph.IsLoaded())
 	{
 		sceneGraph.ComputeInFrustumFlags(cameraViewProj);
 	}
-#pragma region Old Code
-	/*if (mesh_opaque.IsLoaded()) {
+	if (mesh_opaque.IsLoaded()) {
         mesh_opaque.ComputeInFrustumFlags(cameraWorldViewProj);
     }
     if (mesh_alpha.IsLoaded()) {
