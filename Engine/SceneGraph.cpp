@@ -122,7 +122,7 @@ void SceneGraph::Destroy()
 {
 	if(!meshList.empty())
 	{
-		for(unsigned int i=0; i<meshList.size(); i++)
+		for(int i=meshList.size()-1; i>=0; i--)
 		{
 			SAFE_DELETE(meshList[i]);
 		}
@@ -130,7 +130,7 @@ void SceneGraph::Destroy()
 	}
 	if(!positionList.empty())
 	{
-		for(unsigned int i=0; i<positionList.size(); i++)
+		for(int i=positionList.size()-1; i>=0; i--)
 		{
 			SAFE_DELETE(positionList[i]);
 		}

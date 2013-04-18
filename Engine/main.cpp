@@ -347,7 +347,7 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
             //gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
-            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -399,7 +399,7 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.Add(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
-            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -427,7 +427,7 @@ void InitScene(ID3D11Device* d3dDevice)
 			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
 			//gMeshOpaque.Create(d3dDevice, L"..\\media\\Sponza\\sponza_dds.sdkmesh");
 			//gMeshOpaque2.Create(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh");
-            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
+            LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
