@@ -70,10 +70,11 @@ void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName)
 void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& position)
 {
 	CDXUTSDKMesh* newMesh = new CDXUTSDKMesh();
+	D3DXMATRIXA16* newPosition = new D3DXMATRIXA16(position);
 	newMesh->Create(device, szFileName);
 	meshList.push_back(newMesh);
 	unsigned int x = meshList.size();
-	positionList.push_back(&position);
+	positionList.push_back(newPosition);
 	//maybe return size to use as an ID
 }
 
@@ -148,7 +149,7 @@ void SceneGraph::EmptyList(vector<CDXUTSDKMesh*>& list)
 
 void SceneGraph::EmptyList(vector<D3DXMATRIXA16*>& list)
 {
-	if(list.empty())
+	if(!list.empty())
 	{
 		for(unsigned int i=0; i<list.size(); i++)
 		{
