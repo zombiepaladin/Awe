@@ -7,11 +7,11 @@ namespace InputManager
 {
 	enum MouseButton
 	{
-		Left = 0x01,
-		Right = 0x02,
-		Middle = 0x04,
-		X1 = 0x05,
-		X2 = 0x06,
+		LeftClick = 0x01,
+		RightClick = 0x02,
+		MiddleClick = 0x04,
+		X1Click = 0x05,
+		X2Click = 0x06,
 	};
 
 	struct MouseState

@@ -96,6 +96,7 @@
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="physics.cpp" />
+    <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="Texture2D.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +113,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="ColorUtil.h" />
+    <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderDefines.h" />
     <ClInclude Include="ShaderStructures.h" />

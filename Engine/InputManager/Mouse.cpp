@@ -23,8 +23,8 @@ namespace InputManager
 
 	bool Mouse::Init()
 	{
-		mouseHook = SetWindowsHookEx(WH_MOUSE, handleMouseMessage, NULL, 0);
-		keyboardHook = SetWindowsHookEx(WH_KEYBOARD, handleKeyboardMessage, NULL, 0);
+		//mouseHook = SetWindowsHookEx(WH_MOUSE, handleMouseMessage, NULL, 0);
+		//keyboardHook = SetWindowsHookEx(WH_KEYBOARD, handleKeyboardMessage, NULL, 0);
 
 		return (mouseHook != NULL) && (keyboardHook != NULL);
 	}

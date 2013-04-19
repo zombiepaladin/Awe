@@ -64,9 +64,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="MediaPlayer.h" />
     <ClInclude Include="MusicManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MediaPlayer.cpp" />
     <ClCompile Include="MusicManager.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

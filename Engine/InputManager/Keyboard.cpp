@@ -22,7 +22,7 @@ namespace InputManager
 
 	bool Keyboard::Init()
 	{
-		hookHandle = SetWindowsHookEx(WH_KEYBOARD, handleKeyboardMessage, NULL, 0);
+		//hookHandle = SetWindowsHookEx(WH_KEYBOARD, handleKeyboardMessage, NULL, 0);
 		
 		return hookHandle != NULL;
 	}
