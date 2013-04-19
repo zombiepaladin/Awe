@@ -450,12 +450,12 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
 			D3DXMATRIXA16 translate;
-			D3DXMatrixTranslation(&translate,0,-10,0);
+			D3DXMatrixTranslation(&translate,0,0,0);
 			
 			D3DXMATRIXA16 s;
-			D3DXMatrixScaling(&s,100,1,100);
+			D3DXMatrixScaling(&s,100,0.01,100);
 			s=s*translate;
-			sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",s);
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
 			//sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
 			for(float x =0; x<15;x+=5)
 			{
