@@ -106,12 +106,12 @@ void SceneGraph::SetMeshPosition(int id, int x,int y,int z)
 
 void SceneGraph::SetMeshPosition(int id, D3DXMATRIXA16& newPositionMatrix)
 {
-	if(id>=positionList.size())
+	if(id>positionList.size())
 	{
 		invalid_argument ia("In: SetMeshPosition(int id,D3DXMATRIXA16& translationMatrix): ID is not in the SceneGraph");
 		throw ia;
 	}
-	positionList[id]=&newPositionMatrix;
+	positionList[id - 1]= new D3DXMATRIXA16(newPositionMatrix);
 }
 
 void SceneGraph::ComputeInFrustumFlags(const D3DXMATRIXA16 &cameraViewProj)

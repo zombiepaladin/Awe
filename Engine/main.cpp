@@ -25,11 +25,15 @@
 #include "ShaderDefines.h"
 #include <sstream>
 #include "SceneGraph.h"
-
+#include "PhysXObject.h"
+#include "EnginePhysics.h"
+#include <vector>
 
 // Constants
 static const float kLightRotationSpeed = 0.05f;
 static const float kSliderFactorResolution = 10000.0f;
+
+static vector<PhysXObject*> *cubeList;
 
 
 enum SCENE_SELECTION {
@@ -455,22 +459,36 @@ void InitScene(ID3D11Device* d3dDevice)
 			D3DXMATRIXA16 s;
 			D3DXMatrixScaling(&s,100,0.01,100);
 			s=s*translate;
-			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
 			//sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
+			//sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
+
+
+			//Initializing PhysX
+			EnginePhysics::InitializePhysX(cubeList);
+
+			//Creating all of the cubes
+			for(int i = 0; i < cubeList->size(); i++)
+			{
+				(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",
+					(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+			}
+/*
 			for(float x =0; x<15;x+=5)
 			{
 				for(float y=0; y<15; y+=5)
 				{
 					for(float z=0; z<15; z+=5)
 					{
-						//D3DXMatrixTranslation(&translate,x,y,z);
+						D3DXMatrixTranslation(&translate,x,y,z);
 						sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",x,y,z,1,1,1);
 					}
 				}
 			}
+*/
 			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 			cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
 		}break;
     };
 #pragma endregion
@@ -488,6 +506,7 @@ void InitScene(ID3D11Device* d3dDevice)
 
 void DestroyScene()
 {
+	EnginePhysics::ShutdownPhysX();
 	sceneGraph.Destroy();
 	/*gMeshOpaque.Destroy();
 	gMeshOpaque2.Destroy();
@@ -577,6 +596,10 @@ void CALLBACK OnKeyboard(UINT character, bool keyDown, bool altDown, void* userC
             // Toggle display of UI on/off
             gDisplayUI = !gDisplayUI;
             break;
+
+		default:
+			EnginePhysics::ProcessKey(character);
+			break;
         }
     }
 }
@@ -711,7 +734,19 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
         InitScene(d3dDevice);
     }
 
+	EnginePhysics::StepPhysX();
+	if(cubeList)
+	{
+		for(int i = 0; i < cubeList->size(); i++)
+		{
+			if( i == 100)
+				int x = 0;
+			sceneGraph.SetMeshPosition((*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+		}
+	}
+
     ID3D11RenderTargetView* pRTV = DXUTGetD3D11RenderTargetView();
+	
     
     D3D11_VIEWPORT viewport;
     viewport.Width    = static_cast<float>(DXUTGetDXGIBackBufferSurfaceDesc()->Width);
