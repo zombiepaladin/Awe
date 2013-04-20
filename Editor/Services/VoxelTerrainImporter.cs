@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework;
 
 //Temporary
 using System.Windows.Forms;
+using AweEditor.Utilities;
 
 namespace AweEditor
 {
@@ -28,6 +29,13 @@ namespace AweEditor
         TAG_List = 9,
         TAG_Compound = 10,
         TAG_Int_Array = 11
+    }
+
+    public enum FileType : byte
+    {
+        FILE_Schematic,
+        FILE_MCA,
+        FILE_MCR,
     }
 
     /// <summary>
@@ -55,6 +63,7 @@ namespace AweEditor
         /// Maintains only getter attributes of this property
         /// </summary>
         private TagType _type;
+
 
 
         /// <summary>
@@ -119,6 +128,9 @@ namespace AweEditor
 
     public static class VoxelTerrainImporter
     {
+        //Stores the type of the file the importer is currently importing
+        private static FileType fileType;
+
         //TODO: Delete
         private static TextBox status = null;
         private static short statusIndention = 0;
@@ -188,58 +200,85 @@ namespace AweEditor
         {
             List<BlockData> blocks = new List<BlockData>();
 
-            int temp = 0;
+            short width;
+
+            if (fileType == FileType.FILE_MCR)
+                width = 128;
+            else
+                width = 256;
+
+            short length = 16;
 
             foreach (Chunk chunk in chunkList)
             {
-                byte[] blockArray = chunk.ByteArray.GetByteArray();
-
-                //if (temp++ > 2) break;
-
-                short width = 128;
-                short length = 16;
-
-                makeHollow(length, width, 16, blockArray);
-
-                if (blockArray == null)
+                if (fileType == FileType.FILE_MCR)
                 {
-                    //TODO:show error reading file
-                    return new List<BlockData>();
-                }
+                    byte[] blockArray = chunk.ByteArray.GetByteArray();
 
-                //variables used in loop
-                short y, z, x;
-                x = y = z = 0;
-                
-                BlockData blockData = new BlockData();
-
-                for (int i = 0; i < blockArray.Length; i++)
-                {
-                    if (!ignoreAir || blockArray[i] != 0)
+                    if (blockArray == null)
                     {
-                        blockData.x = y + ((int)chunk.Position.X * 16); //Swapping axis so that the chunk appears right side up
-                        blockData.y = x;
-                        blockData.z = z + ((int)chunk.Position.Y * 16); //Working to add the chunk position to the block array
-                        blockData.type = blockArray[i];
-
-                        if(blockData.y > 30)
-                        blocks.Add(blockData);
-
+                        //TODO:show error reading file
+                        return new List<BlockData>();
                     }
 
-                    //simulate 3D array
-                    x++;
-                    if (x == width)
+                    makeHollow(length, width, 16, blockArray); //can only use this for mcr right now, mca doesnt use same array
+
+                    //variables used in loop
+                    short y, z, x;
+                    x = y = z = 0;
+
+                    BlockData blockData = new BlockData();
+
+                    for (int i = 0; i < blockArray.Length; i++)
                     {
-                        x = 0;
-                        z++;
-                        if (z == length)
+                        if (!ignoreAir || blockArray[i] != 0)
                         {
-                            z = 0;
-                            y++;
-                        }
-                    }
+                            blockData.x = y + ((int)chunk.Position.X * 16); //Swapping axis so that the chunk appears right side up
+                            blockData.y = x;
+                            blockData.z = z + ((int)chunk.Position.Y * 16); //Working to add the chunk position to the block array
+                            blockData.type = blockArray[i];
 
+                            if (blockData.y > 30)
+                                blocks.Add(blockData);
+
+                        }
+
+                        //simulate 3D array
+                        x++;
+                        if (x == width)
+                        {
+                            x = 0;
+                            z++;
+                            if (z == length)
+                            {
+                                z = 0;
+                                y++;
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    byte[, ,] blockArray = (byte[, ,])chunk.ByteArray.Payload;
+
+                    makeHollow(length, width, 16, blockArray);
+
+                    BlockData blockData = new BlockData();
+                    for (int x = 0; x < 16; x++)
+                        for (int y = 0; y < 256; y++)
+                            for (int z = 0; z < 16; z++)
+                            {
+                                if (blockArray[x, y, z] != 0)
+                                {
+                                    blockData.x = x + ((int)chunk.Position.X * 16); //Swapping axis so that the chunk appears right side up
+                                    blockData.y = y;
+                                    blockData.z = z + ((int)chunk.Position.Y * 16); //Working to add the chunk position to the block array
+                                    blockData.type = blockArray[x, y, z];
+
+                                    blocks.Add(blockData);
+                                }
+                            }
                 }
             }
 
@@ -266,6 +305,25 @@ namespace AweEditor
                         {
                             blockArray[y * (length * width) + z * (width) + x] = 0;
                         }
+                    }
+        }
+
+        //used for 3d arrays
+        private static void makeHollow(int xMax, int yMax, int zMax, byte[, ,] blockArray)
+        {
+            //TODO: consider transparent blocks when implemented
+
+            if (blockArray == null)
+                return;
+
+            for (int x = 1; x < xMax - 1; x++)
+                for (int y = 1; y < yMax - 1; y++)
+                    for (int z = 1; z < zMax - 1; z++)
+                    {
+                        if (blockArray[x - 1, y, z] != 0 && blockArray[x + 1, y, z] != 0 &&
+                           blockArray[x, y - 1, z] != 0 && blockArray[x, y + 1, z] != 0 &&
+                           blockArray[x, y, z - 1] != 0 && blockArray[x, y, z + 1] != 0)
+                            blockArray[x, y, z] = 0;
                     }
         }
 
@@ -307,13 +365,46 @@ namespace AweEditor
             return unflattenedBlockArray;
         }
 
+        public static List<BlockData> ImportBlockData(string filePath)
+        {
+            List<BlockData> blocks;
+            string extension = Path.GetExtension(filePath).ToLower();
+
+            switch (extension)
+            {
+                case ".schematic":
+                    fileType = FileType.FILE_Schematic;
+                    SchematicProcessor schematicProcessor = new SchematicProcessor(filePath);
+                    blocks = schematicProcessor.generateBlockData();
+                    break;
+
+                case ".mcr":
+                    fileType = FileType.FILE_MCR;
+                    List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(filePath);
+                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
+                    break;
+                case ".mca":
+                    fileType = FileType.FILE_MCA;
+                    chunkList = VoxelTerrainImporter.LoadTerrain(filePath);
+                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
+                    break;
+
+                default:
+                    MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
+                    blocks = null;
+                    break;
+            }
+
+            return blocks;
+        }
+
         /// <summary>
         /// Loads in the terrain if possible
         /// </summary>
         /// <param name="filepath">the path to the file to import</param>
-        public static List<Chunk> LoadTerrain(string filepath)
+        private static List<Chunk> LoadTerrain(string filePath)
         {
-            return ParseRegionFile(filepath);
+            return ParseRegionFile(filePath);
         }
 
         private static List<Chunk> ParseRegionFile(string filePath)
@@ -421,7 +512,7 @@ namespace AweEditor
 
                     GetTagList(decompressedBlock, 0, topLevel);
 
-                    if (FindTag("Sections", topLevel) == null)
+                    if (fileType == FileType.FILE_MCR)
                     {
                         NamedBinaryTag xPos = FindTag("xPos", topLevel);
                         NamedBinaryTag zPos = FindTag("zPos", topLevel);
@@ -431,16 +522,56 @@ namespace AweEditor
                             throw new NullReferenceException("One or more tags not found");
                         else
                         {
-
                             chunkList.Add(new Chunk(new Vector2((float)xPos.GetInt(), (float)zPos.GetInt()), Blocks));
-                            //terrain.ConvertChunkToBlocks(xPos.GetInt(), zPos.GetInt(), Blocks.GetByteArray(), 128);
                         }
                     }
                     else
                     {
-                        Debug.WriteLine("FOUND A SECTION");
+                        NamedBinaryTag xPos = FindTag("xPos", topLevel);
+                        NamedBinaryTag zPos = FindTag("zPos", topLevel);
+                        NamedBinaryTag Blocks;
+                        NamedBinaryTag sectionsTag = FindTag("Sections", topLevel); //this finds a tag, but the value is always 0 even though nbt viewer shows 0,1,2,etc.
+
+                        if (xPos == null || zPos == null || sectionsTag == null)
+                            throw new NullReferenceException("One or more tags not found");
+                        else
+                        {
+                            List<NamedBinaryTag> sections = sectionsTag.GetList();
+                            byte[] sectionBlockArray = new byte[16 * 16 * 16];
+                            byte[, ,] chunkBlockArray = new byte[16, 256, 16]; //start by populating with [x,y,z] since its easier to understand
+                            int yOffset;
+
+                            foreach (NamedBinaryTag section in sections)
+                            {
+                                yOffset = FindTag("Y", section).GetByte() * 16;
+                                sectionBlockArray = FindTag("Blocks", section).GetByteArray();
+
+                                for (int y = 0; y < 16; y++)
+                                    for (int z = 0; z < 16; z++)
+                                        for (int x = 0; x < 16; x++)
+                                            chunkBlockArray[x, y + yOffset, z] = sectionBlockArray[(y * 16 + z) * 16 + x];
+                            }
+
+                            //chunkBlockArray contains all blocks from its sections in [x,y,z] coordinates/locations
+                            //now convert to a flattened array ordered XZY so that it matches the mcr style that this importer is set up for
+
+                            /*
+                            byte[] flattenedChunkBlockArray = new byte[16 * 16 * 256];
+
+                            for (int y = 0; y < 256; y++)
+                                for (int z = 0; z < 16; z++)
+                                    for (int x = 0; x < 16; x++)
+                                        flattenedChunkBlockArray[(x * 16 + z) * 16 + y] = chunkBlockArray[x, y, z];
+
+                            //horribly inefficient conversion complete, now load it like an mcr file.
+                            */
+
+                            //cheat and just send 3d array, process differently in generateBlocks
+                            Blocks = new NamedBinaryTag(TagType.TAG_Byte_Array, chunkBlockArray);
+                            chunkList.Add(new Chunk(new Vector2((float)xPos.GetInt(), (float)zPos.GetInt()), Blocks));
+
+                        }
                     }
-                        
                 }
             }
 
@@ -779,7 +910,7 @@ namespace AweEditor
 
                             //TODO:Change the Status route, throw an error
                             //Here we need to check our guard (and increment it)
-                            if (infiniteGuard++ > int.MaxValue - 4) { UpdateStatus("Woah! Infinite Loop Detected, pulling out"); break; }
+                            if (infiniteGuard++ > int.MaxValue - 4) { UpdateStatus("Woah! Infinite Loop Dected, pulling out"); break; }
                         }
 
                         break;
@@ -891,105 +1022,6 @@ namespace AweEditor
                 default:
                     throw new IndexOutOfRangeException("A non-existent tag was found");
             }
-        }
-
-        private static void PrintTag(NamedBinaryTag currentTag)
-        {
-            string tag = "";
-            statusIndention++;
-            switch (currentTag.Type)
-            {
-                // ID Type = Payload
-
-                // 0 TAG_End = None [No name]
-                case TagType.TAG_End:
-                    tag = "End";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-
-                // 1 TAG_Byte = 1 byte signed
-                case TagType.TAG_Byte:
-                    tag = "Byte";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 2 TAG_Short = 2 bytes, signed, big endian
-                case TagType.TAG_Short:
-                    tag = "Short";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 3 TAG_Int = 4 bytes, signed, big endian
-                case TagType.TAG_Int:
-                    tag = "Int";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 4 TAG_Long = 8 bytes, signed, big endian
-                case TagType.TAG_Long:
-                    tag = "Long";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 5 TAG_Float = 4 bytes, signed, big endian
-                case TagType.TAG_Float:
-                    tag = "Float";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 6 TAG_Double = 8 bytes, signed, big endian
-                case TagType.TAG_Double:
-                    tag = "Double";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 7 TAG_Byte_Array = [Int] size for size # of [Byte] payloads
-                case TagType.TAG_Byte_Array:
-                    tag = "Byte Array";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 8 TAG_String = [Short] size for size # of [UTF-8] characters
-                case TagType.TAG_String:
-                    tag = "String";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-                // 11 TAG_Int_Array = [Int] size for size # of [Int] payloads
-                case TagType.TAG_Int_Array:
-                    tag = "Int Array";
-            UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-                    break;
-
-
-                // 9 TAG_List = [Byte] for tagID, [Int] for size, size # of payloads of type tagID. [contains unnamed tags]
-                case TagType.TAG_List:
-                    {
-                        tag = "List";
-                        UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-
-                        List<NamedBinaryTag> children = currentTag.GetList();
-
-                        foreach (NamedBinaryTag nbt in children)
-                        {
-                            PrintTag(nbt);
-                        }
-
-                        break;
-                    }
-                // 10 TAG_Compound = Any number of fully formed named binary tags, terminates with a TAG_End
-                case TagType.TAG_Compound:
-                    {
-                        tag = "Compound";
-                        UpdateStatus(String.Format("{0}:{1}", tag, currentTag.Name));
-
-                        List<NamedBinaryTag> children = currentTag.GetList();
-
-                        foreach (NamedBinaryTag nbt in children)
-                        {
-                            PrintTag(nbt);
-                        }
-
-                        break;
-                    }
-
-                default:
-                    throw new IndexOutOfRangeException("A non-existent tag was found");
-            }
-
-            statusIndention--;
         }
     }
 }

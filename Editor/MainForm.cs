@@ -328,7 +328,7 @@ namespace AweEditor
 
             fd.Title = "Import Voxel Terrain";
 
-            fd.Filter = "Schematic and Region Files (*.schematic; *.mcr)|*.schematic;*.mcr|"+
+            fd.Filter = "Schematic and Region Files (*.schematic; *.mcr; *.mca)| *.schematic; *.mcr; *.mca|"+
                         "All File (*.*)|*.*";
 
             if (fd.ShowDialog() == DialogResult.OK)
@@ -349,32 +349,11 @@ namespace AweEditor
         {
             Cursor = Cursors.WaitCursor;
 
-            string extension = Path.GetExtension(fileName).ToLower();
+            List<BlockData> blocks = VoxelTerrainImporter.ImportBlockData(fileName);
 
-            List<BlockData> blocks;
-            switch(extension)
-            {
-                case ".schematic":
-                    SchematicProcessor schematicProcessor = new SchematicProcessor(fileName);
-                    blocks = schematicProcessor.generateBlockData();
-                    break;
+            if (blocks != null)
+                editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
 
-                case ".mcr":
-                    List<Chunk> chunkList = VoxelTerrainImporter.LoadTerrain(fileName);
-                    blocks = VoxelTerrainImporter.GenerateBlocks(chunkList);
-                    break;
-                case ".mca":
-                    VoxelTerrainImporter.LoadTerrain(fileName);
-                    blocks = new List<BlockData>();
-                    break;
-                default:
-                    MessageBox.Show(String.Format("The {0} format is not accepted - Aborting", extension));
-                    return;
-            }
-
-            VoxelTerrain terrian = new VoxelTerrain(blocks);
-            editorViewerControl.VoxelTerrain = terrian;
-            gameManifest.VoxelTerrains[fileName] = terrian;
             Cursor = Cursors.Arrow;
         }
 

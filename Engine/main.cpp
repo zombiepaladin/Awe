@@ -453,17 +453,18 @@ void InitScene(ID3D11Device* d3dDevice)
 			D3DXMatrixTranslation(&translate,0,0,0);
 			
 			D3DXMATRIXA16 s;
-			D3DXMatrixScaling(&s,100,.01,100);
+			D3DXMatrixScaling(&s,100,0.01,100);
 			s=s*translate;
 			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
+			//sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",s);
 			for(float x =0; x<15;x+=5)
 			{
 				for(float y=0; y<15; y+=5)
 				{
 					for(float z=0; z<15; z+=5)
 					{
-						D3DXMatrixTranslation(&translate,x,y,z);
-						sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",translate);
+						//D3DXMatrixTranslation(&translate,x,y,z);
+						sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",x,y,z,1,1,1);
 					}
 				}
 			}

@@ -52,14 +52,28 @@ void SceneGraph::StartScene(D3DXMATRIXA16& worldMatrix, float sceneScaling)
 	_sceneScaling=sceneScaling;
 }
 
-void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName)
+int SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, int x, int y, int z, float xScale, float yScale, float zScale)
+{
+	D3DXMATRIXA16 t,s, final;
+	D3DXMatrixScaling(&s,xScale,yScale,zScale);
+	D3DXMatrixTranslation(&t,x,y,z);
+	final=s*t;
+	return Add(device,szFileName,final);
+}
+
+int SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, int x, int y, int z, float scale)
+{
+	return Add(device,szFileName,x,y,z,scale,scale,scale);
+}
+
+int SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName)
 {
 	D3DXMATRIXA16 t;
 	D3DXMatrixTranslation(&t,0,0,0);
-	Add(device,szFileName,t);
+	return Add(device,szFileName,t);
 }
 
-void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& position)
+int SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& position)
 {
 	CDXUTSDKMesh* newMesh = new CDXUTSDKMesh();
 	D3DXMATRIXA16* newPosition = new D3DXMATRIXA16((_worldMatrix*position));
@@ -67,8 +81,7 @@ void SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& po
 	meshList.push_back(newMesh);
 	unsigned int x = meshList.size();
 	positionList.push_back(newPosition);
-//	SAFE_DELETE(newMesh);
-	//maybe return size to use as an ID
+	return meshList.size();
 }
 
 void SceneGraph::TranslateMesh(int id, D3DXMATRIXA16& translationMatrix)
@@ -81,6 +94,14 @@ void SceneGraph::TranslateMesh(int id, D3DXMATRIXA16& translationMatrix)
 	D3DXMATRIXA16 target = *positionList[id];
 	target = translationMatrix * target;
 	positionList[id]= &target;
+}
+
+void SceneGraph::SetMeshPosition(int id, int x,int y,int z)
+{
+	D3DXMATRIXA16 trans,target;
+	D3DXMatrixTranslation(&trans,x,y,z);
+	target = _worldMatrix*trans;
+	SetMeshPosition(id,target);
 }
 
 void SceneGraph::SetMeshPosition(int id, D3DXMATRIXA16& newPositionMatrix)
