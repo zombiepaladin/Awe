@@ -89,8 +89,9 @@ namespace AweEditor
             {
                 OpenGameAssets(fileDialog.FileName);
                 saveLocation = fileDialog.FileName;
+                UpdateManifestView();
             }
-            //UpdateManifestView();
+            
         }
 
         /// <summary>
@@ -334,7 +335,7 @@ namespace AweEditor
             {
                 editorViewerControl.UnpauseForm();
                 ttcControlPanel.SelectTab("tpTerrainControls");
-                LoadVoxelTerrain(fd.FileName);
+                LoadVoxelTerrain(Path.Combine("VoxelTerrian", fd.FileName));
                 RepositionCamera();
                 editorViewerControl.PauseForm();
                 createTerrianModelToolStripMenuItem.Enabled = true;
@@ -351,7 +352,11 @@ namespace AweEditor
             List<BlockData> blocks = VoxelTerrainImporter.ImportBlockData(fileName);
 
             if (blocks != null)
-                editorViewerControl.VoxelTerrain = new VoxelTerrain(blocks);
+            {
+                VoxelTerrain vt = new VoxelTerrain(blocks);
+                gameManifest.VoxelTerrains[fileName] = vt;
+                editorViewerControl.VoxelTerrain = vt;
+            }
 
             Cursor = Cursors.Arrow;
         }
@@ -389,13 +394,7 @@ namespace AweEditor
                     editorViewerControl.Model = model;
 
                 // Also store the model in our game manifest
-                if (!gameManifest.Models.ContainsKey(path))
-                    gameManifest.Models.Add(path, model);
-                else
-                {
-                    gameManifest.Models.Remove(path);
-                    gameManifest.Models.Add(path, model);
-                }
+                gameManifest.Models[path] = model;
 
                 // Backup the Xnb files for this object so that they
                 // can be used later to save the object
@@ -470,13 +469,7 @@ namespace AweEditor
                     editorViewerControl.Texture = texture;
 
                 // Store the texture in our game manifest
-                if (!gameManifest.Models.ContainsKey(path))
-                    gameManifest.Textures.Add(path, texture);
-                else
-                {
-                    gameManifest.Textures.Remove(path);
-                    gameManifest.Textures.Add(path, texture);
-                }
+                gameManifest.Textures[path] = texture;
 
                 // Backup the Xnb files for this object so that they
                 // can be used later to save the object
@@ -529,22 +522,23 @@ namespace AweEditor
             InputDialog dialog = new InputDialog("Enter a name for this terran model", "Terrian Model");
             if (dialog.ShowDialog() != DialogResult.OK)
                 return;
-            CreateTerrianModel(editorViewerControl.VoxelTerrain, dialog.Input);
+            CreateTerrianModel(editorViewerControl.VoxelTerrain, 
+                dialog.Input, 
+                Path.Combine(Path.GetTempPath(), dialog.Input));
             UpdateManifestView();
             toggleMeshButton();
         }
 
-        void CreateTerrianModel(VoxelTerrain terrian, string meshName)
+        void CreateTerrianModel(VoxelTerrain terrian, string meshName, string tempfilePath)
         {
             Cursor = Cursors.WaitCursor;
 
             //Save the voxel terrian to a tempory file.
-            string terrianFile = Path.Combine(Path.GetTempPath(), meshName + ".vox");
-            terrian.SaveTo(terrianFile);
+            terrian.SaveTo(tempfilePath);
 
             //Pull the file through the pipeline.
             contentBuilder.Clear();
-            contentBuilder.Add(terrianFile, meshName, "VoxelTerrianImporter", "ModelProcessor");
+            contentBuilder.Add(tempfilePath, meshName, "VoxelTerrianImporter", "ModelProcessor");
 
             string buildError = contentBuilder.Build();
 
@@ -556,7 +550,7 @@ namespace AweEditor
                 editorViewerControl.UnpauseForm();
                 editorViewerControl.TerrianModel = terrianModel;
 
-                gameManifest.TerrianModels[meshName] = terrianModel;
+                gameManifest.TerrianModels["Terrain\\" + meshName] = terrianModel;
             }
             else
             {

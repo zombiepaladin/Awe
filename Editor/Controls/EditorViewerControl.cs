@@ -202,6 +202,7 @@ namespace AweEditor
             contentManager = new ContentManager(this.Services, contentBuilder.OutputDirectory);
 
             loadModels();
+            loadTextures();
 
             // Start the animation timer.
             timer = Stopwatch.StartNew();
