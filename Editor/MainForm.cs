@@ -224,34 +224,17 @@ namespace AweEditor
                 xmlWriter.WriteStartElement("Manifest");
 
                 // Write the Model Information
-                xmlWriter.WriteStartElement("Models");
-                foreach (KeyValuePair<string, Model> modelPair in gameManifest.Models)
-                {
-                    string[] tokens = modelPair.Key.Split('\\');
-                    int index = (tokens.Length == 2) ? 1 : 0;
-                    xmlWriter.WriteElementString("Name", tokens[index]);
-                }
-                xmlWriter.WriteEndElement();
+                WriteXmlToManifest(xmlWriter, "Models", gameManifest.Models);
 
                 // Write the Texture Information
-                xmlWriter.WriteStartElement("Textures");
-                foreach (KeyValuePair<string, Texture2D> texturePair in gameManifest.Textures)
-                {
-                    string[] tokens = texturePair.Key.Split('\\');
-                    int index = (tokens.Length == 2) ? 1 : 0;
-                    xmlWriter.WriteElementString("Name", tokens[index]);
-                }
-                xmlWriter.WriteEndElement();
+                WriteXmlToManifest(xmlWriter, "Textures", gameManifest.Textures);
+                
 
                 // Write the Voxel Terrain Information
-                xmlWriter.WriteStartElement("VoxelTerrains");
-                foreach (KeyValuePair<string, VoxelTerrain> terrainPair in gameManifest.VoxelTerrains)
-                {
-                    string[] tokens = terrainPair.Key.Split('\\');
-                    int index = (tokens.Length == 2) ? 1 : 0;
-                    xmlWriter.WriteElementString("Name", terrainPair.Key);
-                }
-                xmlWriter.WriteEndElement();
+                WriteXmlToManifest(xmlWriter, "VoxelTerrian", gameManifest.VoxelTerrains);
+
+                //Write the TerrianModel data.
+                WriteXmlToManifest(xmlWriter, "TerrianModels", gameManifest.TerrianModels);
 
                 // End the Xml Documents and Flush the Data to the Memory Stream
                 xmlWriter.WriteEndElement();
@@ -278,7 +261,7 @@ namespace AweEditor
                             voxelStream.SetLength(0);
                             voxelSerializer.Serialize(voxelStream, voxelPair.Value);
                             voxelStream.Seek(0, SeekOrigin.Begin);
-                            zipFile.AddEntry(@"VoxelTerrains\" + voxelPair.Key + ".xml", voxelStream);
+                            zipFile.AddEntry(Path.Combine("VoxelTerrains", voxelPair.Key + ".xml"), voxelStream);
                         }
                     }
                     zipFile.AddEntry("Manifest.xml", mStream);
@@ -288,6 +271,18 @@ namespace AweEditor
             }
 
             Cursor = Cursors.Arrow;
+        }
+
+        private void WriteXmlToManifest<T>(XmlTextWriter xmlWriter, string elementName, Dictionary<string, T> data)
+        {
+            xmlWriter.WriteStartElement(elementName);
+            foreach (KeyValuePair<string, T> item in data)
+            {
+                string[] tokens = item.Key.Split('\\');
+                int index = (tokens.Length == 2) ? 1 : 0;
+                xmlWriter.WriteElementString("Name", tokens[index]);
+            }
+            xmlWriter.WriteEndElement();
         }
 
         /// <summary>
@@ -335,7 +330,7 @@ namespace AweEditor
             {
                 editorViewerControl.UnpauseForm();
                 ttcControlPanel.SelectTab("tpTerrainControls");
-                LoadVoxelTerrain(Path.Combine("VoxelTerrian", fd.FileName));
+                LoadVoxelTerrain(fd.FileName);
                 RepositionCamera();
                 editorViewerControl.PauseForm();
                 createTerrianModelToolStripMenuItem.Enabled = true;
@@ -354,7 +349,7 @@ namespace AweEditor
             if (blocks != null)
             {
                 VoxelTerrain vt = new VoxelTerrain(blocks);
-                gameManifest.VoxelTerrains[fileName] = vt;
+                gameManifest.VoxelTerrains[Path.GetFileNameWithoutExtension(fileName)] = vt;
                 editorViewerControl.VoxelTerrain = vt;
             }
 
@@ -551,6 +546,8 @@ namespace AweEditor
                 editorViewerControl.TerrianModel = terrianModel;
 
                 gameManifest.TerrianModels["Terrain\\" + meshName] = terrianModel;
+
+                BackupXnbFiles();
             }
             else
             {

@@ -1,20 +1,8 @@
-﻿Build started 4/30/2013 7:04:54 PM.
-     1>Project "C:\Users\Borzen\Documents\GitHub\Awe\Engine\InputManager\Awe.Engine.InputManager.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Controller.cpp Keyboard.cpp Mouse.cpp main.cpp
-         main.cpp
-         Mouse.cpp
-         Keyboard.cpp
-         Controller.cpp
-         Generating Code...
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Borzen\Documents\GitHub\Awe\Debug\Engine.InputManager.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Borzen\Documents\GitHub\Awe\Debug\Engine.InputManager.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Borzen\Documents\GitHub\Awe\Debug\Engine.InputManager.lib" /MACHINE:X86 Debug\Controller.obj
-         Debug\Keyboard.obj
-         Debug\Mouse.obj
-         Debug\main.obj
-         Awe.Engine.InputManager.vcxproj -> C:\Users\Borzen\Documents\GitHub\Awe\Debug\Engine.InputManager.exe
-     1>Done Building Project "C:\Users\Borzen\Documents\GitHub\Awe\Engine\InputManager\Awe.Engine.InputManager.vcxproj" (Build target(s)).
+﻿Build started 5/6/2013 10:25:33 PM.
+     1>Project "C:\Users\Devin\Documents\Visual Studio 2010\Projects\zAwe\Engine\InputManager\Awe.Engine.InputManager.vcxproj" on node 3 (build target(s)).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Platforms\Win32\Microsoft.Cpp.Win32.Targets(518,5): error MSB8008: Specified platform toolset (v110) is not installed or invalid. Please make sure that a supported PlatformToolset value is selected.
+     1>Done Building Project "C:\Users\Devin\Documents\Visual Studio 2010\Projects\zAwe\Engine\InputManager\Awe.Engine.InputManager.vcxproj" (build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:02.12
+Time Elapsed 00:00:00.00
