@@ -11,6 +11,9 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{0d0fc263-d513-4573-ad00-5c514188b7c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Xnb">
+      <UniqueIdentifier>{de0b5c92-d4b1-4576-af73-cd872f8213af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\DXUT11\Core\DXUT.cpp">
@@ -51,6 +54,75 @@
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
+    <ClCompile Include="BinaryReader.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="cameraclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentReader.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="GenericTypeReader.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="graphicsclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsTypeReaders.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="inputclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="lightclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="lightshaderclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="MathTypeReaders.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="MediaTypeReaders.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="modelclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimitiveTypeReaders.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="systemclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemTypeReaders.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="textureclass.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="TypeReaderManager.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="XnbModelData.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="XnbParser.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
+    <ClCompile Include="XnbTexture2dData.cpp">
+      <Filter>Xnb</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h">
@@ -95,6 +167,78 @@
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="EnginePhysics.h" />
     <ClInclude Include="PhysXObject.h" />
+    <ClInclude Include="BinaryReader.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="cameraclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentReader.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="GenericTypeReader.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="graphicsclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsTypeReaders.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="inputclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="lightclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="lightshaderclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="MathTypeReaders.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="MediaTypeReaders.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="modelclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimitiveTypeReaders.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="systemclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemTypeReaders.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="textureclass.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeReader.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeReaderManager.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="XnbModelData.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="XnbParser.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
+    <ClInclude Include="XnbTexture2dData.h">
+      <Filter>Xnb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="BasicLoop.hlsl">

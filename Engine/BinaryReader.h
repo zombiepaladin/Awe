@@ -30,6 +30,7 @@ public:
     uint32_t Read7BitEncodedInt();
 
     vector<uint8_t> ReadBytes(uint32_t count);
+	vector<float> ReadFloats(uint32_t count);
 
     uint32_t FilePosition();
     uint32_t FileSize();

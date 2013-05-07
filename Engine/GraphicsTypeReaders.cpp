@@ -1,3 +1,5 @@
+#include <Windows.h>
+
 #include "stdafx.h"
 #include "ContentReader.h"
 #include "GraphicsTypeReaders.h"
@@ -160,16 +162,35 @@ void TextureCubeReader::Read(ContentReader* reader)
 
 void IndexBufferReader::Read(ContentReader* reader)
 {
-    reader->Log.WriteLine("Index format: %s", reader->ReadBoolean() ? "16 bit" : "32 bit");
+	bool is16Bit = reader->ReadBoolean();
+
+    reader->Log.WriteLine("Index format: %s", is16Bit ? "16 bit" : "32 bit");
 
     uint32_t dataSize = reader->ReadUInt32();
-    reader->Log.WriteBytes("Index data", reader->ReadBytes(dataSize));
+	int count = dataSize / (is16Bit ? 2 : 4);
+
+	vector<uint32_t> indexData;
+	//indexData.reserve(count);
+	
+	uint32_t test;
+	for(int i = 0; i < count; i++){
+		if(is16Bit)
+		{
+			indexData.push_back(reader->ReadUInt16());
+		}
+		else
+			indexData.push_back(reader->ReadUInt32());
+	}
+
+	reader->modelIndexData = indexData;
+    //reader->Log.WriteBytes("Index data", reader->ReadBytes(dataSize));
 }
 
 
 static uint32_t ReadVertexDeclaration(ContentReader* reader)
 {
     uint32_t vertexStride = reader->ReadUInt32();
+	reader->modelVertexDataSize = vertexStride / 4;
     reader->Log.WriteLine("Vertex stride: %u", vertexStride);
 
     uint32_t elementCount = reader->ReadUInt32();
@@ -194,6 +215,8 @@ static uint32_t ReadVertexDeclaration(ContentReader* reader)
 
 void VertexBufferReader::Read(ContentReader* reader)
 {
+	int i;
+
     reader->Log.WriteLine("Vertex declaration:");
     reader->Log.Indent();
 
@@ -204,10 +227,11 @@ void VertexBufferReader::Read(ContentReader* reader)
     uint32_t vertexCount = reader->ReadUInt32();
     reader->Log.WriteLine("Vertex count: %u", vertexCount);
 
-	vector<uint8_t> vertexData = reader->ReadBytes(vertexCount * vertexStride);
-	reader->modelVertexData = vertexData; //store in reader for retrieval later in the model class
+	vector<float> vertexFloatData = reader->ReadFloats(vertexCount * vertexStride / 4); //#bytes / 4 = #float
+		
+	reader->modelVertexData = vertexFloatData;
 
-    reader->Log.WriteBytes("Vertex data", vertexData);
+    //reader->Log.WriteBytes("Vertex data", vertexData);
 }
 
 
@@ -227,7 +251,9 @@ void EffectReader::Read(ContentReader* reader)
 
 void EffectMaterialReader::Read(ContentReader* reader)
 {
-    reader->Log.WriteLine("Effect reference: '%S'", reader->ReadString().c_str());
+	const wchar_t* ref = reader->ReadString().c_str();
+
+    reader->Log.WriteLine("Effect reference: '%S'", ref);
     
     reader->Log.WriteLine("Parameters:");
     reader->ReadObject();
@@ -236,7 +262,8 @@ void EffectMaterialReader::Read(ContentReader* reader)
 
 void BasicEffectReader::Read(ContentReader* reader)
 {
-    reader->Log.WriteLine("Texture reference: '%S'", reader->ReadString().c_str());
+	const wchar_t* ref = reader->ReadString().c_str();
+    reader->Log.WriteLine("Texture reference: '%S'", ref);
 
     reader->Log.Write("Diffuse color: ");
     Vector3Reader().Read(reader);

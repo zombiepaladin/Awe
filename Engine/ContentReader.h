@@ -3,7 +3,7 @@
 #include "Logger.h"
 #include "BinaryReader.h"
 #include "TypeReaderManager.h"
-
+#include "stdafx.h"
 
 // Parses an XNB file, calling into the appropriate TypeReader
 // helper to read whatever type(s) of object it contains.
@@ -12,7 +12,10 @@ class ContentReader : public BinaryReader
 public:
     //Fields for storing model data
 	
-	vector<uint8_t> modelVertexData;
+	int modelVertexDataSize;
+	vector<float> modelVertexData;
+	vector<uint32_t> modelIndexData;
+	string modelTextureReference;
 	
 	//end model fields
 	

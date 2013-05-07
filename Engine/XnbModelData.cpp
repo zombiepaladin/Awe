@@ -9,6 +9,9 @@ void XnbModelData::loadFromFile(char* fileName) {
 
 	//retrieve data from reader here
 	this->vertexData = reader.modelVertexData;
+	this->indexData = reader.modelIndexData;
+	this->textureReference = reader.modelTextureReference;
+	this->vertexDataSize = reader.modelVertexDataSize;
 }
 
 XnbModelData::XnbModelData() {
