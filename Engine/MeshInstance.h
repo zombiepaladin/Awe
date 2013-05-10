@@ -22,6 +22,45 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: ModelClass
 ////////////////////////////////////////////////////////////////////////////////
+#pragma region Cube Vertices
+const float cubeVertices[] = {-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f,
+		1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f,-1.0f,
+		1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f};
+#pragma endregion
+
 class MeshInstance
 {
 
@@ -35,9 +74,11 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext* deviceContext);
 	int GetInstanceCount();
+	int GetVertexCount();
 	int AddInstance(D3DXMATRIXA16& in);
 	void SetPosition(int id, D3DXMATRIXA16& pos);
 	bool IsLoaded();
+
 #pragma region Needed for Interface
 	void Create(ID3D11Device* device, LPCTSTR szFileName);
 	void Destroy();
@@ -50,10 +91,27 @@ private:
 	void RenderBuffers(ID3D11DeviceContext* deviceContext);
 	vector<D3DXMATRIXA16*> positionList;
 	ID3D11Buffer* m_instanceBuffer;
+	ID3D11Buffer* m_vertexBuffer;
+
+	bool InitializeVertexBuffer(ID3D11Device* device, float const vetices[]);
+	bool InitializeIndexBuffer(ID3D11Device* device);
+
 	int m_instanceCount;
 	int m_vertexCount;
 
+	struct VertexType
+	{
+		D3DXMATRIXA16 position;
+		//D3DXVECTOR2 texture;
+	};
 
+	struct InstanceType
+	{
+		D3DXMATRIXA16 position;
+	};
+	#pragma region CubeVertices
+	
+#pragma endregion
 };
 
 #endif

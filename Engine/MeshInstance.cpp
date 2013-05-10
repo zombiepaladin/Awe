@@ -7,6 +7,7 @@ __declspec(align(16));
 
 MeshInstance::MeshInstance()
 {
+	m_vertexBuffer =0;
 	m_instanceBuffer = 0;
 }
 
@@ -32,7 +33,6 @@ MeshInstance::~MeshInstance()
 bool MeshInstance::SetBuffers(ID3D11Device* device)
 {
 	bool result;
-
 
 	// Initialize the vertex and instance buffers.
 	result = InitializeBuffers(device);
@@ -61,7 +61,6 @@ void MeshInstance::Render(ID3D11DeviceContext* deviceContext)
 {
 	// Put the vertex and instance buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
-
 	return;
 }
 
@@ -72,27 +71,87 @@ int MeshInstance::GetInstanceCount()
 }
 
 
-
+int MeshInstance::GetVertexCount()
+{
+	return m_vertexCount;
+}
 
 bool MeshInstance::InitializeBuffers(ID3D11Device* device)
 {
-	
-	D3D11_BUFFER_DESC vertexBufferDesc,instanceBufferDesc;
-    D3D11_SUBRESOURCE_DATA vertexData, instanceData;
+	VertexType* vertices;
+	InstanceType* instances; 
+
+	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, instanceData;
 	HRESULT result;
 
+	m_vertexCount=36;
+	
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
 
+	//Load the vertex array with vertice data
+	D3DXMATRIXA16 position;
+	for(int i=0;i<m_vertexCount;i+=3)
+	{
+		D3DXMatrixTranslation(&(vertices[i].position), cubeVertices[3*i],cubeVertices[3*i+1],cubeVertices[3*i+2]);
+		//Figure out textures?
+	}
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+
+	if(FAILED(result))
+		return false;
+
+	//Release the vertex array now that the vertex buffer has been created and loaded
+	delete [] vertices;
+	vertices =0;
+
+	//Set the number of instances in the array
+	m_instanceCount=4;
+
+	//Create the instance array
+	instances = new InstanceType[m_instanceCount];
+	
+	if(!instances)
+	{
+		return false;
+	}
+
+	//Load the instance array with data
+	for(int i=0; i< m_instanceCount; i++)
+	{
+		instances[i].position = *positionList[i];
+	}
 
 	// Set up the description of the instance buffer.
-    instanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    instanceBufferDesc.ByteWidth = sizeof(positionList) * m_instanceCount;
-    instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    instanceBufferDesc.CPUAccessFlags = 0;
-    instanceBufferDesc.MiscFlags = 0;
+	instanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
+	instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	instanceBufferDesc.CPUAccessFlags = 0;
+	instanceBufferDesc.MiscFlags = 0;
 	instanceBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the instance data.
-    instanceData.pSysMem = &positionList;
+	instanceData.pSysMem = instances;
 	instanceData.SysMemPitch = 0;
 	instanceData.SysMemSlicePitch = 0;
 
@@ -104,10 +163,21 @@ bool MeshInstance::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// Release the instance array now that the instance buffer has been created and loaded.
+	delete [] instances;
+	instances = 0;
 
 	return true;
 }
 
+bool MeshInstance::InitializeVertexBuffer(ID3D11Device* device, float const vetices[])
+{
+	return false;
+}
+
+bool MeshInstance::InitializeIndexBuffer(ID3D11Device* device)
+{
+	return false;
+}
 
 void MeshInstance::ShutdownBuffers()
 {
@@ -116,6 +186,12 @@ void MeshInstance::ShutdownBuffers()
 	{
 		m_instanceBuffer->Release();
 		m_instanceBuffer = 0;
+	}
+
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer->Release();
+		m_vertexBuffer=0;
 	}
 
 	// Release the vertex buffer.
@@ -132,15 +208,15 @@ void MeshInstance::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 
 	// Set the buffer strides.
-	strides[0] = sizeof(positionList); 
-	strides[1] = 0; 
+	strides[0] = sizeof(VertexType); 
+	strides[1] = sizeof(InstanceType); 
 
 	// Set the buffer offsets.
 	offsets[0] = 0;
 	offsets[1] = 0;
     
 	// Set the array of pointers to the vertex and instance buffers.
-	bufferPointers[0] = 0;	
+	bufferPointers[0] = m_vertexBuffer;	
 	bufferPointers[1] = m_instanceBuffer;
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
