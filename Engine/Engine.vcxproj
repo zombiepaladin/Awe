@@ -96,6 +96,7 @@
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshInstance.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
@@ -116,6 +117,7 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="EnginePhysics.h" />
+    <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="PhysXObject.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="Shader.h" />

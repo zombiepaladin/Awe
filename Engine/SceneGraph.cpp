@@ -31,6 +31,11 @@ SceneGraph::~SceneGraph()
 
 bool SceneGraph::IsLoaded()
 {
+	if(!instanceList.empty())
+	{
+		return true;
+	}
+
 	if(meshList.empty())
 	{
 		return false;
@@ -126,7 +131,20 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
+	D3DXMATRIXA16 origin; 
+	D3DXMatrixTranslation(&origin,0,0,0);
 	PerFrameConstants *constants;
+
+	deviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	constants = static_cast<PerFrameConstants *>(mappedResource.pData);
+	constants->mCameraWorldViewProj=origin*cameraViewProj;
+	constants->mCameraWorldView=origin*cameraView;
+	deviceContext->Unmap(mPerFrameConstants, 0);
+	for(int i=0; i<instanceList.size();i++)
+	{
+		instanceList[i]->Render(deviceContext);
+	}
+
 	for(int i=0;i<meshList.size();i++)
 	{
 		deviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -157,4 +175,67 @@ void SceneGraph::Destroy()
 		}
 		positionList.clear();
 	}
+
+	if(!instanceList.empty())
+	{
+		for(int i=instanceList.size()-1; i>=0; i--)
+		{
+			SAFE_DELETE(instanceList[i]);
+		}
+		instanceList.clear();
+	}
 }
+
+#pragma region MeshInstance Stuff
+int SceneGraph::AddMeshInstance(ID3D11Device* device, LPCTSTR szFileName)
+{
+	MeshInstance* newInstance = new MeshInstance();
+	newInstance->Create(device, szFileName);
+	instanceList.push_back(newInstance);
+	return instanceList.size();
+}
+
+int SceneGraph::AddInstance(int meshId, int x, int y, int z, float xScale, float yScale, float zScale)
+{
+	D3DXMATRIXA16 t,s, final;
+	D3DXMatrixScaling(&s,xScale,yScale,zScale);
+	D3DXMatrixTranslation(&t,x,y,z);
+	final=s*t;
+	return AddInstance(meshId, final);
+}
+
+int SceneGraph::AddInstance(int meshId,int x, int y, int z, float scale)
+{
+	D3DXMATRIXA16 t,s, final;
+	D3DXMatrixScaling(&s,scale,scale,scale);
+	D3DXMatrixTranslation(&t,x,y,z);
+	final=s*t;
+	return AddInstance(meshId, final);
+}
+
+int SceneGraph::AddInstance(int meshId)
+{
+	D3DXMATRIXA16 t;
+	D3DXMatrixTranslation(&t,0,0,0);
+	return AddInstance(meshId, t);
+}
+
+int SceneGraph::AddInstance(int meshId,D3DXMATRIXA16& position)
+{
+	return instanceList[meshId-1]->AddInstance(position);
+}
+
+
+void SceneGraph::SetInstancePosition(int meshId, int instanceId, int x,int y,int z)
+{
+	D3DXMATRIXA16 t;
+	D3DXMatrixTranslation(&t,x,y,z);
+	SetInstancePosition(meshId, instanceId,t);
+}
+
+void SceneGraph::SetInstancePosition(int meshId, int instanceId, D3DXMATRIXA16& newPositionMatrix)
+{
+	instanceList[meshId-1]->SetPosition(instanceId, newPositionMatrix);
+}
+
+#pragma endregion

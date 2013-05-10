@@ -51,6 +51,7 @@
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
+    <ClCompile Include="MeshInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h">
@@ -95,6 +96,7 @@
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="EnginePhysics.h" />
     <ClInclude Include="PhysXObject.h" />
+    <ClInclude Include="MeshInstance.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BasicLoop.hlsl">

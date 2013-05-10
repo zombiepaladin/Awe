@@ -333,6 +333,7 @@ void InitScene(ID3D11Device* d3dDevice)
     SCENE_SELECTION scene = static_cast<SCENE_SELECTION>(PtrToUlong(gSceneSelectCombo->GetSelectedData()));
     switch (scene) {
 		case CUBE_WORLD: {
+#pragma region CUBE_WORLD
             sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -356,8 +357,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
-
+#pragma endregion
         case POWER_PLANT_SCENE: {
+#pragma region POWER_PLANT_SCENE
             sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -381,9 +383,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
-
+#pragma endregion
         case SPONZA_SCENE: {
-
+#pragma region SPONZA_SCENE
             sceneScaling = 0.05f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -408,7 +410,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
+#pragma endregion
 		case MULTI_SCENE:{
+#pragma region MULTI_SCENE
             sceneScaling = .05f;
 			
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -436,8 +440,10 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
+#pragma endregion
 		case CUBES:
 		{
+#pragma region CUBES
 			sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -465,12 +471,15 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			//Initializing PhysX
 			EnginePhysics::InitializePhysX(cubeList);
-
+			sceneGraph.AddMeshInstance(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
 			//Creating all of the cubes
 			for(int i = 0; i < cubeList->size(); i++)
 			{
-				(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",
-					(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+				(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+				//(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh", (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+				int id = (*cubeList)[i]->id;
+				if(i>=100)
+					int x =0;
 			}
 /*
 			for(float x =0; x<15;x+=5)
@@ -490,6 +499,7 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 		}break;
+#pragma endregion
     };
 #pragma endregion
 
@@ -741,7 +751,8 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
 		{
 			if( i == 100)
 				int x = 0;
-			sceneGraph.SetMeshPosition((*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+			sceneGraph.SetInstancePosition(1,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+			//sceneGraph.SetMeshPosition((*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
 		}
 	}
 
