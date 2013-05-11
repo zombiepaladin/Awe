@@ -142,7 +142,7 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 	deviceContext->Unmap(mPerFrameConstants, 0);
 	for(int i=0; i<instanceList.size();i++)
 	{
-		instanceList[i]->Render(deviceContext);
+		//instanceList[i]->Render(deviceContext);
 	}
 
 	for(int i=0;i<meshList.size();i++)
@@ -189,9 +189,9 @@ void SceneGraph::Destroy()
 #pragma region MeshInstance Stuff
 int SceneGraph::AddMeshInstance(ID3D11Device* device, LPCTSTR szFileName)
 {
-	MeshInstance* newInstance = new MeshInstance();
-	newInstance->Create(device, szFileName);
-	instanceList.push_back(newInstance);
+	//MeshInstance* newInstance = new MeshInstance();
+	//newInstance->Create(device, szFileName);
+//	instanceList.push_back(newInstance);
 	return instanceList.size();
 }
 
@@ -222,7 +222,7 @@ int SceneGraph::AddInstance(int meshId)
 
 int SceneGraph::AddInstance(int meshId,D3DXMATRIXA16& position)
 {
-	return instanceList[meshId-1]->AddInstance(position);
+	return 0;//instanceList[meshId-1]->AddInstance(position);
 }
 
 
@@ -235,7 +235,7 @@ void SceneGraph::SetInstancePosition(int meshId, int instanceId, int x,int y,int
 
 void SceneGraph::SetInstancePosition(int meshId, int instanceId, D3DXMATRIXA16& newPositionMatrix)
 {
-	instanceList[meshId-1]->SetPosition(instanceId, newPositionMatrix);
+	//instanceList[meshId-1]->SetPosition(instanceId, newPositionMatrix);
 }
 
 #pragma endregion

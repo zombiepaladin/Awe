@@ -1,30 +1,30 @@
-#include "MeshInstance.h"
+////////////////////////////////////////////////////////////////////////////////
+// Filename: textureshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "textureshaderclass.h"
 
-MeshInstance::MeshInstance()
+
+TextureShaderClass::TextureShaderClass()
 {
-	//TextureShader
 	m_vertexShader = 0;
 	m_pixelShader = 0;
 	m_layout = 0;
 	m_matrixBuffer = 0;
 	m_sampleState = 0;
-
-	//ModelItems
-	m_vertexBuffer = 0;
-	m_instanceBuffer = 0;
-	m_Texture = 0;
 }
 
-MeshInstance::MeshInstance(const MeshInstance& other)
+
+TextureShaderClass::TextureShaderClass(const TextureShaderClass& other)
 {
 }
 
-MeshInstance::~MeshInstance()
+
+TextureShaderClass::~TextureShaderClass()
 {
 }
 
-#pragma region TextureShader functions
-bool MeshInstance::InitializeTextureShader(ID3D11Device* device, HWND hwnd)
+
+bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
 	bool result;
 
@@ -39,7 +39,8 @@ bool MeshInstance::InitializeTextureShader(ID3D11Device* device, HWND hwnd)
 	return true;
 }
 
-void MeshInstance::ShutdownTexturesShader()
+
+void TextureShaderClass::Shutdown()
 {
 	// Shutdown the vertex and pixel shaders as well as the related objects.
 	ShutdownShader();
@@ -47,10 +48,12 @@ void MeshInstance::ShutdownTexturesShader()
 	return;
 }
 
-bool MeshInstance::RenderTextureShader(ID3D11DeviceContext* deviceContext, int vertexCount, int instanceCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+
+bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int vertexCount, int instanceCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 								D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	bool result;
+
 
 	// Set the shader parameters that it will use for rendering.
 	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture);
@@ -65,7 +68,8 @@ bool MeshInstance::RenderTextureShader(ID3D11DeviceContext* deviceContext, int v
 	return true;
 }
 
-bool MeshInstance::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+
+bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
 	HRESULT result;
 	ID3D10Blob* errorMessage;
@@ -218,7 +222,8 @@ bool MeshInstance::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFi
 	return true;
 }
 
-void MeshInstance::ShutdownShader()
+
+void TextureShaderClass::ShutdownShader()
 {
 	// Release the sampler state.
 	if(m_sampleState)
@@ -258,7 +263,8 @@ void MeshInstance::ShutdownShader()
 	return;
 }
 
-void MeshInstance::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+
+void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
 {
 	char* compileErrors;
 	unsigned long bufferSize, i;
@@ -293,7 +299,8 @@ void MeshInstance::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd,
 	return;
 }
 
-bool MeshInstance::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+
+bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 											 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT result;
@@ -337,7 +344,8 @@ bool MeshInstance::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXM
 	return true;
 }
 
-void MeshInstance::RenderShader(ID3D11DeviceContext* deviceContext, int vertexCount, int instanceCount)
+
+void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int vertexCount, int instanceCount)
 {
 	// Set the vertex input layout.
 	deviceContext->IASetInputLayout(m_layout);
@@ -353,299 +361,4 @@ void MeshInstance::RenderShader(ID3D11DeviceContext* deviceContext, int vertexCo
 	deviceContext->DrawInstanced(vertexCount, instanceCount, 0, 0);
 
 	return;
-}
-#pragma endregion
-
-
-#pragma region ModelClass functions
-
-bool MeshInstance::InitializeMeshInstance(ID3D11Device* device, WCHAR* textureFilename)
-{
-	bool result;
-
-
-	// Initialize the vertex and instance buffers.
-	result = InitializeBuffers(device);
-	if(!result)
-	{
-		return false;
-	}
-
-	// Load the texture for this model.
-	result = LoadTexture(device, textureFilename);
-	if(!result)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-void MeshInstance::ShutdownMeshInstance()
-{
-	// Release the model texture.
-	ReleaseTexture();
-
-	// Shutdown the vertex and instance buffers.
-	ShutdownBuffers();
-
-	return;
-}
-
-void MeshInstance::RenderMeshInstance(ID3D11DeviceContext* deviceContext)
-{
-	// Put the vertex and instance buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext);
-
-	return;
-}
-
-int MeshInstance::GetVertexCount()
-{
-	return m_vertexCount;
-}
-
-
-int MeshInstance::GetInstanceCount()
-{
-	return m_instanceCount;
-}
-
-
-ID3D11ShaderResourceView* MeshInstance::GetTexture()
-{
-	return m_Texture->GetTexture();
-}
-
-
-bool MeshInstance::InitializeBuffers(ID3D11Device* device)
-{
-	VertexType* vertices;
-	InstanceType* instances;
-	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc;
-    D3D11_SUBRESOURCE_DATA vertexData, instanceData;
-	HRESULT result;
-
-
-	// Set the number of vertices in the vertex array.
-	m_vertexCount = 36;
-
-	// Create the vertex array.
-	vertices = new VertexType[m_vertexCount];
-	if(!vertices)
-	{
-		return false;
-	}
-
-	for(int i=0; i<m_vertexCount;i++)
-	{
-		vertices[i].position = D3DXVECTOR3(mesh[3*i],mesh[3*i+1],mesh[3*i+2]);
-		//vertices[i].texture =D3DXVECTOR2(0.0f, 1.0f);
-	}
-
-#pragma region Original triangle
-	/*
-	// Load the vertex array with data.
-	vertices[0].position = D3DXVECTOR3(-1.0f, -1.0f, 0.0f);  // Bottom left.
-	vertices[0].texture = D3DXVECTOR2(0.0f, 1.0f);
-
-	vertices[1].position = D3DXVECTOR3(0.0f, 1.0f, 0.0f);  // Top middle.
-	vertices[1].texture = D3DXVECTOR2(0.5f, 0.0f);
-
-	vertices[2].position = D3DXVECTOR3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	vertices[2].texture = D3DXVECTOR2(1.0f, 1.0f);
-	*/
-#pragma endregion
-
-	// Set up the description of the static vertex buffer.
-    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
-    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vertexBufferDesc.CPUAccessFlags = 0;
-    vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the vertex data.
-    vertexData.pSysMem = vertices;
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if(FAILED(result))
-	{
-		return false;
-	}
-
-	// Release the vertex array now that the vertex buffer has been created and loaded.
-	delete [] vertices;
-	vertices = 0;
-
-	// Set the number of instances in the array.
-	m_instanceCount = 4;
-
-	// Create the instance array.
-	instances = new InstanceType[m_instanceCount];
-	if(!instances)
-	{
-		return false;
-	}
-
-	// Load the instance array with data.
-	instances[0].position = D3DXVECTOR3(-1.5f, -1.5f, 5.0f);
-	instances[1].position = D3DXVECTOR3(-1.5f,  1.5f, 5.0f);
-	instances[2].position = D3DXVECTOR3( 1.5f, -1.5f, 5.0f);
-	instances[3].position = D3DXVECTOR3( 1.5f,  1.5f, 5.0f);
-
-	// Set up the description of the instance buffer.
-    instanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
-    instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    instanceBufferDesc.CPUAccessFlags = 0;
-    instanceBufferDesc.MiscFlags = 0;
-	instanceBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the instance data.
-    instanceData.pSysMem = instances;
-	instanceData.SysMemPitch = 0;
-	instanceData.SysMemSlicePitch = 0;
-
-	// Create the instance buffer.
-	result = device->CreateBuffer(&instanceBufferDesc, &instanceData, &m_instanceBuffer);
-	if(FAILED(result))
-	{
-		return false;
-	}
-
-	// Release the instance array now that the instance buffer has been created and loaded.
-	delete [] instances;
-	instances = 0;
-
-	return true;
-}
-
-
-void MeshInstance::ShutdownBuffers()
-{
-	// Release the instance buffer.
-	if(m_instanceBuffer)
-	{
-		m_instanceBuffer->Release();
-		m_instanceBuffer = 0;
-	}
-
-	// Release the vertex buffer.
-	if(m_vertexBuffer)
-	{
-		m_vertexBuffer->Release();
-		m_vertexBuffer = 0;
-	}
-
-	return;
-}
-
-
-void MeshInstance::RenderBuffers(ID3D11DeviceContext* deviceContext)
-{
-	unsigned int strides[2];
-	unsigned int offsets[2];
-	ID3D11Buffer* bufferPointers[2];
-
-
-	// Set the buffer strides.
-	strides[0] = sizeof(VertexType); 
-	strides[1] = sizeof(InstanceType); 
-
-	// Set the buffer offsets.
-	offsets[0] = 0;
-	offsets[1] = 0;
-    
-	// Set the array of pointers to the vertex and instance buffers.
-	bufferPointers[0] = m_vertexBuffer;	
-	bufferPointers[1] = m_instanceBuffer;
-
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 2, bufferPointers, strides, offsets);
-
-    // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return;
-}
-
-
-bool MeshInstance::LoadTexture(ID3D11Device* device, WCHAR* filename)
-{
-	bool result;
-
-
-	// Create the texture object.
-	m_Texture = new TextureClass;
-	if(!m_Texture)
-	{
-		return false;
-	}
-
-	// Initialize the texture object.
-	result = m_Texture->Initialize(device, filename);
-	if(!result)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-void MeshInstance::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-
-	return;
-}
-
-#pragma endregion
-
-void MeshInstance::Create(ID3D11Device* device, LPCTSTR szFileName)
-{
-	HWND hwnd;
-	//need to set mesh[] to whatever the file says to.
-
-	InitializeMeshInstance(device,L"../Engine/data/seafloor.dds");
-
-	InitializeTextureShader(device,hwnd);
-}
-
-void MeshInstance::Destroy()
-{
-	ShutdownBuffers();
-	ShutdownTexturesShader();
-	ReleasePositionList();
-}
-
-void MeshInstance::ReleasePositionList()
-{
-	if(!positionList.empty())
-	{
-		for(int i=positionList.size()-1; i>=0; i--)
-		{
-			SAFE_DELETE(positionList[i]);
-		}
-		positionList.clear();
-	}
-}
-
-void MeshInstance::Render(ID3D11DeviceContext* deviceContext,D3DXMATRIXA16& worldMatrix,
-		D3DXMATRIXA16& viewMatrix, D3DXMATRIXA16& projectionMatrix)
-{
-	RenderMeshInstance(deviceContext);
-
-	RenderTextureShader(deviceContext,GetVertexCount(),GetInstanceCount(),worldMatrix,viewMatrix,
-		projectionMatrix, GetTexture());
 }
