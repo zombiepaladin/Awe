@@ -494,7 +494,7 @@ void InitScene(ID3D11Device* d3dDevice)
 				}
 			}
 */
-			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
+			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
 			cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 

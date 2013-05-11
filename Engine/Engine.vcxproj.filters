@@ -52,7 +52,6 @@
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
-    <ClCompile Include="PhysXObject.cpp" />
     <ClCompile Include="MeshInstance.cpp" />
     <ClCompile Include="InstancedRendering\cameraclass.cpp">
       <Filter>Resource Files\InstancedRendering</Filter>
@@ -66,9 +65,6 @@
     <ClCompile Include="InstancedRendering\inputclass.cpp">
       <Filter>Resource Files\InstancedRendering</Filter>
     </ClCompile>
-    <ClCompile Include="InstancedRendering\main.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
     <ClCompile Include="InstancedRendering\modelclass.cpp">
       <Filter>Resource Files\InstancedRendering</Filter>
     </ClCompile>
@@ -78,11 +74,12 @@
     <ClCompile Include="InstancedRendering\textureclass.cpp">
       <Filter>Resource Files\InstancedRendering</Filter>
     </ClCompile>
-    <ClCompile Include="main1.cpp" />
     <ClCompile Include="textureclass.cpp" />
     <ClCompile Include="InstancedRendering\textureshaderclass.cpp">
       <Filter>Resource Files\InstancedRendering</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="PhysXObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h">

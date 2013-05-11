@@ -141,7 +141,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	for(int i=0; i<m_vertexCount;i++)
 	{
 		vertices[i].position = D3DXVECTOR3(cube[3*i],cube[3*i+1],cube[3*i+2]);
-		//vertices[i].texture =D3DXVECTOR2(0.0f, 1.0f);
+		vertices[i].texture =D3DXVECTOR2(cube[3*i], cube[3*i+1]);
 	}
 	/*
 	// Load the vertex array with data.

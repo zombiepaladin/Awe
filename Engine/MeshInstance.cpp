@@ -417,15 +417,13 @@ ID3D11ShaderResourceView* MeshInstance::GetTexture()
 	return m_Texture->GetTexture();
 }
 
-
-bool MeshInstance::InitializeBuffers(ID3D11Device* device)
+bool MeshInstance::InitializeVertexBuffer(ID3D11Device* device)
 {
 	VertexType* vertices;
-	InstanceType* instances;
-	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc;
-    D3D11_SUBRESOURCE_DATA vertexData, instanceData;
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData;
 	HRESULT result;
-
+	
 
 	// Set the number of vertices in the vertex array.
 	m_vertexCount = 36;
@@ -440,7 +438,7 @@ bool MeshInstance::InitializeBuffers(ID3D11Device* device)
 	for(int i=0; i<m_vertexCount;i++)
 	{
 		vertices[i].position = D3DXVECTOR3(mesh[3*i],mesh[3*i+1],mesh[3*i+2]);
-		//vertices[i].texture =D3DXVECTOR2(0.0f, 1.0f);
+		vertices[i].texture =D3DXVECTOR2(mesh[3*i], mesh[3*i+1]);
 	}
 
 #pragma region Original triangle
@@ -481,8 +479,19 @@ bool MeshInstance::InitializeBuffers(ID3D11Device* device)
 	delete [] vertices;
 	vertices = 0;
 
+	return true;
+}
+
+bool MeshInstance::InitializeInstanceBuffer(ID3D11Device* device)
+{
+	InstanceType* instances;
+	D3D11_BUFFER_DESC instanceBufferDesc;
+    D3D11_SUBRESOURCE_DATA instanceData;
+	HRESULT result;
+
+	
 	// Set the number of instances in the array.
-	m_instanceCount = 4;
+	m_instanceCount = positionList.size();
 
 	// Create the instance array.
 	instances = new InstanceType[m_instanceCount];
@@ -491,11 +500,20 @@ bool MeshInstance::InitializeBuffers(ID3D11Device* device)
 		return false;
 	}
 
+	for(int i=0; i<m_instanceCount;i++)
+	{
+		instances[i].position = *positionList[i];
+	}
+
+#pragma region Origial Instances
+	/*
 	// Load the instance array with data.
 	instances[0].position = D3DXVECTOR3(-1.5f, -1.5f, 5.0f);
 	instances[1].position = D3DXVECTOR3(-1.5f,  1.5f, 5.0f);
 	instances[2].position = D3DXVECTOR3( 1.5f, -1.5f, 5.0f);
 	instances[3].position = D3DXVECTOR3( 1.5f,  1.5f, 5.0f);
+	*/
+#pragma endregion
 
 	// Set up the description of the instance buffer.
     instanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -522,6 +540,11 @@ bool MeshInstance::InitializeBuffers(ID3D11Device* device)
 	instances = 0;
 
 	return true;
+}
+
+bool MeshInstance::InitializeBuffers(ID3D11Device* device)
+{
+	return InitializeVertexBuffer(device)||InitializeInstanceBuffer(device);
 }
 
 
@@ -614,12 +637,12 @@ void MeshInstance::ReleaseTexture()
 
 void MeshInstance::Create(ID3D11Device* device, LPCTSTR szFileName)
 {
-	HWND hwnd;
+	_device=device;
 	//need to set mesh[] to whatever the file says to.
 
 	InitializeMeshInstance(device,L"../Engine/data/seafloor.dds");
 
-	InitializeTextureShader(device,hwnd);
+	InitializeTextureShader(device,NULL);
 }
 
 void MeshInstance::Destroy()
@@ -627,6 +650,7 @@ void MeshInstance::Destroy()
 	ShutdownBuffers();
 	ShutdownTexturesShader();
 	ReleasePositionList();
+	_device=0;
 }
 
 void MeshInstance::ReleasePositionList()
@@ -644,8 +668,33 @@ void MeshInstance::ReleasePositionList()
 void MeshInstance::Render(ID3D11DeviceContext* deviceContext,D3DXMATRIXA16& worldMatrix,
 		D3DXMATRIXA16& viewMatrix, D3DXMATRIXA16& projectionMatrix)
 {
+	InitializeInstanceBuffer(_device);
 	RenderMeshInstance(deviceContext);
 
 	RenderTextureShader(deviceContext,GetVertexCount(),GetInstanceCount(),worldMatrix,viewMatrix,
 		projectionMatrix, GetTexture());
+}
+
+bool MeshInstance::IsLoaded()
+{
+	if(!positionList.empty())
+	{
+		return true;
+	}
+
+	return false;
+}
+
+int MeshInstance::AddInstance(float x, float y, float z)
+{
+	positionList.push_back(new D3DXVECTOR3(x,y,z));
+	return positionList.size();
+}
+
+void MeshInstance::SetPosition(int instanceId, float x, float y, float z)
+{
+	D3DXVECTOR3* temp;
+	temp = positionList[instanceId-1];
+	positionList[instanceId-1]=new D3DXVECTOR3(x,y,z);
+	delete(temp);
 }

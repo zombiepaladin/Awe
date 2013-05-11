@@ -142,7 +142,7 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 	deviceContext->Unmap(mPerFrameConstants, 0);
 	for(int i=0; i<instanceList.size();i++)
 	{
-		//instanceList[i]->Render(deviceContext);
+		instanceList[i]->Render(deviceContext,_worldMatrix,cameraView,cameraViewProj);
 	}
 
 	for(int i=0;i<meshList.size();i++)
@@ -189,53 +189,35 @@ void SceneGraph::Destroy()
 #pragma region MeshInstance Stuff
 int SceneGraph::AddMeshInstance(ID3D11Device* device, LPCTSTR szFileName)
 {
-	//MeshInstance* newInstance = new MeshInstance();
-	//newInstance->Create(device, szFileName);
-//	instanceList.push_back(newInstance);
+	MeshInstance* newInstance = new MeshInstance();
+	newInstance->Create(device, szFileName);
+	instanceList.push_back(newInstance);
 	return instanceList.size();
 }
 
 int SceneGraph::AddInstance(int meshId, int x, int y, int z, float xScale, float yScale, float zScale)
 {
-	D3DXMATRIXA16 t,s, final;
-	D3DXMatrixScaling(&s,xScale,yScale,zScale);
-	D3DXMatrixTranslation(&t,x,y,z);
-	final=s*t;
-	return AddInstance(meshId, final);
+	return instanceList[meshId-1]->AddInstance(x,y,z);
 }
 
 int SceneGraph::AddInstance(int meshId,int x, int y, int z, float scale)
 {
-	D3DXMATRIXA16 t,s, final;
-	D3DXMatrixScaling(&s,scale,scale,scale);
-	D3DXMatrixTranslation(&t,x,y,z);
-	final=s*t;
-	return AddInstance(meshId, final);
+	return AddInstance(meshId, x,y,z,scale,scale,scale);
 }
 
 int SceneGraph::AddInstance(int meshId)
 {
-	D3DXMATRIXA16 t;
-	D3DXMatrixTranslation(&t,0,0,0);
-	return AddInstance(meshId, t);
+	return AddInstance(meshId, 0,0,0,1,1,1);
 }
 
-int SceneGraph::AddInstance(int meshId,D3DXMATRIXA16& position)
-{
-	return 0;//instanceList[meshId-1]->AddInstance(position);
-}
 
 
 void SceneGraph::SetInstancePosition(int meshId, int instanceId, int x,int y,int z)
 {
 	D3DXMATRIXA16 t;
 	D3DXMatrixTranslation(&t,x,y,z);
-	SetInstancePosition(meshId, instanceId,t);
+	instanceList[meshId-1]->SetPosition(instanceId,x,y,z);
 }
 
-void SceneGraph::SetInstancePosition(int meshId, int instanceId, D3DXMATRIXA16& newPositionMatrix)
-{
-	//instanceList[meshId-1]->SetPosition(instanceId, newPositionMatrix);
-}
 
 #pragma endregion

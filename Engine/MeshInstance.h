@@ -93,16 +93,22 @@ private:
 #pragma endregion
 
 public: 
-	void SetPosition(int instanceId, D3DXMATRIXA16& newPositionMatrix);
+	void SetPosition(int instanceId, float x, float y, float z);
 	void Render(ID3D11DeviceContext* deviceContext,D3DXMATRIXA16& worldMatrix,
 		D3DXMATRIXA16& viewMatrix, D3DXMATRIXA16& projectionMatrix);
 	void Create(ID3D11Device* device, LPCTSTR szFileName);
-	int AddInstance(D3DXMATRIXA16& position);
+	int AddInstance(float x, float y, float z);
 	void Destroy();
+
+	bool IsLoaded();
 
 private:
 	vector<D3DXVECTOR3*> positionList;
 	void ReleasePositionList();
+
+	bool InitializeVertexBuffer(ID3D11Device* device);
+	bool InitializeInstanceBuffer(ID3D11Device* device);
+	ID3D11Device* _device;
 };
 
 const float mesh[] = {-1.0f,-1.0f,-1.0f,

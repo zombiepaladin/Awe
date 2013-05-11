@@ -99,12 +99,11 @@
     <ClCompile Include="InstancedRendering\d3dclass.cpp" />
     <ClCompile Include="InstancedRendering\graphicsclass.cpp" />
     <ClCompile Include="InstancedRendering\inputclass.cpp" />
-    <ClCompile Include="InstancedRendering\main.cpp" />
     <ClCompile Include="InstancedRendering\modelclass.cpp" />
     <ClCompile Include="InstancedRendering\systemclass.cpp" />
     <ClCompile Include="InstancedRendering\textureclass.cpp" />
     <ClCompile Include="InstancedRendering\textureshaderclass.cpp" />
-    <ClCompile Include="main1.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshInstance.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="PhysXObject.cpp" />

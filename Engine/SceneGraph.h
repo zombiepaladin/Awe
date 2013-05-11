@@ -34,11 +34,9 @@ public:
 	int AddMeshInstance(ID3D11Device* device, LPCTSTR szFileName);
 	int AddInstance(int meshId, int x, int y, int z, float xScale, float yScale, float zScale);
 	int AddInstance(int meshId, int x, int y, int z, float scale);
-	int AddInstance(int meshId, D3DXMATRIXA16& position);
 	int AddInstance(int meshId);
 
 	void SetInstancePosition(int meshId, int instanceId, int x,int y,int z);
-	void SetInstancePosition(int meshId, int instanceId, D3DXMATRIXA16& newPositionMatrix);
 #pragma endregion
 private:
 	vector<CDXUTSDKMesh*> meshList;
