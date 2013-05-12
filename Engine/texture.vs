@@ -2,6 +2,9 @@
 // Filename: texture.vs
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifndef INSTANCED_HLSL
+#define INSTANCED_HLSL
+
 
 /////////////
 // GLOBALS //
@@ -57,3 +60,5 @@ PixelInputType TextureVertexShader(VertexInputType input)
     
     return output;
 }
+
+#endif

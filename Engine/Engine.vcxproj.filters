@@ -11,9 +11,6 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{0d0fc263-d513-4573-ad00-5c514188b7c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\InstancedRendering">
-      <UniqueIdentifier>{705fbf40-118c-48e7-b68e-f7930874e646}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\DXUT11\Core\DXUT.cpp">
@@ -53,31 +50,7 @@
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
     <ClCompile Include="MeshInstance.cpp" />
-    <ClCompile Include="InstancedRendering\cameraclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedRendering\d3dclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedRendering\graphicsclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedRendering\inputclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedRendering\modelclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedRendering\systemclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedRendering\textureclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
     <ClCompile Include="textureclass.cpp" />
-    <ClCompile Include="InstancedRendering\textureshaderclass.cpp">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
   </ItemGroup>
@@ -125,31 +98,7 @@
     <ClInclude Include="EnginePhysics.h" />
     <ClInclude Include="PhysXObject.h" />
     <ClInclude Include="MeshInstance.h" />
-    <ClInclude Include="InstancedRendering\cameraclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedRendering\d3dclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedRendering\graphicsclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedRendering\inputclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedRendering\modelclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedRendering\systemclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedRendering\textureclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
     <ClInclude Include="textureclass.h" />
-    <ClInclude Include="InstancedRendering\textureshaderclass.h">
-      <Filter>Resource Files\InstancedRendering</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="BasicLoop.hlsl">

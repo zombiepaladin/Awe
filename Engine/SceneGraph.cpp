@@ -135,14 +135,9 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 	D3DXMatrixTranslation(&origin,0,0,0);
 	PerFrameConstants *constants;
 
-	deviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	constants = static_cast<PerFrameConstants *>(mappedResource.pData);
-	constants->mCameraWorldViewProj=origin*cameraViewProj;
-	constants->mCameraWorldView=origin*cameraView;
-	deviceContext->Unmap(mPerFrameConstants, 0);
 	for(int i=0; i<instanceList.size();i++)
 	{
-		instanceList[i]->Render(deviceContext,_worldMatrix,cameraView,cameraViewProj);
+		instanceList[i]->Render(deviceContext,_worldMatrix,cameraView,cameraProj);
 	}
 
 	for(int i=0;i<meshList.size();i++)
