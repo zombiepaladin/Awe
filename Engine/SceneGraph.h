@@ -19,6 +19,7 @@ public:
 	~SceneGraph();
 	void Destroy();
 	void Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFrameConstants, D3DXMATRIXA16& cameraView, D3DXMATRIXA16& cameraProj);
+	void RenderInstanced(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFrameConstants, D3DXMATRIXA16& cameraView, D3DXMATRIXA16& cameraProj);
 	bool IsLoaded();
 	void ComputeInFrustumFlags(const D3DXMATRIXA16 &cameraViewProj);
 	int Add(ID3D11Device* device, LPCTSTR szFileName,D3DXMATRIXA16& position);

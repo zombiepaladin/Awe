@@ -350,7 +350,7 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
 
-			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1,500,500);
             //gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 

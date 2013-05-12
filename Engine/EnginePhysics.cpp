@@ -22,7 +22,7 @@ namespace EnginePhysics
 	#pragma region Defines
 
 		#define PLANET_HEIGHT 100
-		#define PLANET_NUM 1
+		#define PLANET_NUM 2
 		#define PLANE_NUM 6
 		#define BLOCK_NUM 1000
 		#define STRONG_UNIVERSAL_GRAVITATIONAL_FORCE 200.0f

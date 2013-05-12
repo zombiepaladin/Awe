@@ -153,6 +153,17 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 		meshList[i]->Render(deviceContext,0);
 	}
 
+	
+}
+
+void SceneGraph::RenderInstanced(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFrameConstants, D3DXMATRIXA16& cameraView, D3DXMATRIXA16& cameraProj)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	D3DXMATRIXA16 cameraViewProj = cameraView * cameraProj;
+	D3DXMATRIXA16 origin; 
+	D3DXMatrixTranslation(&origin,0,0,0);
+	PerFrameConstants *constants;
+
 	for(int i=0; i<instanceList.size();i++)
 	{
 		instanceList[i]->Render(deviceContext,_worldMatrix,cameraView,cameraProj);
