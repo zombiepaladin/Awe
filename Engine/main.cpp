@@ -475,11 +475,11 @@ void InitScene(ID3D11Device* d3dDevice)
 			//Creating all of the cubes
 			for(int i = 0; i < cubeList->size(); i++)
 			{
-				(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
-				//(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh", (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
-				int id = (*cubeList)[i]->id;
-				if(i>=100)
-					int x =0;
+				if((i%100)==0)
+					(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh", (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+				else
+					(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+
 			}
 /*
 			for(float x =0; x<15;x+=5)
@@ -749,10 +749,14 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
 	{
 		for(int i = 0; i < cubeList->size(); i++)
 		{
-			if( i == 100)
-				int x = 0;
-			sceneGraph.SetInstancePosition(1,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
-			//sceneGraph.SetMeshPosition((*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+			if((*cubeList)[i]->id<0)
+			{
+				sceneGraph.SetInstancePosition(1,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+			}
+			else
+			{
+				sceneGraph.SetMeshPosition(0,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+			}
 		}
 	}
 

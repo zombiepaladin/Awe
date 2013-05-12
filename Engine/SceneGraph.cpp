@@ -101,12 +101,19 @@ void SceneGraph::TranslateMesh(int id, D3DXMATRIXA16& translationMatrix)
 	positionList[id]= &target;
 }
 
-void SceneGraph::SetMeshPosition(int id, int x,int y,int z)
+void SceneGraph::SetMeshPosition(int instanceId, int id, int x,int y,int z)
 {
-	D3DXMATRIXA16 trans,target;
-	D3DXMatrixTranslation(&trans,x,y,z);
-	target = _worldMatrix*trans;
-	SetMeshPosition(id,target);
+	if(instanceId>0)
+	{
+		SetInstancePosition(instanceId, id,x,y,z);
+	}
+	else
+	{
+		D3DXMATRIXA16 trans,target;
+		D3DXMatrixTranslation(&trans,x,y,z);
+		target = _worldMatrix*trans;
+		SetMeshPosition(id,target);
+	}
 }
 
 void SceneGraph::SetMeshPosition(int id, D3DXMATRIXA16& newPositionMatrix)
@@ -135,11 +142,6 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 	D3DXMatrixTranslation(&origin,0,0,0);
 	PerFrameConstants *constants;
 
-	for(int i=0; i<instanceList.size();i++)
-	{
-		instanceList[i]->Render(deviceContext,_worldMatrix,cameraView,cameraProj);
-	}
-
 	for(int i=0;i<meshList.size();i++)
 	{
 		deviceContext->Map(mPerFrameConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -149,6 +151,11 @@ void SceneGraph::Render(ID3D11DeviceContext* deviceContext,ID3D11Buffer* mPerFra
 		deviceContext->Unmap(mPerFrameConstants, 0);
 		meshList[i]->ComputeInFrustumFlags((*positionList[i])*cameraViewProj,0);
 		meshList[i]->Render(deviceContext,0);
+	}
+
+	for(int i=0; i<instanceList.size();i++)
+	{
+		instanceList[i]->Render(deviceContext,_worldMatrix,cameraView,cameraProj);
 	}
 }
 
@@ -192,7 +199,7 @@ int SceneGraph::AddMeshInstance(ID3D11Device* device, LPCTSTR szFileName)
 
 int SceneGraph::AddInstance(int meshId, int x, int y, int z, float xScale, float yScale, float zScale)
 {
-	return instanceList[meshId-1]->AddInstance(x,y,z);
+	return -instanceList[meshId-1]->AddInstance(x,y,z);
 }
 
 int SceneGraph::AddInstance(int meshId,int x, int y, int z, float scale)
@@ -211,7 +218,7 @@ void SceneGraph::SetInstancePosition(int meshId, int instanceId, int x,int y,int
 {
 	D3DXMATRIXA16 t;
 	D3DXMatrixTranslation(&t,x,y,z);
-	instanceList[meshId-1]->SetPosition(instanceId,x,y,z);
+	instanceList[meshId-1]->SetPosition(-instanceId,x,y,z);
 }
 
 

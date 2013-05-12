@@ -27,7 +27,7 @@ public:
 	int Add(ID3D11Device* device, LPCTSTR szFileName, int x, int y, int z, float xScale, float yScale, float zScale);
 	void TranslateMesh(int id, D3DXMATRIXA16& TranslationMatrix);
 	void SetMeshPosition(int id, D3DXMATRIXA16& newPositionMatrix);
-	void SetMeshPosition(int id, int x,int y,int z);
+	void SetMeshPosition(int instanceId, int id, int x,int y,int z);
 	void StartScene(D3DXMATRIXA16& worldMatrix,float sceneScaling);
 
 #pragma region MeshInstance Stuff
