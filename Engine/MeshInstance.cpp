@@ -438,7 +438,7 @@ bool MeshInstance::InitializeVertexBuffer(ID3D11Device* device)
 	for(int i=0; i<m_vertexCount;i++)
 	{
 		vertices[i].position = D3DXVECTOR3(mesh[3*i],mesh[3*i+1],mesh[3*i+2]);
-		vertices[i].texture =D3DXVECTOR2(mesh[3*i], mesh[3*i+1]);
+		vertices[i].texture = D3DXVECTOR2(mesh[3*i], mesh[3*i+1]);
 	}
 
 #pragma region Original triangle

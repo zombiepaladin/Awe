@@ -75,6 +75,7 @@ private:
 	{
 		D3DXVECTOR3 position;
 	    D3DXVECTOR2 texture;
+		//D3DXMATRIXA16 scale;
 	};
 
 	struct InstanceType
@@ -147,13 +148,13 @@ const float mesh[] = {IV5,IV3,IV2
 	,IV12,IV11,IV3
 	,IV4,IV12,IV3
 	,IV1,IV12,IV4};
-const float mesh1[] = {IV2,IV3,IV5,IV4,IV6,IV1,
+const float isacohedron[] = {IV2,IV3,IV5,IV4,IV6,IV1,
 	IV2,IV5,IV7,IV6,IV8,IV1,
 	IV2,IV7,IV9,IV8,IV10,IV1,
 	IV2,IV9,IV11,IV10,IV12,IV1,
 	IV2,IV11,IV3,IV12,IV4,IV1};
 
-const float cube[] = {-1.0f,-1.0f,-1.0f,
+const float cubes[] = {-1.0f,-1.0f,-1.0f,
 -1.0f,-1.0f, 1.0f,
 -1.0f, 1.0f, 1.0f,
 1.0f, 1.0f,-1.0f,

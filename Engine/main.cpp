@@ -472,14 +472,11 @@ void InitScene(ID3D11Device* d3dDevice)
 			//Initializing PhysX
 			EnginePhysics::InitializePhysX(cubeList);
 			sceneGraph.AddMeshInstance(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+			//sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
 			//Creating all of the cubes
 			for(int i = 0; i < cubeList->size(); i++)
 			{
-				if((i%100)==0)
-					(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh", (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
-				else
-					(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
-
+				(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
 			}
 /*
 			for(float x =0; x<15;x+=5)
