@@ -96,8 +96,12 @@
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="physics.cpp" />
+    <ClCompile Include="PhysXDynamicCube.cpp" />
+    <ClCompile Include="PhysXGroup.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
+    <ClCompile Include="PhysXRope.cpp" />
+    <ClCompile Include="PhysXStaticCube.cpp" />
+    <ClCompile Include="PhysXStaticPlane.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="Texture2D.cpp" />
   </ItemGroup>
@@ -116,7 +120,12 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="EnginePhysics.h" />
+    <ClInclude Include="PhysXDynamicCube.h" />
+    <ClInclude Include="PhysXGroup.h" />
     <ClInclude Include="PhysXObject.h" />
+    <ClInclude Include="PhysXRope.h" />
+    <ClInclude Include="PhysXStaticCube.h" />
+    <ClInclude Include="PhysXStaticPlane.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderDefines.h" />

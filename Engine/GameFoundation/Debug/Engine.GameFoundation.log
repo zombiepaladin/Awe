@@ -1,8 +1,5 @@
-﻿Build started 5/6/2013 10:25:33 PM.
-     1>Project "C:\Users\Devin\Documents\Visual Studio 2010\Projects\zAwe\Engine\GameFoundation\Engine.GameFoundation.vcxproj" on node 4 (build target(s)).
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Platforms\Win32\Microsoft.Cpp.Win32.Targets(518,5): error MSB8008: Specified platform toolset (v110) is not installed or invalid. Please make sure that a supported PlatformToolset value is selected.
-     1>Done Building Project "C:\Users\Devin\Documents\Visual Studio 2010\Projects\zAwe\Engine\GameFoundation\Engine.GameFoundation.vcxproj" (build target(s)) -- FAILED.
+﻿Build started 5/13/2013 3:06:11 AM.
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:00.01
+Time Elapsed 00:00:04.84
