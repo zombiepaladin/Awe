@@ -13,6 +13,22 @@
 #include "DXUT.h"
 using namespace std;
 
+#pragma region Icosahedron vertices;
+#define SCALE 0.5f
+#define PHI SCALE*(1.6180f)
+#define IV1 0.0f, SCALE, PHI
+#define IV2 0.0f, -SCALE, -PHI
+#define IV3 -SCALE, -PHI, 0.0f
+#define IV4 0.0f, -SCALE, PHI
+#define IV5 SCALE, -PHI, 0.0f
+#define IV6 PHI, 0.0f, SCALE
+#define IV7 PHI, 0.0f, -SCALE
+#define IV8 SCALE, PHI, 0.0f
+#define IV9 0.0f, SCALE, -PHI
+#define IV10 -SCALE, PHI, 0.0f
+#define IV11 -PHI, 0.0f, -SCALE
+#define IV12 -PHI, 0.0f, SCALE
+#pragma endregion
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: MeshInstance
@@ -111,7 +127,33 @@ private:
 	ID3D11Device* _device;
 };
 
-const float mesh[] = {-1.0f,-1.0f,-1.0f,
+const float mesh[] = {IV5,IV3,IV2
+	,IV5,IV4,IV3
+	,IV6,IV4,IV5
+	,IV1,IV4,IV6
+	,IV7,IV5,IV2
+	,IV6,IV5,IV7
+	,IV8,IV6,IV7
+	,IV1,IV6,IV8
+	,IV9,IV7,IV2
+	,IV8,IV7,IV9
+	,IV10,IV8,IV9
+	,IV1,IV8,IV10
+	,IV11,IV9,IV2
+	,IV10,IV9,IV11
+	,IV12,IV10,IV11
+	,IV1,IV10,IV12
+	,IV3,IV11,IV2
+	,IV12,IV11,IV3
+	,IV4,IV12,IV3
+	,IV1,IV12,IV4};
+const float mesh1[] = {IV2,IV3,IV5,IV4,IV6,IV1,
+	IV2,IV5,IV7,IV6,IV8,IV1,
+	IV2,IV7,IV9,IV8,IV10,IV1,
+	IV2,IV9,IV11,IV10,IV12,IV1,
+	IV2,IV11,IV3,IV12,IV4,IV1};
+
+const float cube[] = {-1.0f,-1.0f,-1.0f,
 -1.0f,-1.0f, 1.0f,
 -1.0f, 1.0f, 1.0f,
 1.0f, 1.0f,-1.0f,

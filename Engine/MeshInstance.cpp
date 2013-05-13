@@ -426,7 +426,7 @@ bool MeshInstance::InitializeVertexBuffer(ID3D11Device* device)
 	
 
 	// Set the number of vertices in the vertex array.
-	m_vertexCount = 36;
+	m_vertexCount = 60;
 
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
