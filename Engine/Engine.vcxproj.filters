@@ -48,10 +48,13 @@
     </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ColorUtil.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="PhysXDynamicCube.cpp">
+    <ClCompile Include="MeshInstance.cpp" />
+    <ClCompile Include="textureclass.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="PhysXObject.cpp" />
       <Filter>PhysX</Filter>
     </ClCompile>
     <ClCompile Include="PhysXGroup.cpp">
@@ -135,6 +138,8 @@
     <ClInclude Include="EnginePhysics.h">
       <Filter>PhysX</Filter>
     </ClInclude>
+    <ClInclude Include="MeshInstance.h" />
+    <ClInclude Include="textureclass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BasicLoop.hlsl">

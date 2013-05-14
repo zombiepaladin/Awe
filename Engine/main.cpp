@@ -411,6 +411,7 @@ void InitScene(ID3D11Device* d3dDevice)
 	scene = CUBES;
     switch (scene) {
 		case CUBE_WORLD: {
+#pragma region CUBE_WORLD
             sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -427,15 +428,16 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
 
-			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1,500,500);
             //gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
-
+#pragma endregion
         case POWER_PLANT_SCENE: {
+#pragma region POWER_PLANT_SCENE
             sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -459,9 +461,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
-
+#pragma endregion
         case SPONZA_SCENE: {
-
+#pragma region SPONZA_SCENE
             sceneScaling = 0.05f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -486,7 +488,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
+#pragma endregion
 		case MULTI_SCENE:{
+#pragma region MULTI_SCENE
             sceneScaling = .05f;
 			
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -514,8 +518,10 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
+#pragma endregion
 		case CUBES:
 		{
+#pragma region CUBES
 			sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -544,15 +550,22 @@ void InitScene(ID3D11Device* d3dDevice)
 			//Initializing PhysX
 			if(!PXEngine)
 				PXEngine = new PhysXEngine();
-
+			sceneGraph.AddMeshInstance(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+			//sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
 			if(PXEngine)
 				PXEngine->InitializePhysX(cubeList, PhysXUnProject, PhysXProject);
+
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1000,1000,1000);
 
 			//Creating all of the cubes
 			for(int i = 0; i < cubeList->size(); i++)
 			{
-				(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",
-					(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+				if(i%10==0)
+				{
+					sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1,1,1);
+				}
+				else
+					(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
 			}
 /*
 			for(float x =0; x<15;x+=5)
@@ -567,11 +580,12 @@ void InitScene(ID3D11Device* d3dDevice)
 				}
 			}
 */
-			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
+			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
 			cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 		}break;
+#pragma endregion
     };
 #pragma endregion
 	
@@ -829,18 +843,19 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     }
 	if(PXEngine)
 	{
+		for(int i = 0; i < cubeList->size(); i++)
 		PXEngine->StepPhysX();
 		if(cubeList)
 		{
-			//sceneGraph.SetMeshPosition((*cubeList)[0]->id,(*cubeList)[0]->x, (*cubeList)[0]->y,(*cubeList)[0]->z);
 			for(int i = 0; i < cubeList->size(); i++)
 			{
-				sceneGraph.SetMeshPosition((*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
-				if(i == 10)
+				if((*cubeList)[i]->id<0)
 				{
-					cubePos.x = (*cubeList)[i]->x;
-					cubePos.y = (*cubeList)[i]->y;
-					cubePos.z = (*cubeList)[i]->z;
+					sceneGraph.SetInstancePosition(1,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+				}
+				else
+				{
+					sceneGraph.SetMeshPosition(0,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
 				}
 			}
 		}
@@ -875,7 +890,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
         gWorldMatrix, &gViewerCamera, &viewport, &gUIConstants);
 	
 		 
-
+		 sceneGraph.SetMeshPosition(0,1, 100000, 100000, 100000);
     if (gDisplayUI) {
         d3dDeviceContext->RSSetViewports(1, &viewport);
 
@@ -906,146 +921,6 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
             oss << "Lights: " << gApp->GetActiveLights();
             gTextHelper->DrawTextLine(oss.str().c_str());
         }
-
-		//Output Mouse Position
-		{
-			POINT position;
-			GetCursorPos(&position);
-
-			std::wostringstream oss;
-			oss << "Mouse Position: {" << position.x << ", " << position.y << "} ";
-			gTextHelper->DrawTextLine(oss.str().c_str());
-		}
-
-		//Output Center Position
-		{
-			std::wostringstream oss;
-			oss << "Center Position: {" << screenCenterX << ", " << screenCenterY << "}";
-			gTextHelper->DrawTextLine(oss.str().c_str());
-		}
-
-		//Output Camera Values
-		{
-			D3DXVECTOR3 vector = *(gViewerCamera.GetEyePt());
-
-			std::wostringstream oss;
-			oss << "Camera Eye Point: {" << vector.x << ", " << vector.y << ", " << vector.z << "}";
-			gTextHelper->DrawTextLine(oss.str().c_str());
-		}
-		
-		
-		D3DXVECTOR3 result;
-		
-		D3DXVec3Project(&result,&cubePos, &gViewPort, gViewerCamera.GetProjMatrix(), gViewerCamera.GetViewMatrix(), &gWorldMatrix);
-		//D3DXVec3Unproject(&result, &cubePos, &gViewPort, gViewerCamera.GetProjMatrix(), gViewerCamera.GetViewMatrix(), gViewerCamera.GetWorldMatrix());
-		
-		//projected position
-		{
-			std::wostringstream oss;
-			oss << "Cube Position: {" << cubePos.x << ", " << cubePos.y << ", " << cubePos.z << "}";
-			gTextHelper->DrawTextLine(oss.str().c_str());
-
-			std::wostringstream osss;
-			osss << "Cube Projection: {" << result.x << ", " << result.y << "} Adjusted: {" << (result.x / result.z) << ", " << (result.y / result.z) << "}";
-			gTextHelper->DrawTextLine(osss.str().c_str());
-		}
-
-		//Print view Matrix
-		{
-			D3DXMATRIX matrix = *(gViewerCamera.GetViewMatrix());
-
-			std::wostringstream title, oss1, oss2, oss3, oss4;
-			title << "View Matrix:";
-			oss1 << "[" << matrix._11 << " " << matrix._12 << " " << matrix._13 << " " << matrix._14 << "]";
-			oss2 << "[" << matrix._21 << " " << matrix._22 << " " << matrix._23 << " " << matrix._24 << "]";
-			oss3 << "[" << matrix._31 << " " << matrix._32 << " " << matrix._33 << " " << matrix._34 << "]";
-			oss4 << "[" << matrix._41 << " " << matrix._42 << " " << matrix._43 << " " << matrix._44 << "]";
-			gTextHelper->DrawTextLine(title.str().c_str());
-			gTextHelper->DrawTextLine(oss1.str().c_str());
-			gTextHelper->DrawTextLine(oss2.str().c_str());
-			gTextHelper->DrawTextLine(oss3.str().c_str());
-			gTextHelper->DrawTextLine(oss4.str().c_str());
-		}
-
-		//Print proj Matrix
-		{
-			D3DXMATRIX matrix = *(gViewerCamera.GetProjMatrix());
-
-			std::wostringstream title, oss1, oss2, oss3, oss4;
-			title << "Projection Matrix:";
-			oss1 << "[" << matrix._11 << " " << matrix._12 << " " << matrix._13 << " " << matrix._14 << "]";
-			oss2 << "[" << matrix._21 << " " << matrix._22 << " " << matrix._23 << " " << matrix._24 << "]";
-			oss3 << "[" << matrix._31 << " " << matrix._32 << " " << matrix._33 << " " << matrix._34 << "]";
-			oss4 << "[" << matrix._41 << " " << matrix._42 << " " << matrix._43 << " " << matrix._44 << "]";
-			gTextHelper->DrawTextLine(title.str().c_str());
-			gTextHelper->DrawTextLine(oss1.str().c_str());
-			gTextHelper->DrawTextLine(oss2.str().c_str());
-			gTextHelper->DrawTextLine(oss3.str().c_str());
-			gTextHelper->DrawTextLine(oss4.str().c_str());
-		}
-
-		//Print world Matrix
-		{
-			D3DXMATRIX matrix = *(gViewerCamera.GetWorldMatrix());
-
-			std::wostringstream title, oss1, oss2, oss3, oss4;
-			title << "World Matrix:";
-			oss1 << "[" << matrix._11 << " " << matrix._12 << " " << matrix._13 << " " << matrix._14 << "]";
-			oss2 << "[" << matrix._21 << " " << matrix._22 << " " << matrix._23 << " " << matrix._24 << "]";
-			oss3 << "[" << matrix._31 << " " << matrix._32 << " " << matrix._33 << " " << matrix._34 << "]";
-			oss4 << "[" << matrix._41 << " " << matrix._42 << " " << matrix._43 << " " << matrix._44 << "]";
-			gTextHelper->DrawTextLine(title.str().c_str());
-			gTextHelper->DrawTextLine(oss1.str().c_str());
-			gTextHelper->DrawTextLine(oss2.str().c_str());
-			gTextHelper->DrawTextLine(oss3.str().c_str());
-			gTextHelper->DrawTextLine(oss4.str().c_str());
-		}
-
-		//Print world Matrix
-		{
-			D3DXMATRIX matrix = gWorldMatrix;
-
-			std::wostringstream title, oss1, oss2, oss3, oss4;
-			title << "World Matrix:";
-			oss1 << "[" << matrix._11 << " " << matrix._12 << " " << matrix._13 << " " << matrix._14 << "]";
-			oss2 << "[" << matrix._21 << " " << matrix._22 << " " << matrix._23 << " " << matrix._24 << "]";
-			oss3 << "[" << matrix._31 << " " << matrix._32 << " " << matrix._33 << " " << matrix._34 << "]";
-			oss4 << "[" << matrix._41 << " " << matrix._42 << " " << matrix._43 << " " << matrix._44 << "]";
-			gTextHelper->DrawTextLine(title.str().c_str());
-			gTextHelper->DrawTextLine(oss1.str().c_str());
-			gTextHelper->DrawTextLine(oss2.str().c_str());
-			gTextHelper->DrawTextLine(oss3.str().c_str());
-			gTextHelper->DrawTextLine(oss4.str().c_str());
-		}
-
-		//Follow cube
-		{
-			if(PXEngine)
-			{
-				if(cubeList)
-				{
-					gTextHelper->SetInsertionPos(result.x, result.y);
-
-					std::wostringstream oss;
-					oss << "Cube Here!";
-					gTextHelper->DrawTextLine(oss.str().c_str());
-				}
-			}
-		}
-
-		//Following mouse
-		{
-			POINT position;
-			GetCursorPos(&position);
-			
-			ScreenToClient(DXUTGetHWND(),&position);
-
-			gTextHelper->SetInsertionPos(position.x, position.y);
-
-			std::wostringstream oss;
-			oss << "Mouse Here!";
-			gTextHelper->DrawTextLine(oss.str().c_str());
-		}
         
         gTextHelper->End();
     }

@@ -1,5 +1,5 @@
-﻿Build started 5/13/2013 3:06:09 AM.
-     1>Project "F:\School\Awe\Engine\Audio\Engine.Audio.vcxproj" on node 5 (Build target(s)).
+﻿Build started 5/13/2013 3:39:54 PM.
+     1>Project "F:\School\Awe\Engine\Audio\Engine.Audio.vcxproj" on node 3 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt MediaPlayer.cpp MusicManager.cpp main.cpp
          main.cpp
@@ -11,8 +11,8 @@
          Debug\MusicManager.obj
          Debug\main.obj
          Engine.Audio.vcxproj -> F:\School\Awe\Debug\Engine.Audio.exe
-     1>Done Building Project "F:\School\Awe\Engine\Audio\Engine.Audio.vcxproj" (Build target(s)).
+     1>Done Building Project "F:\School\Awe\Engine\Audio\Engine.Audio.vcxproj" (Rebuild target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:32.74
+Time Elapsed 00:00:12.51

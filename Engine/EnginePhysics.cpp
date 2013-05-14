@@ -18,7 +18,13 @@ PxDefaultErrorCallback PhysXEngine::gDefaultErrorCallback;
 PxDefaultAllocator PhysXEngine::gDefaultAllocatorCallback;
 PxSimulationFilterShader PhysXEngine::gDefaultFilterShader = PxDefaultSimulationFilterShader;
 
-#pragma endregion
+		#define PLANET_HEIGHT 100
+		#define PLANET_NUM 2
+		#define PLANE_NUM 6
+		#define BLOCK_NUM 1000
+		#define STRONG_UNIVERSAL_GRAVITATIONAL_FORCE 200.0f
+		#define WEAK_UNIVERSAL_GRAVITATIONAL_FORCE 100.0f
+		#define INVERSE_SQUARE_GRAVITATIONAL_FORCE 200.0f
 
 
 #pragma region Public Methods

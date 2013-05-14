@@ -96,6 +96,8 @@
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="EnginePhysics.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshInstance.cpp" />
+    <ClCompile Include="physics.cpp" />
     <ClCompile Include="PhysXDynamicCube.cpp" />
     <ClCompile Include="PhysXGroup.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
@@ -104,6 +106,7 @@
     <ClCompile Include="PhysXStaticPlane.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="textureclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h" />
@@ -120,6 +123,7 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="EnginePhysics.h" />
+    <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="PhysXDynamicCube.h" />
     <ClInclude Include="PhysXGroup.h" />
     <ClInclude Include="PhysXObject.h" />
@@ -131,6 +135,7 @@
     <ClInclude Include="ShaderDefines.h" />
     <ClInclude Include="ShaderStructures.h" />
     <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="textureclass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BasicLoop.hlsl" />

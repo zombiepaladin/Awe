@@ -589,6 +589,7 @@ void App::RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext,
 		d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mGBufferPS->GetShader(), 0, 0);
 		sceneGraph.Render(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
+		sceneGraph.RenderInstanced(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
 	}
 #pragma region Old Code
    /* D3DXMATRIXA16 cameraWorldViewProj =scaleMatrix * worldMatrix * cameraViewProj;
@@ -964,6 +965,7 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
 			d3dDeviceContext->RSSetState(mRasterizerState);
             d3dDeviceContext->PSSetShader(0, 0, 0);
 			sceneGraph.Render(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
+			sceneGraph.RenderInstanced(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
 		}
 #pragma region Old Code
 		/*
@@ -998,6 +1000,7 @@ ID3D11ShaderResourceView * App::RenderForward(ID3D11DeviceContext* d3dDeviceCont
 		d3dDeviceContext->RSSetState(mRasterizerState);
         d3dDeviceContext->PSSetShader(mForwardPS->GetShader(), 0, 0);
 		sceneGraph.Render(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
+		sceneGraph.RenderInstanced(d3dDeviceContext,mPerFrameConstants,cameraView,cameraProj);
 	}
 #pragma region Old Code
 	/*
