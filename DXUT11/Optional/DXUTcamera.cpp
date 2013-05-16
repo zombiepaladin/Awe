@@ -224,6 +224,7 @@ CBaseCamera::CBaseCamera()
     m_bMouseLButtonDown = false;
     m_bMouseMButtonDown = false;
     m_bMouseRButtonDown = false;
+	m_bOldMouseRButtonDown = false;
     m_nCurrentButtonMask = 0;
     m_nMouseWheelDelta = 0;
 
@@ -253,6 +254,60 @@ CBaseCamera::CBaseCamera()
     m_vMaxBoundary = D3DXVECTOR3( 1, 1, 1 );
 
     m_bResetCursorAfterMove = false;
+}
+
+CBaseCamera::CBaseCamera(void (*Grab)(), void (*Move)(), void (*Drop)())
+{
+	m_cKeysDown = 0;
+    ZeroMemory( m_aKeys, sizeof( BYTE ) * CAM_MAX_KEYS );
+    ZeroMemory( m_GamePad, sizeof( DXUT_GAMEPAD ) * DXUT_MAX_CONTROLLERS );
+
+    // Set attributes for the view matrix
+    D3DXVECTOR3 vEyePt = D3DXVECTOR3( 0.0f, 0.0f, 0.0f );
+    D3DXVECTOR3 vLookatPt = D3DXVECTOR3( 0.0f, 0.0f, 1.0f );
+
+    // Setup the view matrix
+    SetViewParams( &vEyePt, &vLookatPt );
+
+    // Setup the projection matrix
+    SetProjParams( D3DX_PI / 4, 1.0f, 1.0f, 1000.0f );
+
+    GetCursorPos( &m_ptLastMousePosition );
+    m_bMouseLButtonDown = false;
+    m_bMouseMButtonDown = false;
+    m_bMouseRButtonDown = false;
+	m_bOldMouseRButtonDown = false;
+    m_nCurrentButtonMask = 0;
+    m_nMouseWheelDelta = 0;
+
+    m_fCameraYawAngle = 0.0f;
+    m_fCameraPitchAngle = 0.0f;
+
+    SetRect( &m_rcDrag, LONG_MIN, LONG_MIN, LONG_MAX, LONG_MAX );
+    m_vVelocity = D3DXVECTOR3( 0, 0, 0 );
+    m_bMovementDrag = false;
+    m_vVelocityDrag = D3DXVECTOR3( 0, 0, 0 );
+    m_fDragTimer = 0.0f;
+    m_fTotalDragTimeToZero = 0.25;
+    m_vRotVelocity = D3DXVECTOR2( 0, 0 );
+
+    m_fRotationScaler = 0.01f;
+    m_fMoveScaler = 5.0f;
+
+    m_bInvertPitch = false;
+    m_bEnableYAxisMovement = true;
+    m_bEnablePositionMovement = true;
+
+    m_vMouseDelta = D3DXVECTOR2( 0, 0 );
+    m_fFramesToSmoothMouseData = 2.0f;
+
+    m_bClipToBoundary = false;
+    m_vMinBoundary = D3DXVECTOR3( -1, -1, -1 );
+    m_vMaxBoundary = D3DXVECTOR3( 1, 1, 1 );
+
+    m_bResetCursorAfterMove = false;
+
+	this->SetupPicking(Grab, Move, Drop);
 }
 
 
@@ -466,6 +521,24 @@ void CBaseCamera::GetInput( bool bGetKeyboardInput, bool bGetMouseInput, bool bG
     if( bGetMouseInput )
     {
         UpdateMouseDelta();
+		
+		//Right mouse button was just pressed
+		if(m_bMouseLButtonDown && !m_bOldMouseRButtonDown)
+		{
+			PickActor();
+		}
+		//Right mouse button is being held
+		else if(m_bMouseLButtonDown && m_bOldMouseRButtonDown)
+		{
+			MoveActor();
+		}
+		//Right mouse button was just released
+		else if(!m_bMouseLButtonDown && m_bOldMouseRButtonDown)
+		{
+			UnpickActor();
+		}
+
+		m_bOldMouseRButtonDown = m_bMouseLButtonDown;
     }
 
     if( bGetGamepadInput )
@@ -649,8 +722,8 @@ D3DUtil_CameraKeys CBaseCamera::MapKey( UINT nKey )
     // simplicity, we'll use a hardcoded mapping.
     switch( nKey )
     {
-        case VK_CONTROL:
-            return CAM_CONTROLDOWN;
+        /*case VK_CONTROL:
+            return CAM_CONTROLDOWN;*/
         case VK_LEFT:
             return CAM_STRAFE_LEFT;
         case VK_RIGHT:
@@ -672,9 +745,9 @@ D3DUtil_CameraKeys CBaseCamera::MapKey( UINT nKey )
             return CAM_MOVE_FORWARD;
         case 'S':
             return CAM_MOVE_BACKWARD;
-        case 'Q':
+        case VK_CONTROL:
             return CAM_MOVE_DOWN;
-        case 'E':
+        case VK_SHIFT:
             return CAM_MOVE_UP;
 
         case VK_NUMPAD4:
@@ -719,7 +792,11 @@ CFirstPersonCamera::CFirstPersonCamera() : m_nActiveButtonMask( 0x07 )
     m_bRotateWithoutButtonDown = false;
 }
 
-
+CFirstPersonCamera::CFirstPersonCamera(void (*Grab)(), void (*Move)(), void (*Drop)()) 
+	: CBaseCamera(Grab, Move, Drop), m_nActiveButtonMask( 0x07 )
+{
+    m_bRotateWithoutButtonDown = false;
+}
 
 
 //--------------------------------------------------------------------------------------
@@ -727,6 +804,9 @@ CFirstPersonCamera::CFirstPersonCamera() : m_nActiveButtonMask( 0x07 )
 //--------------------------------------------------------------------------------------
 VOID CFirstPersonCamera::FrameMove( FLOAT fElapsedTime )
 {
+	m_bRotateWithoutButtonDown = true;
+	m_bResetCursorAfterMove = true;
+
     if( DXUTGetGlobalTimer()->IsStopped() ) {
         if (DXUTGetFPS() == 0.0f) fElapsedTime = 0;
         else fElapsedTime = 1.0f / DXUTGetFPS();

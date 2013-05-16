@@ -35,6 +35,9 @@ static const float kSliderFactorResolution = 10000.0f;
 
 static vector<PhysXObject*> *cubeList;
 
+void PickActor();
+void MoveActor();
+void UnpickActor();
 
 enum SCENE_SELECTION {
 	CUBE_WORLD,
@@ -74,7 +77,7 @@ enum {
 
 App* gApp = 0;
 
-CFirstPersonCamera gViewerCamera;
+CFirstPersonCamera gViewerCamera(PickActor, MoveActor, UnpickActor);
 
 SceneGraph sceneGraph;
 /*CDXUTSDKMesh gMeshOpaque;
@@ -102,6 +105,78 @@ bool gZeroNextFrameTime = true;
 
 // Any UI state passed directly to rendering shaders
 UIConstants gUIConstants;
+
+//PhysX stuff
+PhysXEngine* PXEngine = NULL;
+D3DVIEWPORT9 gViewPort;
+float screenCenterX = 0;
+float screenCenterY = 0;
+float gMouseDepth = 0.0f;
+void PhysXUnProject(int xi, int yi, float depth, double &rx, double &ry, double &rz)
+{
+	D3DXVECTOR3 output, input;
+
+	input = D3DXVECTOR3(xi, yi, depth);
+
+	D3DXVec3Unproject(&output, &input, &gViewPort, gViewerCamera.GetProjMatrix(), gViewerCamera.GetViewMatrix(), &gWorldMatrix);
+	
+	rx = output.x; ry = output.y; rz = output.z;
+	
+}
+void PhysXProject(float vx, float vy, float vz, int &xi, int &yi, float &depth)
+{
+	D3DXVECTOR3 output, input;
+
+	input = D3DXVECTOR3(vx, vy, vz);
+
+	D3DXVec3Project(&output, &input, &gViewPort, gViewerCamera.GetProjMatrix(), gViewerCamera.GetViewMatrix(), &gWorldMatrix);
+
+	xi = output.x; yi = output.y; depth = output.z;
+}
+void PickActor()
+{
+	PXEngine->UnpickActor();
+
+	POINT position;
+
+	GetCursorPos(&position);
+
+	ScreenToClient(DXUTGetHWND(), &position);
+
+	double origX, origY, origZ;
+	double dirX, dirY, dirZ;
+
+	PhysXUnProject(position.x, position.y, 0.0f, origX, origY, origZ);
+	PhysXUnProject(position.x, position.y, 1.0f, dirX, dirY, dirZ);
+
+	physx::PxRaycastHit* hit = PXEngine->PickActor((float)origX, (float)origY, (float)origZ, (float)dirX, (float)dirY, (float)dirZ);
+
+	if(hit)
+	{
+		int hitx, hity;
+		PhysXProject(hit->impact.x, hit->impact.y, hit->impact.z, hitx, hity, gMouseDepth);
+	}
+}
+void MoveActor()
+{
+	double wx, wy, wz;
+
+	POINT position;
+
+	GetCursorPos(&position);
+
+	ScreenToClient(DXUTGetHWND(), &position);
+
+	PhysXUnProject(position.x, position.y, gMouseDepth, wx, wy, wz);
+
+	PXEngine->MoveActor(wx, wy, wz);
+}
+void UnpickActor()
+{
+	PXEngine->UnpickActor();
+}
+
+
 
 #pragma region Function Prototypes
 #pragma region Callback Declarations
@@ -301,6 +376,8 @@ void InitApp(ID3D11Device* d3dDevice)
 
     // Zero out the elapsed time for the next frame
     gZeroNextFrameTime = true;
+
+
 }
 
 
@@ -331,8 +408,10 @@ void InitScene(ID3D11Device* d3dDevice)
 
 #pragma region Pick Scene
     SCENE_SELECTION scene = static_cast<SCENE_SELECTION>(PtrToUlong(gSceneSelectCombo->GetSelectedData()));
+	scene = CUBES;
     switch (scene) {
 		case CUBE_WORLD: {
+#pragma region CUBE_WORLD
             sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -349,15 +428,16 @@ void InitScene(ID3D11Device* d3dDevice)
 
 			sceneGraph.StartScene(gWorldMatrix,sceneScaling);
 
-			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1,500,500);
             //gMeshOpaque.Create(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");			
             LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
 
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
-
+#pragma endregion
         case POWER_PLANT_SCENE: {
+#pragma region POWER_PLANT_SCENE
             sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -381,9 +461,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
-
+#pragma endregion
         case SPONZA_SCENE: {
-
+#pragma region SPONZA_SCENE
             sceneScaling = 0.05f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -408,7 +488,9 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(1200.0f, 200.0f, 100.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         } break;
+#pragma endregion
 		case MULTI_SCENE:{
+#pragma region MULTI_SCENE
             sceneScaling = .05f;
 			
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -436,8 +518,10 @@ void InitScene(ID3D11Device* d3dDevice)
             cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		}break;
+#pragma endregion
 		case CUBES:
 		{
+#pragma region CUBES
 			sceneScaling = 1.0f;
 
 			D3DXMatrixScaling(&gWorldMatrix, sceneScaling, sceneScaling, sceneScaling);
@@ -464,13 +548,24 @@ void InitScene(ID3D11Device* d3dDevice)
 
 
 			//Initializing PhysX
-			EnginePhysics::InitializePhysX(cubeList);
+			if(!PXEngine)
+				PXEngine = new PhysXEngine();
+			sceneGraph.AddMeshInstance(d3dDevice, L"..\\media\\cube\\cube.sdkmesh");
+			//sceneGraph.Add(d3dDevice,L"..\\media\\powerplant\\powerplant.sdkmesh",translate);
+			if(PXEngine)
+				PXEngine->InitializePhysX(cubeList, PhysXUnProject, PhysXProject);
+
+			sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1000,1000,1000);
 
 			//Creating all of the cubes
 			for(int i = 0; i < cubeList->size(); i++)
 			{
-				(*cubeList)[i]->id = sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",
-					(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
+				if(i%10==0)
+				{
+					sceneGraph.Add(d3dDevice, L"..\\media\\cube\\cube.sdkmesh",0,0,0,1,1,1);
+				}
+				else
+					(*cubeList)[i]->id = sceneGraph.AddInstance(1,(*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z, (*cubeList)[i]->sx, (*cubeList)[i]->sy, (*cubeList)[i]->sz);
 			}
 /*
 			for(float x =0; x<15;x+=5)
@@ -485,18 +580,18 @@ void InitScene(ID3D11Device* d3dDevice)
 				}
 			}
 */
-			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\EmptySpace.dds");
+			LoadSkybox(d3dDevice, L"..\\media\\Skybox\\Clouds.dds");
 			cameraEye = sceneScaling * D3DXVECTOR3(100.0f, 5.0f, 5.0f);
             cameraAt = sceneScaling * D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 		}break;
+#pragma endregion
     };
 #pragma endregion
-
-   
-
+	
+	cameraEye.x += 200;
     gViewerCamera.SetViewParams(&cameraEye, &cameraAt);
-    gViewerCamera.SetScalers(0.01f, 10.0f);
+    gViewerCamera.SetScalers(0.01f, 100.0f);
     gViewerCamera.FrameMove(0.0f);
     
     // Zero out the elapsed time for the next frame
@@ -506,7 +601,11 @@ void InitScene(ID3D11Device* d3dDevice)
 
 void DestroyScene()
 {
-	EnginePhysics::ShutdownPhysX();
+	if(PXEngine)
+	{
+		PXEngine->ShutdownPhysX();
+		PXEngine = NULL;
+	}
 	sceneGraph.Destroy();
 	/*gMeshOpaque.Destroy();
 	gMeshOpaque2.Destroy();
@@ -598,7 +697,14 @@ void CALLBACK OnKeyboard(UINT character, bool keyDown, bool altDown, void* userC
             break;
 
 		default:
-			EnginePhysics::ProcessKey(character);
+			if(PXEngine)
+			{
+				POINT position;
+				GetCursorPos(&position);
+				ScreenToClient(DXUTGetHWND(), &position);
+
+				PXEngine->ProcessKey(character, position.x, position.y);
+			}
 			break;
         }
     }
@@ -713,6 +819,8 @@ void CALLBACK OnD3D11ReleasingSwapChain(void* userContext)
 void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d3dDeviceContext, double time,
                                  float elapsedTime, void* userContext)
 {
+	D3DXVECTOR3 cubePos;
+
     if (gZeroNextFrameTime) {
         elapsedTime = 0.0f;
     }
@@ -733,17 +841,29 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     if (!sceneGraph.IsLoaded()) {
         InitScene(d3dDevice);
     }
-
-	EnginePhysics::StepPhysX();
-	if(cubeList)
+	if(PXEngine)
 	{
 		for(int i = 0; i < cubeList->size(); i++)
+		PXEngine->StepPhysX();
+		if(cubeList)
 		{
-			if( i == 100)
-				int x = 0;
-			sceneGraph.SetMeshPosition((*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+			for(int i = 0; i < cubeList->size(); i++)
+			{
+				if((*cubeList)[i]->id<0)
+				{
+					sceneGraph.SetInstancePosition(1,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+				}
+				else
+				{
+					sceneGraph.SetMeshPosition(0,(*cubeList)[i]->id, (*cubeList)[i]->x, (*cubeList)[i]->y, (*cubeList)[i]->z);
+				}
+			}
 		}
 	}
+
+	//crosshair
+	D3DRECT rec2 = {screenCenterX-20, screenCenterY, screenCenterX + 20, screenCenterY + 2};
+	D3DRECT rec3 = {screenCenterX, screenCenterY - 20, screenCenterX + 2, screenCenterY + 20};
 
     ID3D11RenderTargetView* pRTV = DXUTGetD3D11RenderTargetView();
 	
@@ -755,10 +875,22 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
     viewport.MaxDepth = 1.0f;
     viewport.TopLeftX = 0.0f;
     viewport.TopLeftY = 0.0f;
+	screenCenterX = viewport.Width / 2;
+	screenCenterY = viewport.Height / 2;
+
+	gViewPort.Width = viewport.Width;
+	gViewPort.Height = viewport.Height;
+	gViewPort.MaxZ = viewport.MaxDepth;
+	gViewPort.MinZ = viewport.MinDepth;
+	gViewPort.X = viewport.TopLeftX;
+	gViewPort.Y = viewport.TopLeftY;
+
 
 		 gApp->Render(d3dDeviceContext, pRTV, sceneGraph, gSkyboxSRV,
         gWorldMatrix, &gViewerCamera, &viewport, &gUIConstants);
 	
+		 
+		 sceneGraph.SetMeshPosition(0,1, 100000, 100000, 100000);
     if (gDisplayUI) {
         d3dDeviceContext->RSSetViewports(1, &viewport);
 
@@ -792,5 +924,6 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* d3dDevice, ID3D11DeviceContext* d
         
         gTextHelper->End();
     }
+	
 }
 #pragma endregion

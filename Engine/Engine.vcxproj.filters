@@ -11,6 +11,9 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{0d0fc263-d513-4573-ad00-5c514188b7c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PhysX">
+      <UniqueIdentifier>{9016844c-c66e-47bd-a4d1-43b412b716c5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Xnb">
       <UniqueIdentifier>{de0b5c92-d4b1-4576-af73-cd872f8213af}</UniqueIdentifier>
     </Filter>
@@ -48,11 +51,12 @@
     </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ColorUtil.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="physics.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
-    <ClCompile Include="EnginePhysics.cpp" />
+    <ClCompile Include="PhysXDynamicCube.cpp">
+    <ClCompile Include="MeshInstance.cpp" />
+    <ClCompile Include="textureclass.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysXObject.cpp" />
     <ClCompile Include="BinaryReader.cpp">
       <Filter>Xnb</Filter>
@@ -123,6 +127,26 @@
     <ClCompile Include="XnbTexture2dData.cpp">
       <Filter>Xnb</Filter>
     </ClCompile>
+      <Filter>PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysXGroup.cpp">
+      <Filter>PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysXObject.cpp">
+      <Filter>PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysXRope.cpp">
+      <Filter>PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysXStaticCube.cpp">
+      <Filter>PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysXStaticPlane.cpp">
+      <Filter>PhysX</Filter>
+    </ClCompile>
+    <ClCompile Include="EnginePhysics.cpp">
+      <Filter>PhysX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXUT11\Core\DXUT.h">
@@ -165,8 +189,29 @@
       <Filter>Resource Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="SceneGraph.h" />
-    <ClInclude Include="EnginePhysics.h" />
-    <ClInclude Include="PhysXObject.h" />
+    <ClInclude Include="PhysXDynamicCube.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysXGroup.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysXObject.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysXRope.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysXStaticCube.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysXStaticPlane.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="EnginePhysics.h">
+      <Filter>PhysX</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshInstance.h" />
+    <ClInclude Include="textureclass.h" />
     <ClInclude Include="BinaryReader.h">
       <Filter>Xnb</Filter>
     </ClInclude>

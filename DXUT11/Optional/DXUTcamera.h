@@ -9,6 +9,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+
 //--------------------------------------------------------------------------------------
 class CD3DArcBall
 {
@@ -127,6 +128,7 @@ class CBaseCamera
 {
 public:
                                 CBaseCamera();
+								CBaseCamera(void (*Grab)(), void (*Move)(), void (*Drop)());
 
     // Call these from client and use Get*Matrix() to read new matrices
     virtual LRESULT             HandleMessages( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
@@ -136,6 +138,19 @@ public:
     virtual void                Reset();
     virtual void                SetViewParams( D3DXVECTOR3* pvEyePt, D3DXVECTOR3* pvLookatPt );
     virtual void                SetProjParams( FLOAT fFOV, FLOAT fAspect, FLOAT fNearPlane, FLOAT fFarPlane );
+
+	//Function pointers
+	void (*PickActor)();
+	void (*MoveActor)();
+	void (*UnpickActor)();
+
+	//Functions to set function pointers
+	void SetupPicking(void (*Grab)(), void (*Move)(), void (*Drop)())
+	{
+		PickActor = Grab;
+		MoveActor = Move;
+		UnpickActor = Drop;
+	}
 
     // Functions to change behavior
     virtual void                SetDragRect( RECT& rc )
@@ -253,6 +268,7 @@ protected:
     bool m_bMouseLButtonDown;    // True if left button is down 
     bool m_bMouseMButtonDown;    // True if middle button is down 
     bool m_bMouseRButtonDown;    // True if right button is down 
+	bool m_bOldMouseRButtonDown;		//True if the right button was down last frame
     int m_nCurrentButtonMask;   // mask of which buttons are down
     int m_nMouseWheelDelta;     // Amount of middle wheel scroll (+/-) 
     D3DXVECTOR2 m_vMouseDelta;          // Mouse relative delta smoothed over a few frames
@@ -290,6 +306,8 @@ protected:
     D3DXVECTOR3 m_vMaxBoundary;         // Max point in clip boundary
 
     bool m_bResetCursorAfterMove;// If true, the class will reset the cursor position so that the cursor always has space to move 
+
+	
 };
 
 
@@ -303,6 +321,8 @@ class CFirstPersonCamera : public CBaseCamera
 {
 public:
                     CFirstPersonCamera();
+					CFirstPersonCamera::CFirstPersonCamera(void (*Grab)(), void (*Move)(), void (*Drop)());
+
 
     // Call these from client and use Get*Matrix() to read new matrices
     virtual void    FrameMove( FLOAT fElapsedTime );
