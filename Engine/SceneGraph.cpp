@@ -1,4 +1,5 @@
 #include "SceneGraph.h"
+#include "modelclass.h"
 using std::tr1::shared_ptr;
 
 // NOTE: Must match layout of shader constant buffers
@@ -80,7 +81,9 @@ int SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName)
 
 int SceneGraph::Add(ID3D11Device* device, LPCTSTR szFileName, D3DXMATRIXA16& position)
 {
+	//CDXUTSDKMesh* newMesh = new ModelClass();
 	CDXUTSDKMesh* newMesh = new CDXUTSDKMesh();
+
 	D3DXMATRIXA16* newPosition = new D3DXMATRIXA16((_worldMatrix*position));
 	newMesh->Create(device, szFileName);
 	meshList.push_back(newMesh);

@@ -189,6 +189,19 @@ vector<uint8_t> BinaryReader::ReadBytes(uint32_t count)
     return result;
 }
 
+vector<float> BinaryReader::ReadFloats(uint32_t count)
+{
+    vector<float> result;
+
+    result.reserve(count);
+
+    while (count--)
+    {
+        result.push_back(ReadSingle());
+    }
+
+    return result;
+}
 
 uint32_t BinaryReader::FilePosition()
 {

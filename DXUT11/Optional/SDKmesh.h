@@ -16,6 +16,7 @@
 #define _SDKMESH_
 
 #include <vector>           // INTEL
+//#include "MeshRepresentation.h"
 
 //--------------------------------------------------------------------------------------
 // Hard Defines for the various structures
@@ -451,7 +452,7 @@ public:
     // INTEL: Manage frustum checks on mesh subsets. Results are used for future rendering
     // to cull subsets that are outside of the frustum.
     void SetInFrustumFlags(bool flag);
-    void ComputeInFrustumFlags(const D3DXMATRIXA16 &worldViewProj,
+    virtual void ComputeInFrustumFlags(const D3DXMATRIXA16 &worldViewProj,
                                bool cullNear = true);
 
     //Direct3D 11 Rendering
@@ -519,7 +520,7 @@ public:
     UINT                            GetOutstandingResources();
     UINT                            GetOutstandingBufferResources();
     bool                            CheckLoadDone();
-    bool                            IsLoaded();
+    virtual bool                            IsLoaded();
     bool                            IsLoading();
     void                            SetLoading( bool bLoading );
     BOOL                            HadLoadingError();

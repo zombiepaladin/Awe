@@ -10,12 +10,17 @@
 //
 // Modified by Intel Corporation in 2010.
 //--------------------------------------------------------------------------------------
+
 #include "DXUT.h"
 #include "SDKMesh.h"
 #include "SDKMisc.h"
 #include <algorithm>       // INTEL
+//#include "MeshRepresentation.cpp"
 
 //--------------------------------------------------------------------------------------
+
+
+
 void CDXUTSDKMesh::LoadMaterials( ID3D11Device* pd3dDevice, SDKMESH_MATERIAL* pMaterials, UINT numMaterials,
                                   SDKMESH_CALLBACKS11* pLoaderCallbacks )
 {
